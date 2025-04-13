@@ -13,3 +13,11 @@
 #include <malloc.h>
 #include <memory.h>
 #include <tchar.h>
+
+// stl
+#include <array>
+#include <memory>
+#include <random>
+
+#define FRAME_BUFFER_WIDTH			1024
+#define FRAME_BUFFER_HEIGHT			768
