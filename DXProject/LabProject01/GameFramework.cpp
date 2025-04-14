@@ -44,6 +44,8 @@ void CGameFramework::ProcessFrame()
 	//AnimateObjects();
 
 	ClearFrameBuffer(RGB(255, 255, 255));
+
+	for(const auto& object : objects)
 		object->Render(hdc_frame_buffer);
 
 	PresentFrameBuffer();
@@ -75,14 +77,39 @@ void CGameFramework::BuildObjects()
 
 	auto uid_size = std::uniform_int_distribution<int>{ 20, 100 };
 	auto uid_pos = std::uniform_int_distribution<int>{ 20, FRAME_BUFFER_WIDTH };
-	int x = uid_pos(rd);
-	int y = uid_pos(rd);
-	int nHalfWidth = uid_size(rd);
-	int nHalfHeight = uid_size(rd);
+	
+	
 
-	// 오브젝트 생성
-	RECT r = { x - nHalfWidth, y - nHalfHeight, x + nHalfWidth, y + nHalfHeight };
-	object = std::make_unique < CHexagonObject > (r);
+	for (int i = 0; i < object_num; ++i) {
+		// 위치 사이즈 정의
+		int x = uid_pos(rd);
+		int y = uid_pos(rd);
+		int nHalfWidth = uid_size(rd);
+		int nHalfHeight = uid_size(rd);
+
+		// 오브젝트 생성
+		int type = (i % 5);
+		RECT r = { x - nHalfWidth, y - nHalfHeight, x + nHalfWidth, y + nHalfHeight };
+		switch (type) {
+		case (int)CObject::eType::Rectangle:
+			objects[i] = std::make_unique<CRectangleObject>(r);
+			break;
+		case (int)CObject::eType::RoundRectangle:
+			objects[i] = std::make_unique<CRoundRectangleObject>(r);
+			break;
+		case (int)CObject::eType::Ellipse:
+			objects[i] = std::make_unique<CEllipseObject>(r);
+			break;
+		case (int)CObject::eType::Star:
+			objects[i] = std::make_unique<CStarObject>(r);
+			break;
+		case (int)CObject::eType::Hexagon:
+			objects[i] = std::make_unique<CHexagonObject>(r);
+			break;
+		default:
+			break;
+		}
+	}
 }
 
 void CGameFramework::PresentFrameBuffer()

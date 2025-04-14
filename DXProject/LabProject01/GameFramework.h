@@ -24,7 +24,7 @@ private:
 
 	RECT rect_client{};
 
-	// 우선 하나만 구현
-	std::unique_ptr<CObject> object;
+	const static size_t object_num{100};
+	std::array<std::unique_ptr<CObject>, object_num> objects;
 };
 
