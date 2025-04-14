@@ -44,8 +44,7 @@ void CGameFramework::ProcessFrame()
 	//AnimateObjects();
 
 	ClearFrameBuffer(RGB(255, 255, 255));
-
-	object->Render(hdc_frame_buffer);
+		object->Render(hdc_frame_buffer);
 
 	PresentFrameBuffer();
 }
@@ -70,19 +69,20 @@ void CGameFramework::AnimateObjects()
 
 void CGameFramework::BuildObjects()
 {
+	// 랜덤 위치, 사이즈 설정
 	std::random_device rd;
 	auto rm = std::mt19937(rd());
 
 	auto uid_size = std::uniform_int_distribution<int>{ 20, 100 };
 	auto uid_pos = std::uniform_int_distribution<int>{ 20, FRAME_BUFFER_WIDTH };
-	auto uid_color = std::uniform_int_distribution<int>{0, 255};
 	int x = uid_pos(rd);
 	int y = uid_pos(rd);
 	int nHalfWidth = uid_size(rd);
 	int nHalfHeight = uid_size(rd);
 
+	// 오브젝트 생성
 	RECT r = { x - nHalfWidth, y - nHalfHeight, x + nHalfWidth, y + nHalfHeight };
-	object = std::make_unique < CRectangleObject > (r);
+	object = std::make_unique < CHexagonObject > (r);
 }
 
 void CGameFramework::PresentFrameBuffer()

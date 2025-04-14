@@ -18,6 +18,7 @@
 #include <array>
 #include <memory>
 #include <random>
+#include <vector>
 
 #define FRAME_BUFFER_WIDTH			1024
 #define FRAME_BUFFER_HEIGHT			768
