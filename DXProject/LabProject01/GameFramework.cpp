@@ -118,3 +118,8 @@ void CGameFramework::PresentFrameBuffer()
 	BitBlt(hDC, rect_client.left, rect_client.top, rect_client.right - rect_client.left, rect_client.bottom - rect_client.top, hdc_frame_buffer, rect_client.left, rect_client.top, SRCCOPY);
 	ReleaseDC(h_wnd, hDC);
 }
+
+LRESULT CGameFramework::ProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+{
+	return input_manager.ProcessingWindowMessage(hWnd, nMessageID, wParam, lParam);
+}
