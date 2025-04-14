@@ -20,8 +20,9 @@ public:
 	};
 
 	void SetPosition(Point position) { pos = position; }
-	eType GetType() { return n_type; }
 	void SetType(eType type) { n_type = type; }
+	void SetColor(DWORD color) { dw_color = color; }
+	eType GetType() { return n_type; }
 	
 	virtual void Animate(float fElapsedTime) {};
 	virtual void Render(HDC) = 0;

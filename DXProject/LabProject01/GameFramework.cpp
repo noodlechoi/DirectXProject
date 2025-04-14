@@ -41,7 +41,7 @@ void CGameFramework::ProcessFrame()
 {
 	//input_manager.InputProcess();
 
-	//AnimateObjects();
+	AnimateObjects();
 
 	ClearFrameBuffer(RGB(255, 255, 255));
 
@@ -66,7 +66,19 @@ void CGameFramework::ClearFrameBuffer(DWORD dwColor)
 
 void CGameFramework::AnimateObjects()
 {
+	// 랜덤 위치, 색상 설정
+	std::random_device rd;
+	auto rm = std::mt19937(rd());
 
+	auto uid_pos = std::uniform_int_distribution<int>{ 20, FRAME_BUFFER_WIDTH };
+	auto uid_color = std::uniform_int_distribution<int>{ 0, 255 };
+	
+	// 오브젝트 랜덤 값 재할당
+	for (auto& object : objects) {
+		Point p = { uid_pos(rd), uid_pos(rd) };
+		object->SetPosition(p);
+		object->SetColor(RGB(uid_color(rd), uid_color(rd), uid_color(rd)));
+	}
 }
 
 void CGameFramework::BuildObjects()
