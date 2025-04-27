@@ -1,17 +1,32 @@
 #pragma once
+#include "stdafx.h"
 
-class CTimer
-{
+class CTimer {
 public:
 	CTimer();
-	// 생성할 때 프레임 전달
-	CTimer(float);
 
 	void Tick(float = 60.0f);
+	size_t GetFrameRate(LPTSTR, int);
+	float GetTimeElapsed() { return time_elapsed; }
+
 private:
-	const float kframe{};
-	__int64 current_performance_counter;
+	const static size_t kMaxSampleCount{ 50 };
+	
+	__int64 performance_frequency;
+
+	__int64 current_performance_counter{};
 	__int64 last_performance_counter;
-	double seconds_per_frame;
+
+	double time_sacle;
+
+	float time_elapsed;
+
+	std::array<float, kMaxSampleCount> frame_time;
+	size_t sample_cnt{};
+	double frame_per_seconds{};
+	float fps_time_elapsed;
+	size_t current_frame_rate{};
+
+	bool is_stop;
 };
 

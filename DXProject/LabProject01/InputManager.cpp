@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "InputManager.h"
 
 void CInputManager::ProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)

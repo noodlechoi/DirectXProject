@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "GameFramework.h"
 
 
@@ -9,6 +10,8 @@ void CGameFramework::Create(HINSTANCE hInstance, HWND hMainWnd)
 	BuildFrameBuffer();
 
 	BuildObjects();
+
+	_tcscpy_s(frame_rate_title, _T("LabProject ("));
 }
 
 void CGameFramework::Delete()
@@ -39,6 +42,8 @@ void CGameFramework::ReleaseObjects()
 
 void CGameFramework::ProcessFrame()
 {
+	timer.Tick(10);
+
 	//input_manager.InputProcess();
 
 	AnimateObjects();
@@ -49,6 +54,9 @@ void CGameFramework::ProcessFrame()
 		object->Render(hdc_frame_buffer);
 
 	PresentFrameBuffer();
+
+	timer.GetFrameRate(frame_rate_title + 12, 37);
+	::SetWindowText(h_wnd, frame_rate_title);
 }
 
 void CGameFramework::ClearFrameBuffer(DWORD dwColor)

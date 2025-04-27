@@ -1,5 +1,5 @@
 ﻿// LabProject01.cpp : 애플리케이션에 대한 진입점을 정의합니다.
-// naming rule: function, class => PascalCase. member value name => use_underbar. Contant => k camelCase. bool => b camelCase, prameter => camelCase
+// naming rule: function, class => PascalCase. member value name => use_underbar. Contant => k camelCase. prameter => camelCase
 
 #include "stdafx.h"
 #include "GameFramework.h"

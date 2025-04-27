@@ -1,7 +1,7 @@
 #pragma once
-#include "stdafx.h"
 #include "Object.h"
 #include "InputManager.h"
+#include "Timer.h"
 
 class CGameFramework {
 public:
@@ -14,7 +14,7 @@ public:
 	void ProcessFrame();
 	void ClearFrameBuffer(DWORD);
 	void PresentFrameBuffer();
-	LRESULT CALLBACK ProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
+	LRESULT CALLBACK ProcessingWindowMessage(HWND, UINT , WPARAM , LPARAM );
 
 	void AnimateObjects();
 	void BuildObjects();
@@ -28,6 +28,9 @@ private:
 	HBITMAP h_bitmap_frame_buffer{};
 
 	RECT rect_client{};
+
+	CTimer timer;
+	_TCHAR frame_rate_title[50];
 
 	const static size_t object_num{100};
 	std::array<std::unique_ptr<CObject>, object_num> objects;

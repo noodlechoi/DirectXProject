@@ -1,5 +1,4 @@
 #pragma once
-#include "stdafx.h"
 
 typedef struct Point {
 	int x, y;
@@ -24,7 +23,7 @@ public:
 	void SetColor(DWORD color) { dw_color = color; }
 	eType GetType() { return n_type; }
 	
-	virtual void Animate(float fElapsedTime) {};
+	virtual void Animate(float ) {};
 	virtual void Render(HDC) = 0;
 protected:
 	eType n_type;
@@ -36,7 +35,7 @@ protected:
 
 class CRectangleObject : public CObject {
 public:
-	CRectangleObject(const RECT& rect);
+	CRectangleObject(const RECT& );
 
 	void Render(HDC) override;
 protected:
@@ -45,14 +44,14 @@ protected:
 
 class CRoundRectangleObject : public CRectangleObject {
 public:
-	CRoundRectangleObject(const RECT& rect);
+	CRoundRectangleObject(const RECT& );
 
 	void Render(HDC) override;
 };
 
 class CEllipseObject : public CObject {
 public:
-	CEllipseObject(const RECT& rect);
+	CEllipseObject(const RECT& );
 
 	void Render(HDC) override;
 private:
@@ -61,9 +60,9 @@ private:
 
 class CPolygonObject : public CObject {
 public:
-	CPolygonObject(const RECT& rect);
+	CPolygonObject(const RECT& );
 	
-	void SetVertices(const std::vector<POINT>& pVertices);
+	void SetVertices(const std::vector<POINT>& );
 	void Render(HDC) override;
 protected:
 	std::vector<POINT> p_vertices{};
@@ -71,10 +70,10 @@ protected:
 
 class CStarObject : public CPolygonObject {
 public:
-	CStarObject(const RECT& rect);
+	CStarObject(const RECT& );
 };
 
 class CHexagonObject : public CPolygonObject {
 public:
-	CHexagonObject(const RECT& rect);
+	CHexagonObject(const RECT& );
 };
