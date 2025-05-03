@@ -8,7 +8,7 @@ public:
 	virtual LRESULT ProcessingWindowMessage(HWND&, UINT&, WPARAM&, LPARAM&) = 0;
 };
 
-class CSpaceShipInputManager : CInputManager {
+class CSpaceShipInputManager : public CInputManager {
 public:
 	virtual LRESULT ProcessingWindowMessage(HWND&, UINT&, WPARAM&, LPARAM&) override;
 };

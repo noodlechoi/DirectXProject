@@ -131,6 +131,7 @@
     <ClInclude Include="GameFramework.h" />
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="LabProject02.h" />
+    <ClInclude Include="Mesh.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="stdafx.h" />
@@ -141,6 +142,7 @@
     <ClCompile Include="GameFramework.cpp" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="LabProject02.cpp" />
+    <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="Timer.cpp" />

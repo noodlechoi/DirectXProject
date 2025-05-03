@@ -2,7 +2,7 @@
 #include "GameFramework.h"
 
 
-CGameFramework::CGameFramework() : now_scene{std::make_unique<>}
+CGameFramework::CGameFramework() : now_scene{std::make_unique<CSpaceShipScene>()}
 {
 }
 
@@ -54,8 +54,7 @@ void CGameFramework::ProcessFrame()
 
 	ClearFrameBuffer(RGB(255, 255, 255));
 
-	for(const auto& object : objects)
-		object->Render(hdc_frame_buffer);
+	// 오브젝트
 
 	PresentFrameBuffer();
 
@@ -78,62 +77,11 @@ void CGameFramework::ClearFrameBuffer(DWORD dwColor)
 
 void CGameFramework::AnimateObjects()
 {
-	// 랜덤 위치, 색상 설정
-	std::random_device rd;
-	auto rm = std::mt19937(rd());
-
-	auto uid_pos = std::uniform_int_distribution<int>{ 20, FRAME_BUFFER_WIDTH };
-	auto uid_color = std::uniform_int_distribution<int>{ 0, 255 };
-	
-	// 오브젝트 랜덤 값 재할당
-	for (auto& object : objects) {
-		Point p = { uid_pos(rd), uid_pos(rd) };
-		object->SetPosition(p);
-		object->SetColor(RGB(uid_color(rd), uid_color(rd), uid_color(rd)));
-	}
 }
 
 void CGameFramework::BuildObjects()
 {
-	// 랜덤 위치, 사이즈 설정
-	std::random_device rd;
-	auto rm = std::mt19937(rd());
-
-	auto uid_size = std::uniform_int_distribution<int>{ 20, 100 };
-	auto uid_pos = std::uniform_int_distribution<int>{ 20, FRAME_BUFFER_WIDTH };
-	
-	
-
-	for (int i = 0; i < object_num; ++i) {
-		// 위치 사이즈 정의
-		int x = uid_pos(rd);
-		int y = uid_pos(rd);
-		int nHalfWidth = uid_size(rd);
-		int nHalfHeight = uid_size(rd);
-
-		// 오브젝트 생성
-		int type = (i % 5);
-		RECT r = { x - nHalfWidth, y - nHalfHeight, x + nHalfWidth, y + nHalfHeight };
-		switch (type) {
-		case (int)CObject::eType::Rectangle:
-			objects[i] = std::make_unique<CRectangleObject>(r);
-			break;
-		case (int)CObject::eType::RoundRectangle:
-			objects[i] = std::make_unique<CRoundRectangleObject>(r);
-			break;
-		case (int)CObject::eType::Ellipse:
-			objects[i] = std::make_unique<CEllipseObject>(r);
-			break;
-		case (int)CObject::eType::Star:
-			objects[i] = std::make_unique<CStarObject>(r);
-			break;
-		case (int)CObject::eType::Hexagon:
-			objects[i] = std::make_unique<CHexagonObject>(r);
-			break;
-		default:
-			break;
-		}
-	}
+	now_scene = std::make_unique<CSpaceShipScene>();
 }
 
 void CGameFramework::PresentFrameBuffer()
