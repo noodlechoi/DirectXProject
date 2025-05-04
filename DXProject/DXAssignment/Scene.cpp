@@ -105,7 +105,6 @@ StartScene::StartScene() : CScene{std::make_unique<CStartInputManager>()}
 void StartScene::BuildObjects()
 {
 	CTextMesh textMesh;
-	textMesh.SetText("HELLO");
 	object.SetMesh(textMesh);
 	object.SetColor(RGB(128, 0, 255));
 	object.SetPosition(0.0f, 00.0f, 10.f);
