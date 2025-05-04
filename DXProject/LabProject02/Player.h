@@ -24,7 +24,7 @@ public:
 
 	void SetCamera(std::unique_ptr<CCamera>& pCamera) { camera = std::move(pCamera); }
 	std::unique_ptr<CCamera>& GetCamera() { return camera; }
-private:
+public:
 	XMFLOAT3					position{ XMFLOAT3(0.0f, 0.0f, 0.0f) };
 	XMFLOAT3					right{ XMFLOAT3(1.0f, 0.0f, 0.0f) };
 	XMFLOAT3					up{ XMFLOAT3(0.0f, 1.0f, 0.0f) };

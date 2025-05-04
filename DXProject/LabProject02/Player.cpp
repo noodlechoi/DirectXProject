@@ -107,8 +107,20 @@ void CPlayer::SetCameraOffset(XMFLOAT3&& cameraOffset)
 	camera->GenerateViewMatrix();
 }
 
-void CPlayer::Update(float)
+void CPlayer::Update(float timeElapsed)
 {
+	Move(velocity, false);
+
+	camera->Update(this, position, timeElapsed);
+	camera->GenerateViewMatrix();
+
+	XMVECTOR xmvVelocity = XMLoadFloat3(&velocity);
+	XMVECTOR xmvDeceleration = XMVector3Normalize(XMVectorScale(xmvVelocity, -1.0f));
+	float length = XMVectorGetX(XMVector3Length(xmvVelocity));
+	float deceleration = friction * timeElapsed;
+	if (deceleration > length) deceleration = length;
+	XMStoreFloat3(&velocity, XMVectorAdd(xmvVelocity, XMVectorScale(xmvDeceleration, deceleration)));
+
 }
 
 void CPlayer::OnUpdateTransform()

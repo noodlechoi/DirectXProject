@@ -48,14 +48,17 @@ void CGameFramework::ProcessFrame()
 {
 	timer.Tick(60);
 
-	//input_manager.InputProcess();
-
-	AnimateObjects();
-
 	ClearFrameBuffer(RGB(255, 255, 255));
 
+	AnimateObjects();
 	// 오브젝트
-	if (now_scene) now_scene->Render(hdc_frame_buffer, player->GetCamera());
+	if (now_scene) {
+		// 키 입력 받은 후 업데이트
+		now_scene->ProcessInput(h_wnd, player);
+		player->Update(timer.GetTimeElapsed());
+
+		now_scene->Render(hdc_frame_buffer, player->GetCamera());
+	}
 
 	if (player) player->Render(hdc_frame_buffer, player->GetCamera());
 
@@ -80,6 +83,9 @@ void CGameFramework::ClearFrameBuffer(DWORD dwColor)
 
 void CGameFramework::AnimateObjects()
 {
+	float timeElapsed = timer.GetTimeElapsed();
+	if (player) player->Animate(timeElapsed);
+	if (now_scene) now_scene->Animate(timeElapsed);
 }
 
 void CGameFramework::BuildObjects()

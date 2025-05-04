@@ -85,38 +85,10 @@ void CSpaceShipScene::Render(HDC hDCFrameBuffer, std::unique_ptr<CCamera>& camer
 	}
 }
 
-void CSpaceShipScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
-{
-}
 
-void CSpaceShipScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+void CSpaceShipScene::ProcessInput(HWND& hwnd, std::unique_ptr<CPlayer>& player)
 {
-	switch (nMessageID)
-	{
-	case WM_KEYDOWN:
-		switch (wParam)
-		{
-		case '1':
-		case '2':
-		case '3':
-		case '4':
-		case '5':
-		case '6':
-		case '7':
-		case '8':
-		case '9':
-		{
-			break;
-		}
-		case 'A':
-			break;
-		default:
-			break;
-		}
-		break;
-	default:
-		break;
-	}
+	input_manager->ProcessInput(hwnd, player);
 }
 
 LRESULT CSpaceShipScene::ProcessingWindowMessage(HWND& hWnd, UINT& nMessageID, WPARAM& wParam, LPARAM& lParam)

@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Player.h"
 #include "Camera.h"
 
 void CViewport::SetViewport(int Left, int Top, int Width, int Height)
@@ -118,30 +119,57 @@ void CCamera::Rotate(float pitch, float yaw, float roll)
 	}
 }
 
-//void CCamera::Update(std::unique_ptr<CPlayer> player, XMFLOAT3& lookAt, float timeElapsed)
-//{
-//	XMMATRIX rotate;
-//	rotate.r[0] = XMVectorSet(player.get()m_xmf3Right.x, player->m_xmf3Right.y, player->m_xmf3Right.z, 0.0f);
-//	rotate.r[1] = XMVectorSet(player->m_xmf3Up.x, player->m_xmf3Up.y, player->m_xmf3Up.z, 0.0f);
-//	rotate.r[2] = XMVectorSet(player->m_xmf3Look.x, player->m_xmf3Look.y, player->m_xmf3Look.z, 0.0f);
-//	rotate.r[3] = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
-//
-//	XMVECTOR xmvPosition = XMLoadFloat3(&position);
-//	XMVECTOR xmvOffset = XMVector3TransformCoord(XMLoadFloat3(&player->m_xmf3CameraOffset), rotate);
-//	XMVECTOR xmvNewPosition = XMVectorAdd(XMLoadFloat3(&player->position), xmvOffset);
-//	XMVECTOR xmvDirection = XMVectorSubtract(xmvNewPosition, xmvPosition);
-//
-//	float fLength = XMVectorGetX(XMVector3Length(xmvDirection));
-//	xmvDirection = XMVector3Normalize(xmvDirection);
-//
-//	float fTimeLagScale = fTimeElapsed * 4.0f;
-//	float fDistance = fLength * fTimeLagScale;
-//	if (fDistance > fLength) fDistance = fLength;
-//	if (fLength < 0.01f) fDistance = fLength;
-//	if (fDistance > 0)
-//	{
-//		XMStoreFloat3(&position, XMVectorAdd(xmvPosition, XMVectorScale(xmvDirection, fDistance)));
-//		SetLookAt(player->position, player->m_xmf3Up);
-//	}
-//}
+void CCamera::Update(std::unique_ptr<CPlayer>& player, XMFLOAT3& lookAt, float timeElapsed)
+{
+	XMMATRIX rotate;
+	rotate.r[0] = XMVectorSet(player->right.x, player->right.y, player->right.z, 0.0f);
+	rotate.r[1] = XMVectorSet(player->up.x, player->up.y, player->up.z, 0.0f);
+	rotate.r[2] = XMVectorSet(player->look.x, player->look.y, player->look.z, 0.0f);
+	rotate.r[3] = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
+
+	XMVECTOR xmvPosition = XMLoadFloat3(&position);
+	XMVECTOR xmvOffset = XMVector3TransformCoord(XMLoadFloat3(&player->camera_offset), rotate);
+	XMVECTOR xmvNewPosition = XMVectorAdd(XMLoadFloat3(&player->position), xmvOffset);
+	XMVECTOR xmvDirection = XMVectorSubtract(xmvNewPosition, xmvPosition);
+
+	float length = XMVectorGetX(XMVector3Length(xmvDirection));
+	xmvDirection = XMVector3Normalize(xmvDirection);
+
+	float timeLagScale = timeElapsed * 4.0f;
+	float distance = length * timeLagScale;
+	if (distance > length) distance = length;
+	if (length < 0.01f) distance = length;
+	if (distance > 0)
+	{
+		XMStoreFloat3(&position, XMVectorAdd(xmvPosition, XMVectorScale(xmvDirection, distance)));
+		SetLookAt(player->position, player->up);
+	}
+}
+
+void CCamera::Update(CPlayer* player, XMFLOAT3& lookAt, float timeElapsed)
+{
+	XMMATRIX rotate;
+	rotate.r[0] = XMVectorSet(player->right.x, player->right.y, player->right.z, 0.0f);
+	rotate.r[1] = XMVectorSet(player->up.x, player->up.y, player->up.z, 0.0f);
+	rotate.r[2] = XMVectorSet(player->look.x, player->look.y, player->look.z, 0.0f);
+	rotate.r[3] = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
+
+	XMVECTOR xmvPosition = XMLoadFloat3(&position);
+	XMVECTOR xmvOffset = XMVector3TransformCoord(XMLoadFloat3(&player->camera_offset), rotate);
+	XMVECTOR xmvNewPosition = XMVectorAdd(XMLoadFloat3(&player->position), xmvOffset);
+	XMVECTOR xmvDirection = XMVectorSubtract(xmvNewPosition, xmvPosition);
+
+	float length = XMVectorGetX(XMVector3Length(xmvDirection));
+	xmvDirection = XMVector3Normalize(xmvDirection);
+
+	float timeLagScale = timeElapsed * 4.0f;
+	float distance = length * timeLagScale;
+	if (distance > length) distance = length;
+	if (length < 0.01f) distance = length;
+	if (distance > 0)
+	{
+		XMStoreFloat3(&position, XMVectorAdd(xmvPosition, XMVectorScale(xmvDirection, distance)));
+		SetLookAt(player->position, player->up);
+	}
+}
 
