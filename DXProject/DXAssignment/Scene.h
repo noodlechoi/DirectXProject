@@ -25,8 +25,26 @@ public:
 	void Animate(float) override;
 	void Render(HDC, std::unique_ptr<CCamera>&) override;
 
-	void ProcessInput(HWND&, std::unique_ptr<CPlayer>&);
+	void ProcessInput(HWND&, std::unique_ptr<CPlayer>&) override;
 	LRESULT ProcessingWindowMessage(HWND&, UINT&, WPARAM&, LPARAM&) override;
 private:
 	std::array<CObject, 5> objects;
+};
+
+// ==============================
+// 과제
+
+// 회전하는 이름
+class StartScene : public CScene {
+public:
+	StartScene();
+
+	void BuildObjects() override;
+	void Animate(float) override;
+	void Render(HDC, std::unique_ptr<CCamera>&) override;
+
+	void ProcessInput(HWND&, std::unique_ptr<CPlayer>&) override;
+	LRESULT ProcessingWindowMessage(HWND&, UINT&, WPARAM&, LPARAM&) override;
+private:
+	CObject object;
 };
