@@ -1,6 +1,8 @@
 #pragma once
 #include "Timer.h"
 #include "Scene.h"
+#include "Camera.h"
+#include "Player.h"
 
 class CGameFramework {
 public:
@@ -38,5 +40,6 @@ private:
 	std::unique_ptr<CScene> now_scene;
 
 	// object
+	std::unique_ptr<CPlayer> player;
 };
 

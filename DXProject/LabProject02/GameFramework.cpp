@@ -46,7 +46,7 @@ void CGameFramework::ReleaseObjects()
 
 void CGameFramework::ProcessFrame()
 {
-	timer.Tick(10);
+	timer.Tick(60);
 
 	//input_manager.InputProcess();
 
@@ -55,6 +55,9 @@ void CGameFramework::ProcessFrame()
 	ClearFrameBuffer(RGB(255, 255, 255));
 
 	// 오브젝트
+	if (now_scene) now_scene->Render(hdc_frame_buffer, player->GetCamera());
+
+	if (player) player->Render(hdc_frame_buffer, player->GetCamera());
 
 	PresentFrameBuffer();
 
@@ -81,7 +84,20 @@ void CGameFramework::AnimateObjects()
 
 void CGameFramework::BuildObjects()
 {
+	std::unique_ptr<CCamera> camera = std::make_unique<CCamera>();
+	camera->SetViewport(0, 0, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
+	camera->GeneratePerspectiveProjectionMatrix(1.01f, 500.0f, 60.0f);
+	camera->SetFOVAngle(60.0f);
+
+	player = std::make_unique<CAirplanePlayer>();
+	player->SetPosition(0.0f, 0.0f, 0.0f);
+	player->SetMesh(CCubeMesh());
+	player->SetColor(RGB(0, 0, 255));
+	player->SetCamera(camera);
+	player->SetCameraOffset(XMFLOAT3(0.0f, 5.0f, -15.0f));
+
 	now_scene = std::make_unique<CSpaceShipScene>();
+	now_scene->BuildObjects();
 }
 
 void CGameFramework::PresentFrameBuffer()
