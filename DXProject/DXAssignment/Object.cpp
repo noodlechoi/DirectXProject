@@ -159,20 +159,3 @@ void CObject::Render(HDC hDCFrameBuffer)
 		::DeleteObject(hPen);
 	}
 }
-
-void CObject::Save(const std::string_view fileName) const
-{
-	std::ofstream out{ fileName.data(), std::ios::binary | std::ios::app };
-	out.write(reinterpret_cast<const char*>(this), sizeof(CObject));
-	OutputDebugString(L"Save\n");
-}
-
-void CObject::Load(const std::string_view fileName)
-{
-	std::ifstream in{ fileName.data(),  std::ios::binary | std::ios::app };
-	if (in) {
-		throw std::runtime_error("File not found");
-	}
-	in.read(reinterpret_cast<char*>(this), sizeof(CObject));
-	OutputDebugString(L"Load\n");
-}

@@ -42,8 +42,6 @@ public:
 	virtual void Animate(float );
 	virtual void Render(HDC );
 
-	void Save(const std::string_view) const;
-	void Load(const std::string_view);
 protected:
 	bool is_active{ true };
 

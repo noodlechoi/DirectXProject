@@ -14,9 +14,15 @@ CScene::CScene(size_t objectNum, std::unique_ptr<T>&& manager, std::unique_ptr<Y
 	objects.reserve(objectNum);
 }
 
-CObject&& CScene::CreateObject()
+void CScene::BuildObjects()
 {
-	return CObject();
+	try {
+		Load();
+	}
+	catch (const std::runtime_error& e) {
+		CreateObject();
+		Save();
+	}
 }
 
 void CScene::Animate(float elapsedTime)
@@ -46,16 +52,27 @@ LRESULT CScene::ProcessingWindowMessage(HWND& hWnd, UINT& nMessageID, WPARAM& wP
 	return input_manager->ProcessingWindowMessage(hWnd, nMessageID, wParam, lParam);
 }
 
-void CScene::Save(const CObject& object) const
+void CScene::Save() const
 {
-	object.Save(FileName);
+	std::ofstream out{ FileName.data(), std::ios::binary | std::ios::app };
+	for (auto& object : objects) {
+		out.write(reinterpret_cast<const char*>(&object), sizeof(CObject));
+	}
+	OutputDebugString(L"Save\n");
 }
 
 void CScene::Load()
 {
-	for (auto& object : objects) {
-		object.Load(FileName);
+	std::ifstream in{ FileName.data(),  std::ios::binary };
+	if (not in) {
+		throw std::runtime_error("File not found");
 	}
+	CObject object;
+	while (in.read(reinterpret_cast<char*>(&object), sizeof(CObject))) {
+		objects.push_back(object);
+	}
+	OutputDebugString(L"Load\n");
+	
 }
 
 CSpaceShipScene::CSpaceShipScene() : CScene(5, std::make_unique<CSpaceShipInputManager>(), std::make_unique<CAirplanePlayer>())
@@ -161,7 +178,7 @@ CRollerCoasterScene::CRollerCoasterScene() : CScene{ 3, std::make_unique<CRoller
 {
 }
 
-CObject&& CRollerCoasterScene::CreateObject()
+void CRollerCoasterScene::CreateObject()
 {
 	CObject object;
 	CCubeMesh cube{ 4.0f, 4.0f, 4.0f };
@@ -173,26 +190,8 @@ CObject&& CRollerCoasterScene::CreateObject()
 	object.SetMovingDirection(XMFLOAT3(1.0f, 0.0f, 0.0f));
 	object.SetMovingSpeed(0.0f);
 
-	return std::move(object);
+	objects.push_back(object);
 }
-
-void CRollerCoasterScene::BuildObjects()
-{
-	// 로드될 때까지 
-	while (true) {
-		if (0 == objects.size()) {
-			Save(CreateObject());
-		}
-		try {
-			Load();
-			return;
-		}
-		catch (const std::runtime_error& e) {
-			Save(CreateObject());
-		}
-	}
-}
-
 
 void CRollerCoasterScene::ProcessInput(HWND& hwnd, float timeElapsed)
 {

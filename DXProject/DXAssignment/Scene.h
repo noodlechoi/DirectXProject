@@ -5,15 +5,16 @@
 // 씬과 플레이어, input을 관리하는 클래스
 class CScene {
 public:
-	virtual void BuildObjects() {}
-	virtual CObject&& CreateObject();
+	virtual void BuildObjects();
+	// 이 함수에서만 Object 생성
+	virtual void CreateObject() {};
 	virtual void Animate(float);
 	virtual void Render(HDC);
 
 	virtual void ProcessInput(HWND&, float) {};
 	virtual LRESULT ProcessingWindowMessage(HWND&, UINT&, WPARAM&, LPARAM&) = 0;
 
-	virtual void Save(const CObject&) const;
+	virtual void Save() const;
 	virtual void Load();
 protected:
 	std::unique_ptr<CInputManager> input_manager{};
@@ -56,8 +57,7 @@ class CRollerCoasterScene : public CScene {
 public:
 	CRollerCoasterScene();
 
-	CObject&& CreateObject() override;
-	void BuildObjects() override;
+	void CreateObject() override;
 
 	void ProcessInput(HWND&, float) override;
 	LRESULT ProcessingWindowMessage(HWND&, UINT&, WPARAM&, LPARAM&) override;
