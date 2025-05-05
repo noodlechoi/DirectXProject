@@ -172,77 +172,67 @@ CCubeMesh::CCubeMesh(float width, float height, float depth) : CMesh(6)
 
 }
 
-CTextMesh::CTextMesh(float width, float height, float depth) : CMesh(100) // 폴리곤 개수는 대략적인 값
+CTextMesh::CTextMesh(float width, float height, float depth) :CMesh(6)
 {
 	float halfWidth = width * 0.5f;
 	float halfHeight = height * 0.5f;
 	float halfDepth = depth * 0.5f;
 
-	float charWidth = width / 10.0f; // 각 글자의 너비
-	float charHeight = height / 10.0f; // 각 글자의 높이
-	float spacing = charWidth * 0.2f; // 글자 간 간격
-	float fontSizeX{ halfWidth * 0.2f };// 글자 크기
-	float fontSizeY{ halfHeight * 0.5f };// 글자 크기
-	float innerfontX{ fontSizeX * 0.5f };// 글자 내부 크기
-	float innerfontY{ fontSizeY * 0.2f };// 글자 내부 크기
-	float startX = -halfWidth; // 텍스트 시작 위치
-	float startY = halfHeight; // 텍스트 시작 높이
-
-
-	// "3" 글자 정의
-	// -
-	polygons.push_back(CPolygon(CVertex(startX, startY, -halfDepth),
-		CVertex(startX + innerfontX, startY, -halfDepth),
-		CVertex(startX + innerfontX, startY - innerfontY, -halfDepth),
-		CVertex(startX, startY - innerfontY, -halfDepth)
-	));
-	// -
-	polygons.push_back(CPolygon(CVertex(startX, startY - (innerfontY * 2), -halfDepth),
-		CVertex(startX + innerfontX, startY - (innerfontY * 2), -halfDepth),
-		CVertex(startX + innerfontX, startY - (innerfontY * 3), -halfDepth),
-		CVertex(startX, startY - (innerfontY * 3), -halfDepth)
-	));
-	// -
-	polygons.push_back(CPolygon(CVertex(startX, startY - (innerfontY * 4), -halfDepth),
-		CVertex(startX + innerfontX, startY - (innerfontY * 4), -halfDepth),
-		CVertex(startX + innerfontX, startY - (innerfontY * 5), -halfDepth),
-		CVertex(startX, startY - (innerfontY * 5), -halfDepth)
-	));
-	// ㅣ
-	polygons.push_back(CPolygon(CVertex(startX + innerfontX, startY, +halfDepth),
-		CVertex(startX + fontSizeX, startY, -halfDepth),
-		CVertex(startX + fontSizeX, startY - fontSizeY, -halfDepth),
-		CVertex(startX + innerfontX, startY - fontSizeY, -halfDepth)
+	polygons.push_back(CPolygon(CVertex(-halfWidth, +halfHeight, -halfDepth),
+		CVertex(+halfWidth, +halfHeight, -halfDepth),
+		CVertex(+halfWidth, -halfHeight, -halfDepth),
+		CVertex(-halfWidth, -halfHeight, -halfDepth)
 	));
 
-
-	// ㅣ
-	polygons.push_back(CPolygon(CVertex(startX + innerfontX, startY, +halfDepth),
-		CVertex(startX + fontSizeX, startY, +halfDepth),
-		CVertex(startX + fontSizeX, startY - fontSizeY, +halfDepth),
-		CVertex(startX + innerfontX, startY - fontSizeY, +halfDepth)
-	));
-	// 뒤
-	polygons.push_back(CPolygon(CVertex(startX, startY, +halfDepth),
-		CVertex(startX + innerfontX, startY, +halfDepth),
-		CVertex(startX + innerfontX, startY - innerfontY, +halfDepth),
-		CVertex(startX, startY - innerfontY, +halfDepth)
-	));
-	// -
-	polygons.push_back(CPolygon(CVertex(startX, startY - (innerfontY * 2), +halfDepth),
-		CVertex(startX + innerfontX, startY - (innerfontY * 2), +halfDepth),
-		CVertex(startX + innerfontX, startY - (innerfontY * 3), +halfDepth),
-		CVertex(startX, startY - (innerfontY * 3), +halfDepth)
-	));
-	// -
-	polygons.push_back(CPolygon(CVertex(startX, startY - (innerfontY * 4), +halfDepth),
-		CVertex(startX + innerfontX, startY - (innerfontY * 4), +halfDepth),
-		CVertex(startX + innerfontX, startY - (innerfontY * 5), +halfDepth),
-		CVertex(startX, startY - (innerfontY * 5), +halfDepth)
+	polygons.push_back(CPolygon(CVertex(-halfWidth, +halfHeight, +halfDepth),
+		CVertex(+halfWidth, +halfHeight, +halfDepth),
+		CVertex(+halfWidth, +halfHeight, -halfDepth),
+		CVertex(-halfWidth, +halfHeight, -halfDepth)
 	));
 
+	polygons.push_back(CPolygon(CVertex(-halfWidth, -halfHeight, +halfDepth),
+		CVertex(+halfWidth, -halfHeight, +halfDepth),
+		CVertex(+halfWidth, +halfHeight, +halfDepth),
+		CVertex(-halfWidth, +halfHeight, +halfDepth)
+	));
 
-	// "D" 글자 정의
-	
+	polygons.push_back(CPolygon(CVertex(-halfWidth, -halfHeight, -halfDepth),
+		CVertex(+halfWidth, -halfHeight, -halfDepth),
+		CVertex(+halfWidth, -halfHeight, +halfDepth),
+		CVertex(-halfWidth, -halfHeight, +halfDepth)
+	));
 
+	polygons.push_back(CPolygon(CVertex(-halfWidth, +halfHeight, +halfDepth),
+		CVertex(-halfWidth, +halfHeight, -halfDepth),
+		CVertex(-halfWidth, -halfHeight, -halfDepth),
+		CVertex(-halfWidth, -halfHeight, +halfDepth)
+	));
+
+	polygons.push_back(CPolygon(CVertex(+halfWidth, +halfHeight, -halfDepth),
+		CVertex(+halfWidth, +halfHeight, +halfDepth),
+		CVertex(+halfWidth, -halfHeight, +halfDepth),
+		CVertex(+halfWidth, -halfHeight, -halfDepth)
+	));
+}
+
+void CTextMesh::Render(HDC hDCFrameBuffer) const
+{
+	XMFLOAT3 initialProject, previousProject;
+	// 보이는지 확인
+	bool isPreviousInside{ false }, isInitialInside{ false }, isCurrentInside{ false }, isIntersectInside{ false };
+
+	for (const auto& polygon : polygons) {
+		initialProject = previousProject = CGraphicsPipeline::Project(polygon.vertexes[0].position);
+		isPreviousInside = isInitialInside = (-1.0f <= initialProject.x) && (initialProject.x <= 1.0f) && (-1.0f <= initialProject.y) && (initialProject.y <= 1.0f);
+		for (const auto& v : polygon.vertexes) {
+			XMFLOAT3 currentProject = CGraphicsPipeline::Project(v.position);
+			isCurrentInside = (-1.0f <= currentProject.x) && (currentProject.x <= 1.0f) && (-1.0f <= currentProject.y) && (currentProject.y <= 1.0f);
+
+			if (((0.0f <= currentProject.z) && (currentProject.z <= 1.0f)) && ((isCurrentInside || isPreviousInside))) ::Draw2DLine(hDCFrameBuffer, previousProject, currentProject);
+			previousProject = currentProject;
+			isPreviousInside = isCurrentInside;
+		}
+		// 마지막 점과 첫번 째 점 연결
+		if (((0.0f <= initialProject.z) && (initialProject.z <= 1.0f)) && ((isInitialInside || isPreviousInside))) ::Draw2DLine(hDCFrameBuffer, previousProject, initialProject);
+	}
 }

@@ -35,7 +35,7 @@ public:
 	virtual void OnUpdateTransform() {}
 
 	virtual void Animate(float );
-	virtual void Render(HDC , std::unique_ptr< CCamera>&);
+	virtual void Render(HDC );
 protected:
 	bool is_active{ true };
 

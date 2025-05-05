@@ -2,19 +2,45 @@
 #include "Scene.h"
 #include "Camera.h"
 #include "GraphicsPipeline.h"
+#include "Player.h"
 
-template <typename T>
-CScene::CScene(std::unique_ptr<T>&& manager)
+
+template <typename T, typename Y>
+CScene::CScene(size_t objectNum, std::unique_ptr<T>&& manager, std::unique_ptr<Y>&& Player)
 {
 	input_manager.reset(manager.release());
+	player.reset(Player.release());
+	objects.reserve(objectNum);
 }
+
+void CScene::Animate(float elapsedTime)
+{
+	player->Animate(elapsedTime);
+
+	for (auto& object : objects) {
+		object.Animate(elapsedTime);
+	}
+}
+
+void CScene::Render(HDC hDCFrameBuffer)
+{
+	CGraphicsPipeline::SetViewport(player->camera->viewport);
+	CGraphicsPipeline::SetViewPerspectiveProjectTransform(player->camera->view_perspective_project_matrix);
+
+	player->Render(hDCFrameBuffer);
+
+	for (auto& object : objects) {
+		object.Render(hDCFrameBuffer);
+	}
+}
+
 
 LRESULT CScene::ProcessingWindowMessage(HWND& hWnd, UINT& nMessageID, WPARAM& wParam, LPARAM& lParam)
 {
 	return input_manager->ProcessingWindowMessage(hWnd, nMessageID, wParam, lParam);
 }
 
-CSpaceShipScene::CSpaceShipScene() : CScene(std::make_unique<CSpaceShipInputManager>())
+CSpaceShipScene::CSpaceShipScene() : CScene(5, std::make_unique<CSpaceShipInputManager>(), std::make_unique<CAirplanePlayer>())
 {
 }
 
@@ -22,7 +48,7 @@ void CSpaceShipScene::BuildObjects()
 {
 
 	CCubeMesh cube{ 4.0f, 4.0f, 4.0f };
-	objects[0] = CObject();
+	objects.push_back(CObject());
 	objects[0].SetMesh(cube);
 	objects[0].SetColor(RGB(255, 0, 0));
 	objects[0].SetPosition(-13.5f, 0.0f, +14.0f);
@@ -31,7 +57,7 @@ void CSpaceShipScene::BuildObjects()
 	objects[0].SetMovingDirection(XMFLOAT3(1.0f, 0.0f, 0.0f));
 	objects[0].SetMovingSpeed(0.0f);
 
-	objects[1] = CObject();
+	objects.push_back(CObject());
 	objects[1].SetMesh(cube);
 	objects[1].SetColor(RGB(0, 0, 255));
 	objects[1].SetPosition(+13.5f, 0.0f, +14.0f);
@@ -40,7 +66,7 @@ void CSpaceShipScene::BuildObjects()
 	objects[1].SetMovingDirection(XMFLOAT3(-1.0f, 0.0f, 0.0f));
 	objects[1].SetMovingSpeed(0.0f);
 
-	objects[2] = CObject();
+	objects.push_back(CObject());
 	objects[2].SetMesh(cube);
 	objects[2].SetColor(RGB(0, 255, 0));
 	objects[2].SetPosition(0.0f, +5.0f, 20.0f);
@@ -49,7 +75,7 @@ void CSpaceShipScene::BuildObjects()
 	objects[2].SetMovingDirection(XMFLOAT3(1.0f, -1.0f, 0.0f));
 	objects[2].SetMovingSpeed(0.0f);
 
-	objects[3] = CObject();
+	objects.push_back(CObject());
 	objects[3].SetMesh(cube);
 	objects[3].SetColor(RGB(0, 255, 255));
 	objects[3].SetPosition(0.0f, 0.0f, 40.0f);
@@ -58,7 +84,7 @@ void CSpaceShipScene::BuildObjects()
 	objects[3].SetMovingDirection(XMFLOAT3(0.0f, 0.0f, 1.0f));
 	objects[3].SetMovingSpeed(0.0f);
 
-	objects[4] = CObject();
+	objects.push_back(CObject());
 	objects[4].SetMesh(cube);
 	objects[4].SetColor(RGB(128, 0, 255));
 	objects[4].SetPosition(10.0f, 10.0f, 50.0f);
@@ -68,27 +94,13 @@ void CSpaceShipScene::BuildObjects()
 	objects[4].SetMovingSpeed(0.0f);
 }
 
-void CSpaceShipScene::Animate(float elapsedTime)
-{
-	for (auto& object : objects) {
-		object.Animate(elapsedTime);
-	}
-}
-
-void CSpaceShipScene::Render(HDC hDCFrameBuffer, std::unique_ptr<CCamera>& camera)
-{
-	CGraphicsPipeline::SetViewport(camera->viewport);
-	CGraphicsPipeline::SetViewPerspectiveProjectTransform(camera->view_perspective_project_matrix);
-
-	for (auto& object : objects) {
-		object.Render(hDCFrameBuffer, camera);
-	}
-}
 
 
-void CSpaceShipScene::ProcessInput(HWND& hwnd, std::unique_ptr<CPlayer>& player)
+void CSpaceShipScene::ProcessInput(HWND& hwnd, float timeElapsed)
 {
 	input_manager->ProcessInput(hwnd, player);
+	// 인풋 후 업데이트
+	player->Update(timeElapsed);
 }
 
 LRESULT CSpaceShipScene::ProcessingWindowMessage(HWND& hWnd, UINT& nMessageID, WPARAM& wParam, LPARAM& lParam)
@@ -98,40 +110,52 @@ LRESULT CSpaceShipScene::ProcessingWindowMessage(HWND& hWnd, UINT& nMessageID, W
 
 // ==================
 
-StartScene::StartScene() : CScene{std::make_unique<CStartInputManager>()}
+CStartScene::CStartScene() : CScene{1, std::make_unique<CStartInputManager>(), std::make_unique<CNonePlayer>() }
 {
 }
 
-void StartScene::BuildObjects()
+void CStartScene::BuildObjects()
 {
+	// 회전하는 이름
 	CTextMesh textMesh;
-	object.SetMesh(textMesh);
-	object.SetColor(RGB(128, 0, 255));
-	object.SetPosition(0.0f, 00.0f, 10.f);
-	object.SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
-	object.SetRotationSpeed(30.0f);
-	object.SetMovingDirection(XMFLOAT3(0.0f, 1.0f, 1.0f));
-	object.SetMovingSpeed(0.0f);
+	objects[0].SetActive(true);
+	objects[0].SetMesh(CTextMesh());
+	objects[0].SetColor(RGB(255, 0, 0));
+	objects[0].SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
+	objects[0].SetRotationSpeed(30.0f);
+	objects[0].SetMovingDirection(XMFLOAT3(0.0f, 1.0f, 1.0f));
+	objects[0].SetMovingSpeed(0.0f);
 }
 
-void StartScene::Animate(float elapsedTime)
-{
-	object.Animate(elapsedTime);
-}
 
-void StartScene::Render(HDC hDCFrameBuffer, std::unique_ptr<CCamera>& camera)
-{
-	CGraphicsPipeline::SetViewport(camera->viewport);
-	CGraphicsPipeline::SetViewPerspectiveProjectTransform(camera->view_perspective_project_matrix);
-	object.Render(hDCFrameBuffer, camera);
-}
-
-void StartScene::ProcessInput(HWND& hwnd, std::unique_ptr<CPlayer>& player)
+void CStartScene::ProcessInput(HWND& hwnd, float timeElapsed)
 {
 	input_manager->ProcessInput(hwnd, player);
+	player->Update(timeElapsed);
 }
 
-LRESULT StartScene::ProcessingWindowMessage(HWND& hWnd, UINT& nMessageID, WPARAM& wParam, LPARAM& lParam)
+LRESULT CStartScene::ProcessingWindowMessage(HWND& hWnd, UINT& nMessageID, WPARAM& wParam, LPARAM& lParam)
+{
+	return input_manager->ProcessingWindowMessage(hWnd, nMessageID, wParam, lParam);
+}
+
+// ==================
+CRollerCoasterScene::CRollerCoasterScene() : CScene{ 3, std::make_unique<CRollerCoasterInputManager>(), std::make_unique<CRollerCosterPlayer>()}
+{
+}
+
+void CRollerCoasterScene::BuildObjects()
+{
+}
+
+
+void CRollerCoasterScene::ProcessInput(HWND& hwnd, float timeElapsed)
+{
+	input_manager->ProcessInput(hwnd, player);
+	player->Update(timeElapsed);
+}
+
+LRESULT CRollerCoasterScene::ProcessingWindowMessage(HWND& hWnd, UINT& nMessageID, WPARAM& wParam, LPARAM& lParam)
 {
 	return input_manager->ProcessingWindowMessage(hWnd, nMessageID, wParam, lParam);
 }

@@ -2,7 +2,7 @@
 #include "GameFramework.h"
 
 
-CGameFramework::CGameFramework() : now_scene{std::make_unique<StartScene>()}
+CGameFramework::CGameFramework() : now_scene{std::make_unique<CStartScene>()}
 {
 }
 
@@ -51,16 +51,11 @@ void CGameFramework::ProcessFrame()
 	ClearFrameBuffer(RGB(255, 255, 255));
 
 	AnimateObjects();
-	// 오브젝트
+
 	if (now_scene) {
-		// 키 입력 받은 후 업데이트
-		now_scene->ProcessInput(h_wnd, player);
-		player->Update(timer.GetTimeElapsed());
-
-		now_scene->Render(hdc_frame_buffer, player->GetCamera());
+		now_scene->ProcessInput(h_wnd, timer.GetTimeElapsed());
+		now_scene->Render(hdc_frame_buffer);
 	}
-
-	if (player) player->Render(hdc_frame_buffer, player->GetCamera());
 
 	PresentFrameBuffer();
 
@@ -84,25 +79,12 @@ void CGameFramework::ClearFrameBuffer(DWORD dwColor)
 void CGameFramework::AnimateObjects()
 {
 	float timeElapsed = timer.GetTimeElapsed();
-	if (player) player->Animate(timeElapsed);
 	if (now_scene) now_scene->Animate(timeElapsed);
 }
 
 void CGameFramework::BuildObjects()
 {
-	std::unique_ptr<CCamera> camera = std::make_unique<CCamera>();
-	camera->SetViewport(0, 0, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
-	camera->GeneratePerspectiveProjectionMatrix(1.01f, 500.0f, 60.0f);
-	camera->SetFOVAngle(60.0f);
-
-	player = std::make_unique<CAirplanePlayer>();
-	player->SetPosition(0.0f, 0.0f, 0.0f);
-	player->SetMesh(CCubeMesh());
-	player->SetColor(RGB(0, 0, 255));
-	player->SetCamera(camera);
-	player->SetCameraOffset(XMFLOAT3(0.0f, 5.0f, -15.0f));
-
-	now_scene = std::make_unique<StartScene>();
+	now_scene = std::make_unique<CSpaceShipScene>();
 	now_scene->BuildObjects();
 }
 

@@ -2,6 +2,15 @@
 #include "Camera.h"
 #include "Player.h"
 
+CPlayer::CPlayer()
+{
+	// 카메라 설정
+	camera = std::make_unique<CCamera>();
+	camera->SetViewport(0, 0, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
+	camera->GeneratePerspectiveProjectionMatrix(1.01f, 500.0f, 60.0f);
+	camera->SetFOVAngle(60.0f);
+}
+
 void CPlayer::SetPosition(float x, float y, float z)
 {
 	position = XMFLOAT3(x, y, z);
@@ -138,10 +147,45 @@ void CPlayer::Animate(float elapsedTime)
 	CObject::Animate(elapsedTime);
 }
 
+
+CAirplanePlayer::CAirplanePlayer()
+{
+	// mesh 및 플레이어 설정
+	SetPosition(0.0f, 0.0f, 0.0f);
+	SetMesh(CCubeMesh());
+	SetColor(RGB(0, 0, 255));
+	SetCamera(camera);
+	SetCameraOffset(XMFLOAT3(0.0f, 5.0f, -15.0f));
+}
+
 void CAirplanePlayer::OnUpdateTransform()
 {
 	CPlayer::OnUpdateTransform();
 
 	XMStoreFloat4x4(&world_matrix, XMMatrixMultiply(XMMatrixRotationRollPitchYaw(XMConvertToRadians(90.0f), 0.0f, 0.0f), XMLoadFloat4x4(&world_matrix)));
 
+}
+
+
+CRollerCosterPlayer::CRollerCosterPlayer()
+{
+	// mesh 및 플레이어 설정
+	SetPosition(0.0f, 0.0f, 0.0f);
+	SetMesh(CCubeMesh());
+	SetColor(RGB(255, 0, 255));
+	SetCamera(camera);
+	SetCameraOffset(XMFLOAT3(0.0f, 5.0f, -15.0f));
+}
+
+void CRollerCosterPlayer::OnUpdateTransform()
+{
+	CPlayer::OnUpdateTransform();
+
+	XMStoreFloat4x4(&world_matrix, XMMatrixMultiply(XMMatrixRotationRollPitchYaw(XMConvertToRadians(90.0f), 0.0f, 0.0f), XMLoadFloat4x4(&world_matrix)));
+}
+
+void CNonePlayer::OnUpdateTransform()
+{
+	CPlayer::OnUpdateTransform();
+	XMStoreFloat4x4(&world_matrix, XMMatrixMultiply(XMMatrixRotationRollPitchYaw(XMConvertToRadians(90.0f), 0.0f, 0.0f), XMLoadFloat4x4(&world_matrix)));
 }

@@ -55,4 +55,8 @@ public:
 class CTextMesh : public CMesh {
 public:
 	CTextMesh(float = 24.0f, float = 8.0f, float = 4.0f);
+
+	void Render(HDC) const override;
+	LPCTSTR text{L"3D 게임프로그래밍 1"};
 };
+

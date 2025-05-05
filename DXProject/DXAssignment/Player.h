@@ -1,8 +1,10 @@
 #pragma once
 #include "Object.h"
 
+// player 생성자에서 카메라 생성, 상속받은 플레이어에서 메쉬 및 설정
 class CPlayer : public CObject {
 public:
+	CPlayer();
 	void SetPosition(float, float, float);
 
 	void LookAt(XMFLOAT3&, XMFLOAT3&);
@@ -20,7 +22,7 @@ public:
 
 	virtual void OnUpdateTransform();
 	virtual void Animate(float);
-	//	virtual void Render(HDC hDCFrameBuffer, std::unique_ptr<CCamera>&);
+	//virtual void Render(HDC hDCFrameBuffer);
 
 	void SetCamera(std::unique_ptr<CCamera>& pCamera) { camera = std::move(pCamera); }
 	std::unique_ptr<CCamera>& GetCamera() { return camera; }
@@ -45,6 +47,17 @@ public:
 class CAirplanePlayer : public CPlayer
 {
 public:
+	CAirplanePlayer();
+	void OnUpdateTransform() override;
+};
 
+class CNonePlayer : public CPlayer {
+public:
+	void OnUpdateTransform() override;
+};
+
+class CRollerCosterPlayer : public CPlayer {
+public:
+	CRollerCosterPlayer();
 	void OnUpdateTransform() override;
 };

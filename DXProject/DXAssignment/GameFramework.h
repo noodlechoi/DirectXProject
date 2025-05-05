@@ -39,7 +39,5 @@ private:
 	//scene
 	std::unique_ptr<CScene> now_scene;
 
-	// object
-	std::unique_ptr<CPlayer> player;
 };
 

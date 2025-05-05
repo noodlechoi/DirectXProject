@@ -68,7 +68,7 @@ void CObject::Animate(float elapsedTime)
 	if (moving_speed != 0.0f) Move(moving_direction, moving_speed * elapsedTime);
 }
 
-void CObject::Render(HDC hDCFrameBuffer , std::unique_ptr< CCamera>& camera)
+void CObject::Render(HDC hDCFrameBuffer)
 {
 	if (meshes.data()) {
 		CGraphicsPipeline::SetWorldTransform(world_matrix);

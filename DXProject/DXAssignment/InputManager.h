@@ -30,3 +30,13 @@ public:
 	void ProcessingKeyboardMessage(HWND&, UINT&, WPARAM&, LPARAM&) override;
 	virtual LRESULT ProcessingWindowMessage(HWND&, UINT&, WPARAM&, LPARAM&) override;
 };
+
+class CRollerCoasterInputManager : public CInputManager {
+public:
+	void ProcessInput(HWND&, std::unique_ptr<CPlayer>&) override;
+	void ProcessingMouseMessage(HWND&, UINT&, WPARAM&, LPARAM&) override;
+	void ProcessingKeyboardMessage(HWND&, UINT&, WPARAM&, LPARAM&) override;
+	virtual LRESULT ProcessingWindowMessage(HWND&, UINT&, WPARAM&, LPARAM&) override;
+private:
+	POINT old_cursor_pos;
+};
