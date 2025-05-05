@@ -4,8 +4,6 @@
 #include "GraphicsPipeline.h"
 #include "Player.h"
 
-std::string CRollerCoasterScene::FileName{"data/CRollerCoasterScene.dat"};
-
 template <typename T, typename Y>
 CScene::CScene(size_t objectNum, std::unique_ptr<T>&& manager, std::unique_ptr<Y>&& Player)
 {
@@ -14,10 +12,6 @@ CScene::CScene(size_t objectNum, std::unique_ptr<T>&& manager, std::unique_ptr<Y
 	objects.reserve(objectNum);
 }
 
-CObject&& CScene::CreateObject()
-{
-	return CObject();
-}
 
 void CScene::Animate(float elapsedTime)
 {
@@ -46,17 +40,6 @@ LRESULT CScene::ProcessingWindowMessage(HWND& hWnd, UINT& nMessageID, WPARAM& wP
 	return input_manager->ProcessingWindowMessage(hWnd, nMessageID, wParam, lParam);
 }
 
-void CScene::Save(const CObject& object) const
-{
-	object.Save(FileName);
-}
-
-void CScene::Load()
-{
-	for (auto& object : objects) {
-		object.Load(FileName);
-	}
-}
 
 CSpaceShipScene::CSpaceShipScene() : CScene(5, std::make_unique<CSpaceShipInputManager>(), std::make_unique<CAirplanePlayer>())
 {
@@ -161,7 +144,7 @@ CRollerCoasterScene::CRollerCoasterScene() : CScene{ 3, std::make_unique<CRoller
 {
 }
 
-CObject&& CRollerCoasterScene::CreateObject()
+void CRollerCoasterScene::BuildObjects()
 {
 	CObject object;
 	CCubeMesh cube{ 4.0f, 4.0f, 4.0f };
@@ -173,24 +156,7 @@ CObject&& CRollerCoasterScene::CreateObject()
 	object.SetMovingDirection(XMFLOAT3(1.0f, 0.0f, 0.0f));
 	object.SetMovingSpeed(0.0f);
 
-	return std::move(object);
-}
-
-void CRollerCoasterScene::BuildObjects()
-{
-	// 로드될 때까지 
-	while (true) {
-		if (0 == objects.size()) {
-			Save(CreateObject());
-		}
-		try {
-			Load();
-			return;
-		}
-		catch (const std::runtime_error& e) {
-			Save(CreateObject());
-		}
-	}
+	objects.push_back(object);
 }
 
 
