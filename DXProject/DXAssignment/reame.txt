@@ -1,0 +1,4 @@
+object에 load, save 함수
+binary로 저장
+
+상속받은 class마다 다 다른 파일 읽어오도록 구현

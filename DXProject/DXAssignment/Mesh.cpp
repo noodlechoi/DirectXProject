@@ -62,11 +62,11 @@ CPolygon& CPolygon::operator=(const CPolygon& other)
 	return *this;
 }
 
-CPolygon::CPolygon(const CPolygon&& other) : vertexes{ std::move(other.vertexes) }
+CPolygon::CPolygon( CPolygon&& other) : vertexes{ std::move(other.vertexes) }
 {
 }
 
-CPolygon& CPolygon::operator=(const CPolygon&& other)
+CPolygon& CPolygon::operator=( CPolygon&& other)
 {
 	if (this == &other)
 		return *this;
@@ -84,6 +84,38 @@ void CPolygon::SetVertex(CVertex vertex)
 CMesh::CMesh(int polygonNum)
 {
 	polygons.reserve(polygonNum);
+}
+
+CMesh::CMesh(const CMesh& other) :
+	ref_num{ other.ref_num },
+	polygons{ other.polygons }
+{
+}
+
+CMesh& CMesh::operator=(const CMesh& other)
+{
+	if (this == &other) return *this;
+
+	ref_num = other.ref_num;
+	polygons = other.polygons;
+
+	return *this;
+}
+
+CMesh::CMesh(CMesh&& other) :
+	ref_num{ other.ref_num },
+	polygons{ std::move(other.polygons) }
+{
+}
+
+CMesh& CMesh::operator=(CMesh&& other)
+{
+	if (this == &other) return *this;
+
+	ref_num = other.ref_num;
+	polygons = std::move(other.polygons);
+
+	return *this;
 }
 
 //void CMesh::SetPolygon(CPolygon polygon)

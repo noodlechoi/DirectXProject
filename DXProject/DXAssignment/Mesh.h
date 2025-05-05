@@ -21,9 +21,9 @@ public:
 	CPolygon(const CPolygon&);
 	CPolygon& operator=(const CPolygon&);
 	// 이동 생성자
-	CPolygon(const CPolygon&&);
+	CPolygon( CPolygon&&);
 	// 이동 할당 연산자
-	CPolygon& operator=(const CPolygon&&);
+	CPolygon& operator=( CPolygon&&);
 
 	void SetVertex(CVertex);
 public:
@@ -33,7 +33,11 @@ public:
 // Mesh - 공유 자원(com 객체처럼 작동)
 class CMesh {
 public:
-	CMesh(int polygonNum);
+	CMesh(int = 6);
+	CMesh(const CMesh&);
+	CMesh& operator=(const CMesh&);
+	CMesh(CMesh&&);
+	CMesh& operator=(CMesh&&);
 
 	void AddRef() { ++ref_num; }
 	void Release() { --ref_num; if (0 >= ref_num) delete this; }

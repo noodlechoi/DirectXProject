@@ -19,6 +19,7 @@
 #include <memory>
 #include <random>
 #include <vector>
+#include <fstream>
 
 // directX
 #include <DirectXMath.h>

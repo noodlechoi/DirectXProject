@@ -6,11 +6,15 @@
 class CScene {
 public:
 	virtual void BuildObjects() {}
+	virtual CObject&& CreateObject();
 	virtual void Animate(float);
 	virtual void Render(HDC);
 
 	virtual void ProcessInput(HWND&, float) {};
 	virtual LRESULT ProcessingWindowMessage(HWND&, UINT&, WPARAM&, LPARAM&) = 0;
+
+	virtual void Save(const CObject&) const;
+	virtual void Load();
 protected:
 	std::unique_ptr<CInputManager> input_manager{};
 	std::unique_ptr<CPlayer> player{};
@@ -20,6 +24,8 @@ protected:
 	// 이동 생성자
 	template <typename T, typename Y>
 	CScene(size_t, std::unique_ptr<T>&&, std::unique_ptr<Y>&&);
+
+	static std::string FileName;
 };
 
 class CSpaceShipScene : public CScene {
@@ -50,6 +56,7 @@ class CRollerCoasterScene : public CScene {
 public:
 	CRollerCoasterScene();
 
+	CObject&& CreateObject() override;
 	void BuildObjects() override;
 
 	void ProcessInput(HWND&, float) override;

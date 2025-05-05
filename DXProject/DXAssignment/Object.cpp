@@ -19,6 +19,81 @@ CObject::~CObject()
 	}
 }
 
+CObject::CObject(const CObject& other) :
+	is_active{ other.is_active },
+	world_matrix{ other.world_matrix },
+	color{ other.color },
+	moving_direction{ other.moving_direction },
+	moving_speed{ other.moving_speed },
+	moving_range{ other.moving_range },
+	rotation_axis{ other.rotation_axis },
+	rotation_speed{ other.rotation_speed }
+{
+	if (other.meshes.data()) {
+		meshes.reserve(other.meshes.size());
+		meshes = other.meshes;
+	}
+	else {
+		meshes.clear();
+	}
+}
+
+CObject& CObject::operator=(const CObject& other)
+{
+	if (this == &other) return *this;
+
+	is_active = other.is_active;
+	world_matrix = other.world_matrix;
+	color = other.color;
+	moving_direction = other.moving_direction;
+	moving_speed = other.moving_speed;
+	moving_range = other.moving_range;
+	rotation_axis = other.rotation_axis;
+	rotation_speed = other.rotation_speed;
+	if (other.meshes.data()) {
+		meshes.resize(other.meshes.size());
+		meshes = other.meshes;
+	}
+	else {
+		meshes.clear();
+	}
+
+	return *this;
+}
+
+CObject::CObject( CObject&& other) :
+	is_active{ other.is_active },
+	world_matrix{ other.world_matrix },
+	color{ other.color },
+	moving_direction{ other.moving_direction },
+	moving_speed{ other.moving_speed },
+	moving_range{ other.moving_range },
+	rotation_axis{ other.rotation_axis },
+	rotation_speed{ other.rotation_speed }
+{
+	meshes.reserve(other.meshes.size());
+	meshes = std::move(other.meshes);
+}
+
+CObject& CObject::operator=( CObject&& other)
+{
+	if (this == &other) return *this;
+
+	is_active = other.is_active;
+	world_matrix = other.world_matrix;
+	color = other.color;
+	moving_direction = other.moving_direction;
+	moving_speed = other.moving_speed;
+	moving_range = other.moving_range;
+	rotation_axis = other.rotation_axis;
+	rotation_speed = other.rotation_speed;
+	
+	meshes.resize(other.meshes.size());
+	meshes = std::move(other.meshes);
+
+	return *this;
+}
+
 void CObject::SetMesh(CMesh&& mesh)
 {
 	mesh.AddRef();
@@ -85,3 +160,19 @@ void CObject::Render(HDC hDCFrameBuffer)
 	}
 }
 
+void CObject::Save(const std::string_view fileName) const
+{
+	std::ofstream out{ fileName.data(), std::ios::binary | std::ios::app };
+	out.write(reinterpret_cast<const char*>(this), sizeof(CObject));
+	OutputDebugString(L"Save\n");
+}
+
+void CObject::Load(const std::string_view fileName)
+{
+	std::ifstream in{ fileName.data(),  std::ios::binary | std::ios::app };
+	if (in) {
+		throw std::runtime_error("File not found");
+	}
+	in.read(reinterpret_cast<char*>(this), sizeof(CObject));
+	OutputDebugString(L"Load\n");
+}
