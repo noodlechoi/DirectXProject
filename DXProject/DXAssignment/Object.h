@@ -33,7 +33,12 @@ public:
 	void SetRotationAxis(XMFLOAT3&& xmf3RotationAxis) { XMStoreFloat3(&rotation_axis, XMVector3Normalize(XMLoadFloat3(&xmf3RotationAxis))); }
 	void SetRotationSpeed(float fSpeed) { rotation_speed = fSpeed; }
 
-	void Move(XMFLOAT3& , float );
+	XMFLOAT3 GetPosition();
+	XMFLOAT3 GetLook();
+	XMFLOAT3 GetUp();
+	XMFLOAT3 GetRight();
+
+	virtual void Move(XMFLOAT3& , float );
 
 	void Rotate(float  = 10.0f, float  = 10.0f, float  = 10.0f);
 	void Rotate(XMFLOAT3& , float );
@@ -62,3 +67,17 @@ protected:
 	float rotation_speed{};
 };
 
+class CRollerCoaster : public CObject {
+public:
+	CRollerCoaster();
+	virtual ~CRollerCoaster() = default;
+
+
+	// 업데이트 (경로를 따라 이동)
+	void Animate(float) override;
+
+private:
+	std::vector<XMFLOAT3> path; // 롤러코스터 경로
+	size_t current_index{ 0 };   // 현재 경로 인덱스
+
+};

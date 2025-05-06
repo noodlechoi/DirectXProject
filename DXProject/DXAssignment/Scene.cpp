@@ -135,6 +135,7 @@ void CSpaceShipScene::BuildObjects()
 void CSpaceShipScene::ProcessInput(HWND& hwnd, float timeElapsed)
 {
 	input_manager->ProcessInput(hwnd, player);
+	player->Update(timeElapsed);
 }
 
 LRESULT CSpaceShipScene::ProcessingWindowMessage(HWND& hWnd, UINT& nMessageID, WPARAM& wParam, LPARAM& lParam)
@@ -165,6 +166,7 @@ void CStartScene::BuildObjects()
 void CStartScene::ProcessInput(HWND& hwnd, float timeElapsed)
 {
 	input_manager->ProcessInput(hwnd, player);
+	player->Update(timeElapsed);
 }
 
 LRESULT CStartScene::ProcessingWindowMessage(HWND& hWnd, UINT& nMessageID, WPARAM& wParam, LPARAM& lParam)
@@ -187,7 +189,7 @@ void CRollerCoasterScene::CreateObject()
 		object.SetColor(RGB(255, 0, 0));
 		object.SetPosition(XMFLOAT3(player->position.x , player->position.y - 4.0f, player->position.z - (4.0f * i)));
 		object.SetMovingDirection(XMFLOAT3(0.0f, 0.0f, 0.0f));
-		//object.SetRotationAxis(XMFLOAT3(0.0f, 0.0f, 0.0f));
+		object.SetRotationAxis(XMFLOAT3(1.0f, 0.0f, 0.0f));
 		object.SetMovingSpeed(5.0f);
 
 		objects.push_back(std::make_unique<CRollerCoaster>(object));
@@ -211,6 +213,7 @@ void CRollerCoasterScene::Load()
 void CRollerCoasterScene::ProcessInput(HWND& hwnd, float timeElapsed)
 {
 	input_manager->ProcessInput(hwnd, player);
+	player->Update(timeElapsed);
 }
 
 LRESULT CRollerCoasterScene::ProcessingWindowMessage(HWND& hWnd, UINT& nMessageID, WPARAM& wParam, LPARAM& lParam)
