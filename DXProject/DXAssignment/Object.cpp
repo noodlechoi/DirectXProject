@@ -120,6 +120,13 @@ void CObject::SetPosition(XMFLOAT3& position)
 	world_matrix._43 = position.z;
 }
 
+void CObject::SetPosition(XMFLOAT3&& position)
+{
+	world_matrix._41 = position.x;
+	world_matrix._42 = position.y;
+	world_matrix._43 = position.z;
+}
+
 void CObject::Move(XMFLOAT3& direction, float speed)
 {
 	SetPosition(world_matrix._41 + direction.x * speed, world_matrix._42 + direction.y * speed, world_matrix._43 + direction.z * speed);
@@ -159,3 +166,28 @@ void CObject::Render(HDC hDCFrameBuffer)
 		::DeleteObject(hPen);
 	}
 }
+
+void CObject::Save(std::ostream& out) const
+{
+	 out.write(reinterpret_cast<const char*>(&world_matrix), sizeof(world_matrix));
+	 out.write(reinterpret_cast<const char*>(&color), sizeof(color));
+	 out.write(reinterpret_cast<const char*>(&moving_direction), sizeof(moving_direction));
+	 out.write(reinterpret_cast<const char*>(&moving_speed), sizeof(moving_speed));
+	 out.write(reinterpret_cast<const char*>(&moving_range), sizeof(moving_range));
+	 out.write(reinterpret_cast<const char*>(&rotation_axis), sizeof(rotation_axis));
+	 out.write(reinterpret_cast<const char*>(&rotation_speed), sizeof(rotation_speed));
+}
+
+std::istream& CObject::Load(std::istream& in)
+{
+	in.read(reinterpret_cast<char*>(&world_matrix), sizeof(world_matrix));
+	in.read(reinterpret_cast<char*>(&color), sizeof(color));
+	in.read(reinterpret_cast<char*>(&moving_direction), sizeof(moving_direction));
+	in.read(reinterpret_cast<char*>(&moving_speed), sizeof(moving_speed));
+	in.read(reinterpret_cast<char*>(&moving_range), sizeof(moving_range));
+	in.read(reinterpret_cast<char*>(&rotation_axis), sizeof(rotation_axis));
+	in.read(reinterpret_cast<char*>(&rotation_speed), sizeof(rotation_speed));
+
+	return in;
+}
+

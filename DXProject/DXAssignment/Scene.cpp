@@ -56,7 +56,7 @@ void CScene::Save() const
 {
 	std::ofstream out{ FileName.data(), std::ios::binary | std::ios::app };
 	for (auto& object : objects) {
-		out.write(reinterpret_cast<const char*>(&object), sizeof(CObject));
+		object.Save(out);
 	}
 	OutputDebugString(L"Save\n");
 }
@@ -68,7 +68,8 @@ void CScene::Load()
 		throw std::runtime_error("File not found");
 	}
 	CObject object;
-	while (in.read(reinterpret_cast<char*>(&object), sizeof(CObject))) {
+	while (object.Load(in)) {
+		object.SetMesh(CCubeMesh());
 		objects.push_back(object);
 	}
 	OutputDebugString(L"Load\n");
@@ -180,17 +181,19 @@ CRollerCoasterScene::CRollerCoasterScene() : CScene{ 3, std::make_unique<CRoller
 
 void CRollerCoasterScene::CreateObject()
 {
-	CObject object;
-	CCubeMesh cube{ 4.0f, 4.0f, 4.0f };
-	object.SetMesh(cube);
-	object.SetColor(RGB(255, 0, 0));
-	object.SetPosition(-13.5f, 0.0f, +14.0f);
-	object.SetRotationAxis(XMFLOAT3(1.0f, 1.0f, 0.0f));
-	object.SetRotationSpeed(90.0f);
-	object.SetMovingDirection(XMFLOAT3(1.0f, 0.0f, 0.0f));
-	object.SetMovingSpeed(0.0f);
+	for (int i = 0; i < 5; ++i) {
+		CObject object;
+		CCubeMesh cube{ 4.0f, 4.0f, 4.0f };
 
-	objects.push_back(object);
+		object.SetMesh(cube);
+		object.SetColor(RGB(255, 0, 0));
+		object.SetPosition(XMFLOAT3(player->position.x , player->position.y - 4.0f, player->position.z - (4.0f * i)));
+		object.SetMovingDirection(XMFLOAT3(1.0f, 0.0f, 0.0f));
+		object.SetMovingSpeed(0.0f);
+
+		objects.push_back(object);
+	}
+	
 }
 
 void CRollerCoasterScene::ProcessInput(HWND& hwnd, float timeElapsed)

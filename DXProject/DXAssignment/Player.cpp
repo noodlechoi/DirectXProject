@@ -179,6 +179,9 @@ CRollerCosterPlayer::CRollerCosterPlayer()
 
 void CRollerCosterPlayer::OnUpdateTransform()
 {
+	// 롤러코스터 라인에 따라 이동
+	
+
 	CPlayer::OnUpdateTransform();
 
 	XMStoreFloat4x4(&world_matrix, XMMatrixMultiply(XMMatrixRotationRollPitchYaw(XMConvertToRadians(90.0f), 0.0f, 0.0f), XMLoadFloat4x4(&world_matrix)));

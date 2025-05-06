@@ -22,6 +22,7 @@ public:
 
 	void SetPosition(float , float , float );
 	void SetPosition(XMFLOAT3& );
+	void SetPosition(XMFLOAT3&& );
 
 	void SetMovingDirection(XMFLOAT3& xmMovingDirection) { XMStoreFloat3(&moving_direction, XMVector3Normalize(XMLoadFloat3(&moving_direction))); }
 	void SetMovingDirection(XMFLOAT3&& xmMovingDirection) { XMStoreFloat3(&moving_direction, XMVector3Normalize(XMLoadFloat3(&moving_direction))); }
@@ -42,6 +43,9 @@ public:
 	virtual void Animate(float );
 	virtual void Render(HDC );
 
+	// meshes 빼고 저장 및 로드
+	virtual void Save(std::ostream&) const;
+	virtual std::istream& Load(std::istream&);
 protected:
 	bool is_active{ true };
 
