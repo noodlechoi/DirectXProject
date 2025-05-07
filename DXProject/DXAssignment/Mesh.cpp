@@ -46,7 +46,7 @@ CPolygon::CPolygon(int vertexNum)
 // 나중에 리펙토링
 CPolygon::CPolygon(CVertex v1, CVertex v2, CVertex v3, CVertex v4)
 {
-	vertexes.reserve(3);
+	vertexes.reserve(4);
 	vertexes.push_back(v1);
 	vertexes.push_back(v2);
 	vertexes.push_back(v3);

@@ -84,10 +84,10 @@ public:
 	CRollerCoaster();
 	virtual ~CRollerCoaster() = default;
 
+	size_t GetPathNum() const { return path.size(); }
 
 	// 업데이트 (경로를 따라 이동)
 	void Animate(float) override;
-
 private:
 	std::vector<XMFLOAT3> path; // 롤러코스터 경로
 	size_t current_index{ 0 };   // 현재 경로 인덱스

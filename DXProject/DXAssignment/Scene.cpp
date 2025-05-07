@@ -219,7 +219,7 @@ CRollerCoasterScene::CRollerCoasterScene() : CScene{ 10, std::make_unique<CRolle
 void CRollerCoasterScene::CreateObject()
 {
 	CCubeMesh cube{ 4.0f, 4.0f, 4.0f };
-	for (int i = 0; i < 2; ++i) {
+	for (int i = 0; i < 5; ++i) {
 		CRollerCoaster object;
 
 		object.SetMesh(cube);
@@ -231,20 +231,16 @@ void CRollerCoasterScene::CreateObject()
 
 		objects.push_back(std::make_unique<CRollerCoaster>(object));
 	}
-
-	/*CObject object;
+	CObject object;
 	CCubeMesh bigCube{ 10.0f, 10.0f, 10.0f };
-	object.SetMesh(cube);
-	object.SetColor(RGB(255, 0, 0));
+	object.SetMesh(bigCube);
+	object.SetColor(RGB(0, 0, 0));
 	object.SetPosition(XMFLOAT3(0.0f, 0.0f, 50.0f));
 	object.SetMovingDirection(XMFLOAT3(0.0f, 0.0f, 0.0f));
 	object.SetRotationAxis(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	object.SetMovingSpeed(5.0f);
+	object.SetMovingSpeed(0.0f);
 
 	objects.push_back(std::make_unique<CObject>(object));
-	for (int i = 0; i < 9; ++i) {
-
-	}*/
 }
 
 void CRollerCoasterScene::ProcessInput(HWND& hwnd, float timeElapsed)
