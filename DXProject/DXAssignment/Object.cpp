@@ -27,7 +27,8 @@ CObject::CObject(const CObject& other) :
 	moving_speed{ other.moving_speed },
 	moving_range{ other.moving_range },
 	rotation_axis{ other.rotation_axis },
-	rotation_speed{ other.rotation_speed }
+	rotation_speed{ other.rotation_speed },
+	type{other.type}
 {
 	if (other.meshes.data()) {
 		meshes.reserve(other.meshes.size());
@@ -50,6 +51,7 @@ CObject& CObject::operator=(const CObject& other)
 	moving_range = other.moving_range;
 	rotation_axis = other.rotation_axis;
 	rotation_speed = other.rotation_speed;
+	type = other.type;
 	if (other.meshes.data()) {
 		meshes.resize(other.meshes.size());
 		meshes = other.meshes;
@@ -69,7 +71,8 @@ CObject::CObject( CObject&& other) :
 	moving_speed{ other.moving_speed },
 	moving_range{ other.moving_range },
 	rotation_axis{ other.rotation_axis },
-	rotation_speed{ other.rotation_speed }
+	rotation_speed{ other.rotation_speed },
+	type{ other.type }
 {
 	meshes.reserve(other.meshes.size());
 	meshes = std::move(other.meshes);
@@ -87,6 +90,7 @@ CObject& CObject::operator=( CObject&& other)
 	moving_range = other.moving_range;
 	rotation_axis = other.rotation_axis;
 	rotation_speed = other.rotation_speed;
+	type = other.type;
 	
 	meshes.resize(other.meshes.size());
 	meshes = std::move(other.meshes);
@@ -236,13 +240,14 @@ std::istream& CObject::Load(std::istream& in)
 	in.read(reinterpret_cast<char*>(&rotation_axis), sizeof(rotation_axis));
 	in.read(reinterpret_cast<char*>(&rotation_speed), sizeof(rotation_speed));
 
-	
 	return in;
 }
 
 
 CRollerCoaster::CRollerCoaster()
 {
+	SetType(eTYPE::RollerCoaster);
+
 	path = {
 	   { 0.0f, 0.0f, 0.0f },
 		{ 10.0f, 0.0f, 0.0f },

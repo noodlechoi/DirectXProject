@@ -64,6 +64,10 @@ void CScene::Save() const {
 
 	// °¢ °´Ã¼ ÀúÀå
 	for (const auto& object : objects) {
+		// °´Ã¼ Å¸ÀÔ ÀúÀå
+		int type = object->GetType();
+		out.write(reinterpret_cast<const char*>(&type), sizeof(int));
+
 		object->Save(out);
 	}
 
@@ -74,15 +78,38 @@ void CScene::Save() const {
 
 void CScene::Load()
 {
-	std::ifstream in{ FileName.data(),  std::ios::binary };
+	std::ifstream in{ FileName.data(), std::ios::binary };
 	if (!in) {
 		throw std::runtime_error("File not found");
 	}
-	CObject object;
-	while (object.Load(in)) {
-		objects.push_back(std::make_unique<CObject>(object));
+
+	// °´Ã¼ ¼ö ÀÐ±â
+	int objectCount{};
+	in.read(reinterpret_cast<char*>(&objectCount), sizeof(objectCount));
+	objects.reserve(objectCount);
+	int type{};
+	for (int i = 0; i < objectCount; ++i) {
+		// °´Ã¼ Å¸ÀÔ load
+		in.read(reinterpret_cast<char*>(&type), sizeof(int));
+		std::unique_ptr<CObject> object;
+		switch (type) {
+		case (int)CObject::eTYPE::Obstacle:
+			object = std::make_unique<CObject>();
+			break;
+		case (int)CObject::eTYPE::RollerCoaster:
+			object = std::make_unique<CRollerCoaster>();
+			break;
+		default:
+			object = std::make_unique<CObject>();
+			break;
+		}
+		object->SetType(type);
+
+		object->Load(in);
+		objects.push_back(std::move(object));
 	}
-	OutputDebugString(L"Load\n");
+
+	OutputDebugString(L"Load completed\n");
 	
 }
 
@@ -219,27 +246,6 @@ void CRollerCoasterScene::CreateObject()
 
 	}*/
 }
-
-void CRollerCoasterScene::Load() {
-	std::ifstream in{ FileName.data(), std::ios::binary };
-	if (!in) {
-		throw std::runtime_error("File not found");
-	}
-
-	// °´Ã¼ ¼ö ÀÐ±â
-	int objectCount{};
-	in.read(reinterpret_cast<char*>(&objectCount), sizeof(objectCount));
-	// °´Ã¼ ·Îµå
-	objects.clear();
-	for (int i = 0; i < objectCount; ++i) {
-		auto object = std::make_unique<CRollerCoaster>();
-		object->Load(in);
-		objects.push_back(std::move(object));
-	}
-
-	OutputDebugString(L"Load completed\n");
-}
-
 
 void CRollerCoasterScene::ProcessInput(HWND& hwnd, float timeElapsed)
 {

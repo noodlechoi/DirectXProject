@@ -6,6 +6,11 @@ class CCamera;
 class CObject
 {
 public:
+	enum class eTYPE {
+		Obstacle,
+		RollerCoaster,
+	};
+public:
 	CObject();
 	virtual ~CObject();
 
@@ -33,6 +38,11 @@ public:
 	void SetRotationAxis(XMFLOAT3&& xmf3RotationAxis) { XMStoreFloat3(&rotation_axis, XMVector3Normalize(XMLoadFloat3(&xmf3RotationAxis))); }
 	void SetRotationSpeed(float fSpeed) { rotation_speed = fSpeed; }
 
+	void SetType(int Type) { type = Type; }
+	void SetType(eTYPE Type) { type = (int)Type; }
+	bool EqualType(eTYPE Type) { return type == (int)Type; }
+
+	int GetType() { return type; }
 	XMFLOAT3 GetPosition();
 	XMFLOAT3 GetLook();
 	XMFLOAT3 GetUp();
@@ -65,6 +75,8 @@ protected:
 
 	XMFLOAT3 rotation_axis;
 	float rotation_speed{};
+
+	int type{};
 };
 
 class CRollerCoaster : public CObject {

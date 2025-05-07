@@ -16,6 +16,7 @@ public:
 
 	virtual void Save() const;
 	virtual void Load();
+
 protected:
 	std::unique_ptr<CInputManager> input_manager{};
 	std::unique_ptr<CPlayer> player{};
@@ -58,7 +59,6 @@ public:
 	CRollerCoasterScene();
 
 	void CreateObject() override;
-	virtual void Load();
 
 	void ProcessInput(HWND&, float) override;
 	LRESULT ProcessingWindowMessage(HWND&, UINT&, WPARAM&, LPARAM&) override;
