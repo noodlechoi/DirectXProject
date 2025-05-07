@@ -17,6 +17,7 @@ public:
 	virtual void Save() const;
 	virtual void Load();
 
+	void SetFileName(std::string_view fileName) { file_name = fileName; }
 protected:
 	std::unique_ptr<CInputManager> input_manager{};
 	std::unique_ptr<CPlayer> player{};
@@ -27,7 +28,7 @@ protected:
 	template <typename T, typename Y>
 	CScene(size_t, std::unique_ptr<T>&&, std::unique_ptr<Y>&&);
 
-	static std::string FileName;
+	std::string file_name;
 };
 
 class CSpaceShipScene : public CScene {
@@ -57,6 +58,16 @@ public:
 class CRollerCoasterScene : public CScene {
 public:
 	CRollerCoasterScene();
+
+	void CreateObject() override;
+
+	void ProcessInput(HWND&, float) override;
+	LRESULT ProcessingWindowMessage(HWND&, UINT&, WPARAM&, LPARAM&) override;
+};
+
+class CTankScene : CScene {
+public:
+	CTankScene();
 
 	void CreateObject() override;
 

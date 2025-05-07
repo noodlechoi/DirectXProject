@@ -40,3 +40,13 @@ public:
 private:
 	POINT old_cursor_pos;
 };
+
+class CTankInputManager : public CInputManager {
+public:
+	void ProcessInput(HWND&, std::unique_ptr<CPlayer>&) override;
+	void ProcessingMouseMessage(HWND&, UINT&, WPARAM&, LPARAM&) override;
+	void ProcessingKeyboardMessage(HWND&, UINT&, WPARAM&, LPARAM&) override;
+	virtual LRESULT ProcessingWindowMessage(HWND&, UINT&, WPARAM&, LPARAM&) override;
+private:
+	POINT old_cursor_pos;
+};

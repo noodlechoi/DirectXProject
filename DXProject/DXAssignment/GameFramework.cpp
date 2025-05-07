@@ -84,7 +84,7 @@ void CGameFramework::AnimateObjects()
 
 void CGameFramework::BuildObjects()
 {
-	now_scene = std::make_unique<CRollerCoasterScene>();
+	now_scene = std::make_unique<CTankScene>();
 	now_scene->BuildObjects();
 }
 

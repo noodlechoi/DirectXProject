@@ -61,3 +61,9 @@ public:
 	CRollerCosterPlayer();
 	void OnUpdateTransform() override;
 };
+
+class CTankPlayer : public CPlayer {
+public:
+	CTankPlayer();
+	void OnUpdateTransform() override;
+};

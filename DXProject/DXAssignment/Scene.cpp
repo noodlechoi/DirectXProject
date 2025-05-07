@@ -4,7 +4,6 @@
 #include "GraphicsPipeline.h"
 #include "Player.h"
 
-std::string CRollerCoasterScene::FileName{"data/CRollerCoasterScene.dat"};
 
 template <typename T, typename Y>
 CScene::CScene(size_t objectNum, std::unique_ptr<T>&& manager, std::unique_ptr<Y>&& Player)
@@ -53,7 +52,7 @@ LRESULT CScene::ProcessingWindowMessage(HWND& hWnd, UINT& nMessageID, WPARAM& wP
 }
 
 void CScene::Save() const {
-	std::ofstream out{ FileName.data(), std::ios::binary };
+	std::ofstream out{ file_name.data(), std::ios::binary };
 	if (!out) {
 		throw std::runtime_error("Failed to open file for saving");
 	}
@@ -78,7 +77,7 @@ void CScene::Save() const {
 
 void CScene::Load()
 {
-	std::ifstream in{ FileName.data(), std::ios::binary };
+	std::ifstream in{ file_name.data(), std::ios::binary };
 	if (!in) {
 		throw std::runtime_error("File not found");
 	}
@@ -214,6 +213,7 @@ LRESULT CStartScene::ProcessingWindowMessage(HWND& hWnd, UINT& nMessageID, WPARA
 // ==================
 CRollerCoasterScene::CRollerCoasterScene() : CScene{ 10, std::make_unique<CRollerCoasterInputManager>(), std::make_unique<CRollerCosterPlayer>()}
 {
+	SetFileName("data / CRollerCoasterScene.dat");
 }
 
 void CRollerCoasterScene::CreateObject()
@@ -252,6 +252,26 @@ void CRollerCoasterScene::ProcessInput(HWND& hwnd, float timeElapsed)
 }
 
 LRESULT CRollerCoasterScene::ProcessingWindowMessage(HWND& hWnd, UINT& nMessageID, WPARAM& wParam, LPARAM& lParam)
+{
+	return input_manager->ProcessingWindowMessage(hWnd, nMessageID, wParam, lParam);
+}
+
+CTankScene::CTankScene() : CScene(15, std::make_unique<CTankInputManager>(), std::make_unique<CTankPlayer>())
+{
+	SetFileName("data/CTankScene.data");
+}
+
+void CTankScene::CreateObject()
+{
+}
+
+void CTankScene::ProcessInput(HWND& hwnd, float timeElapsed)
+{
+	input_manager->ProcessInput(hwnd, player);
+	player->Update(timeElapsed);
+}
+
+LRESULT CTankScene::ProcessingWindowMessage(HWND& hWnd, UINT& nMessageID, WPARAM& wParam, LPARAM& lParam)
 {
 	return input_manager->ProcessingWindowMessage(hWnd, nMessageID, wParam, lParam);
 }
