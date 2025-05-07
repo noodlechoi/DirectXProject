@@ -223,7 +223,7 @@ CRollerCoaster::CRollerCoaster()
 	path = {
 	   { 0.0f, 0.0f, 0.0f },
 		{ 10.0f, 0.0f, 0.0f },
-		{ 10.0f, 50.0f, 10.0f },
+		{ 10.0f, 5.0f, 10.0f },
 		{ 0.0f, 10.0f, 20.0f }
 	};
 }
@@ -234,21 +234,12 @@ void CRollerCoaster::Animate(float elapsedTime)
 {
 	float fDistance = moving_speed * elapsedTime;
 
-	//XMFLOAT3 xmf3Position = GetPosition();
-
-	//// 회전 방향 변경
-	//float dotProduct = Vector3::DotProduct(GetLook(), moving_direction);
-	//// 내적한 각도가 직선이 아니라면 회전 각도 변경
-	//float rotationAngle = ::IsEqual(dotProduct, 1.0f) ? 0.0f : (float)XMConvertToDegrees(acos(dotProduct));
-
-	//if (rotationAngle != 0.0f) Rotate(rotationAngle, 0, 0);
-
 	XMFLOAT3 xmf3Position = GetPosition();
 
-	XMFLOAT3 xmf3RotationAxis = Vector3::CrossProduct(rotation_axis, moving_direction, true);
-	float fDotProduct = Vector3::DotProduct(rotation_axis, moving_direction);
-	float fRotationAngle = ::IsEqual(fDotProduct, 1.0f) ? 0.0f : (float)XMConvertToDegrees(acos(fDotProduct));
-	XMFLOAT4X4 mtxRotate2 = Matrix4x4::RotationAxis(xmf3RotationAxis, fRotationAngle);
+	// 회전 방향 변경
+	float dotProduct = Vector3::DotProduct(GetLook(), moving_direction);
+	// 내적한 각도가 직선이 아니라면 회전 각도 변경
+	float rotationAngle = ::IsEqual(dotProduct, 1.0f) ? 0.0f : (float)XMConvertToDegrees(acos(dotProduct));
 
 
 	// 경로까지 이동
