@@ -27,6 +27,17 @@ CVertex& CVertex::operator=(CVertex&& other)
 	return *this;
 }
 
+void CVertex::Save(std::ostream& out) const
+{
+	out.write(reinterpret_cast<const char*>(&position), sizeof(position));
+}
+
+std::istream& CVertex::Load(std::istream& in)
+{
+	in.read(reinterpret_cast<char*>(&position), sizeof(position));
+	return in;
+}
+
 CPolygon::CPolygon(int vertexNum)
 {
 	vertexes.reserve(vertexNum);
@@ -79,6 +90,29 @@ CPolygon& CPolygon::operator=( CPolygon&& other)
 void CPolygon::SetVertex(CVertex vertex)
 {
 	vertexes.push_back(vertex);
+}
+
+void CPolygon::Save(std::ostream& out) const
+{
+	size_t vertexCount = vertexes.size();
+	out.write(reinterpret_cast<const char*>(&vertexCount), sizeof(size_t));
+	for (const auto& v : vertexes) {
+		v.Save(out);
+	}
+}
+
+std::istream& CPolygon::Load(std::istream& in)
+{
+	size_t vertexCount;
+	in.read(reinterpret_cast<char*>(&vertexCount), sizeof(size_t));
+	vertexes.reserve(vertexCount);
+	for (int i = 0; i < vertexCount; ++i) {
+		CVertex v;
+		v.Load(in);
+		vertexes.push_back(std::move(v));
+	}
+
+	return in;
 }
 
 CMesh::CMesh(int polygonNum)
@@ -156,6 +190,29 @@ void CMesh::Render(HDC hDCFrameBuffer) const
 		// 마지막 점과 첫번 째 점 연결
 		if (((0.0f <= initialProject.z) && (initialProject.z <= 1.0f)) && ((isInitialInside || isPreviousInside))) ::Draw2DLine(hDCFrameBuffer, previousProject, initialProject);
 	}
+}
+
+void CMesh::Save(std::ostream& out) const
+{
+	size_t polygonCount = polygons.size();
+	out.write(reinterpret_cast<const char*>(&polygonCount), sizeof(size_t));
+	for (const auto& polygon : polygons) {
+		polygon.Save(out);
+	}
+}
+
+std::istream& CMesh::Load(std::istream& in)
+{
+	size_t polygonCount;
+	in.read(reinterpret_cast<char*>(&polygonCount), sizeof(size_t));
+	polygons.reserve(polygonCount);
+	for (int i = 0; i < polygonCount; ++i) {
+		CPolygon polygon;
+		polygon.Load(in);
+		polygons.push_back(std::move(polygon));
+	}
+
+	return in;
 }
 
 

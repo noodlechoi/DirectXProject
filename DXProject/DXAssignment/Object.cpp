@@ -195,6 +195,13 @@ void CObject::Render(HDC hDCFrameBuffer)
 
 void CObject::Save(std::ostream& out) const
 {
+	// mesh
+	size_t meshCount = meshes.size();
+	out.write(reinterpret_cast<const char*>(&meshCount), sizeof(size_t));
+	for (const auto& mesh : meshes) {
+		mesh.Save(out);
+	}
+
 	 out.write(reinterpret_cast<const char*>(&world_matrix), sizeof(world_matrix));
 	 out.write(reinterpret_cast<const char*>(&color), sizeof(color));
 	 out.write(reinterpret_cast<const char*>(&moving_direction), sizeof(moving_direction));
@@ -206,6 +213,16 @@ void CObject::Save(std::ostream& out) const
 
 std::istream& CObject::Load(std::istream& in)
 {
+	// mesh
+	size_t meshCount;
+	in.read(reinterpret_cast<char*>(&meshCount), sizeof(size_t));
+	meshes.reserve(meshCount);
+	for (int i = 0; i < meshCount; ++i) {
+		CMesh mesh;
+		mesh.Load(in);
+		SetMesh(std::move(mesh));
+	}
+
 	in.read(reinterpret_cast<char*>(&world_matrix), sizeof(world_matrix));
 	in.read(reinterpret_cast<char*>(&color), sizeof(color));
 	in.read(reinterpret_cast<char*>(&moving_direction), sizeof(moving_direction));
@@ -214,6 +231,7 @@ std::istream& CObject::Load(std::istream& in)
 	in.read(reinterpret_cast<char*>(&rotation_axis), sizeof(rotation_axis));
 	in.read(reinterpret_cast<char*>(&rotation_speed), sizeof(rotation_speed));
 
+	
 	return in;
 }
 
@@ -228,8 +246,6 @@ CRollerCoaster::CRollerCoaster()
 	};
 }
 
-
-
 void CRollerCoaster::Animate(float elapsedTime)
 {
 	float fDistance = moving_speed * elapsedTime;
@@ -237,10 +253,19 @@ void CRollerCoaster::Animate(float elapsedTime)
 	XMFLOAT3 xmf3Position = GetPosition();
 
 	// 회전 방향 변경
-	float dotProduct = Vector3::DotProduct(GetLook(), moving_direction);
-	// 내적한 각도가 직선이 아니라면 회전 각도 변경
-	float rotationAngle = ::IsEqual(dotProduct, 1.0f) ? 0.0f : (float)XMConvertToDegrees(acos(dotProduct));
+	XMFLOAT3 dotProduct{ Vector3::DotProduct(GetRight(), moving_direction),
+		Vector3::DotProduct(GetUp(), moving_direction),
+		Vector3::DotProduct(GetLook(), moving_direction) 
+	};
+	// 각 좌표축에 대한 각도 구하기(일직선 상에 있으면 구하지 않기)
+	XMFLOAT3 RotationAngle{ ::IsEqual(dotProduct.x, 1.0f) ? 0.0f : (float)XMConvertToDegrees(acos(dotProduct.x)),
+		::IsEqual(dotProduct.y, 1.0f) ? 0.0f : (float)XMConvertToDegrees(acos(dotProduct.y)),
+		::IsEqual(dotProduct.z, 1.0f) ? 0.0f : (float)XMConvertToDegrees(acos(dotProduct.z)) 
+	};
 
+	// 회전 시 객체가 사라짐... -nan(ind) 나옴
+	//if(0 != RotationAngle.x || 0 != RotationAngle.y || 0 != RotationAngle.z)
+	//	Rotate(RotationAngle.x, RotationAngle.y, RotationAngle.z);
 
 	// 경로까지 이동
 	XMFLOAT3 xmf3Movement = Vector3::Normalize(Vector3::Subtract(path[current_index], xmf3Position));
@@ -249,7 +274,7 @@ void CRollerCoaster::Animate(float elapsedTime)
 	moving_direction = Vector3::Normalize(Vector3::Add(moving_direction, xmf3Movement));
 
 	// 경로까지 도달하면
-	std::wstring debugMessage2 = L"moving_direction: " + std::to_wstring(moving_direction.x) + std::to_wstring(moving_direction.y) + std::to_wstring(moving_direction.z) + L"\n";
+	std::wstring debugMessage2 = L"RotationAngle: " + std::to_wstring(RotationAngle.x) + std::to_wstring(RotationAngle.y) + std::to_wstring(RotationAngle.z) + L"\n";
 	OutputDebugString(debugMessage2.c_str());
 	if (1.0f >= Vector3::Distance(xmf3Position, path[current_index])) {
 		current_index = (current_index + 1) % path.size();

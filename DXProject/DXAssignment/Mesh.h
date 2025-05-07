@@ -9,6 +9,9 @@ public:
 	CVertex& operator=(const CVertex&);
 	CVertex(CVertex&&);
 	CVertex& operator=(CVertex&&);
+
+	virtual void Save(std::ostream&) const;
+	virtual std::istream& Load(std::istream&);
 public:
 	XMFLOAT3 position{};
 };
@@ -26,6 +29,9 @@ public:
 	CPolygon& operator=( CPolygon&&);
 
 	void SetVertex(CVertex);
+
+	virtual void Save(std::ostream&) const;
+	virtual std::istream& Load(std::istream&);
 public:
 	std::vector<CVertex> vertexes;
 };
@@ -44,7 +50,11 @@ public:
 
 	//void SetPolygon(CPolygon);
 	void SetPolygon(CPolygon&&);
+	int GetRefNum() const { return ref_num; }
+	CPolygon* GetPolygon()  { return polygons.data(); };
 	virtual void Render(HDC) const;
+	virtual void Save(std::ostream&) const;
+	virtual std::istream& Load(std::istream&);
 protected:
 	int ref_num{ 1 };
 

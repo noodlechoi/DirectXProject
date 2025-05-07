@@ -69,7 +69,6 @@ void CScene::Load()
 	}
 	CObject object;
 	while (object.Load(in)) {
-		object.SetMesh(CCubeMesh());
 		objects.push_back(std::make_unique<CObject>(object));
 	}
 	OutputDebugString(L"Load\n");
@@ -175,24 +174,38 @@ LRESULT CStartScene::ProcessingWindowMessage(HWND& hWnd, UINT& nMessageID, WPARA
 }
 
 // ==================
-CRollerCoasterScene::CRollerCoasterScene() : CScene{ 3, std::make_unique<CRollerCoasterInputManager>(), std::make_unique<CRollerCosterPlayer>()}
+CRollerCoasterScene::CRollerCoasterScene() : CScene{ 10, std::make_unique<CRollerCoasterInputManager>(), std::make_unique<CRollerCosterPlayer>()}
 {
 }
 
 void CRollerCoasterScene::CreateObject()
 {
+	CCubeMesh cube{ 4.0f, 4.0f, 4.0f };
 	for (int i = 0; i < 5; ++i) {
 		CRollerCoaster object;
-		CCubeMesh cube{ 4.0f, 4.0f, 4.0f };
 
 		object.SetMesh(cube);
 		object.SetColor(RGB(255, 0, 0));
-		object.SetPosition(XMFLOAT3(player->position.x , player->position.y - 4.0f, player->position.z - (4.0f * i)));
+		object.SetPosition(XMFLOAT3(player->position.x , player->position.y - 4.0f, player->position.z - (6.0f * i)));
 		object.SetMovingDirection(XMFLOAT3(0.0f, 0.0f, 0.0f));
-		object.SetRotationAxis(XMFLOAT3(1.0f, 0.0f, 0.0f));
+		object.SetRotationAxis(XMFLOAT3(0.0f, 0.0f, 0.0f));
 		object.SetMovingSpeed(5.0f);
 
 		objects.push_back(std::make_unique<CRollerCoaster>(object));
+	}
+
+	CObject object;
+	CCubeMesh bigCube{ 10.0f, 10.0f, 10.0f };
+	object.SetMesh(cube);
+	object.SetColor(RGB(255, 0, 0));
+	object.SetPosition(XMFLOAT3(0.0f, 0.0f, 50.0f));
+	object.SetMovingDirection(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	object.SetRotationAxis(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	object.SetMovingSpeed(5.0f);
+
+	objects.push_back(std::make_unique<CObject>(object));
+	for (int i = 0; i < 9; ++i) {
+
 	}
 }
 
@@ -204,7 +217,6 @@ void CRollerCoasterScene::Load()
 	}
 	CRollerCoaster object;
 	while (object.Load(in)) {
-		object.SetMesh(CCubeMesh());
 		objects.push_back(std::make_unique<CRollerCoaster>(object));
 	}
 	OutputDebugString(L"Load\n");
@@ -213,6 +225,8 @@ void CRollerCoasterScene::Load()
 void CRollerCoasterScene::ProcessInput(HWND& hwnd, float timeElapsed)
 {
 	input_manager->ProcessInput(hwnd, player);
+	XMFLOAT3 objectPosition = objects[0]->GetPosition();
+	player->position = XMFLOAT3(objectPosition.x, objectPosition.y + 4.0f, objectPosition.z);
 	player->Update(timeElapsed);
 }
 

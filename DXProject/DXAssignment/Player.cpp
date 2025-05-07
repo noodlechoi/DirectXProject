@@ -129,7 +129,6 @@ void CPlayer::Update(float timeElapsed)
 	float deceleration = friction * timeElapsed;
 	if (deceleration > length) deceleration = length;
 	XMStoreFloat3(&velocity, XMVectorAdd(xmvVelocity, XMVectorScale(xmvDeceleration, deceleration)));
-
 }
 
 void CPlayer::OnUpdateTransform()
@@ -180,7 +179,6 @@ CRollerCosterPlayer::CRollerCosterPlayer()
 void CRollerCosterPlayer::OnUpdateTransform()
 {
 	// 롤러코스터 라인에 따라 이동
-	
 
 	CPlayer::OnUpdateTransform();
 
