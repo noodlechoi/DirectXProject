@@ -52,14 +52,25 @@ LRESULT CScene::ProcessingWindowMessage(HWND& hWnd, UINT& nMessageID, WPARAM& wP
 	return input_manager->ProcessingWindowMessage(hWnd, nMessageID, wParam, lParam);
 }
 
-void CScene::Save() const
-{
-	std::ofstream out{ FileName.data(), std::ios::binary | std::ios::app };
-	for (auto& object : objects) {
+void CScene::Save() const {
+	std::ofstream out{ FileName.data(), std::ios::binary };
+	if (!out) {
+		throw std::runtime_error("Failed to open file for saving");
+	}
+
+	// °´Ã¼ ¼ö ÀúÀå
+	int objectCount = static_cast<int>(objects.size());
+	out.write(reinterpret_cast<const char*>(&objectCount), sizeof(objectCount));
+
+	// °¢ °´Ã¼ ÀúÀå
+	for (const auto& object : objects) {
 		object->Save(out);
 	}
-	OutputDebugString(L"Save\n");
+
+	OutputDebugString(L"Save completed\n");
 }
+
+
 
 void CScene::Load()
 {
@@ -181,7 +192,7 @@ CRollerCoasterScene::CRollerCoasterScene() : CScene{ 10, std::make_unique<CRolle
 void CRollerCoasterScene::CreateObject()
 {
 	CCubeMesh cube{ 4.0f, 4.0f, 4.0f };
-	for (int i = 0; i < 5; ++i) {
+	for (int i = 0; i < 2; ++i) {
 		CRollerCoaster object;
 
 		object.SetMesh(cube);
@@ -194,7 +205,7 @@ void CRollerCoasterScene::CreateObject()
 		objects.push_back(std::make_unique<CRollerCoaster>(object));
 	}
 
-	CObject object;
+	/*CObject object;
 	CCubeMesh bigCube{ 10.0f, 10.0f, 10.0f };
 	object.SetMesh(cube);
 	object.SetColor(RGB(255, 0, 0));
@@ -206,21 +217,29 @@ void CRollerCoasterScene::CreateObject()
 	objects.push_back(std::make_unique<CObject>(object));
 	for (int i = 0; i < 9; ++i) {
 
-	}
+	}*/
 }
 
-void CRollerCoasterScene::Load()
-{
-	std::ifstream in{ FileName.data(),  std::ios::binary };
+void CRollerCoasterScene::Load() {
+	std::ifstream in{ FileName.data(), std::ios::binary };
 	if (!in) {
 		throw std::runtime_error("File not found");
 	}
-	CRollerCoaster object;
-	while (object.Load(in)) {
-		objects.push_back(std::make_unique<CRollerCoaster>(object));
+
+	// °´Ã¼ ¼ö ÀÐ±â
+	int objectCount{};
+	in.read(reinterpret_cast<char*>(&objectCount), sizeof(objectCount));
+	// °´Ã¼ ·Îµå
+	objects.clear();
+	for (int i = 0; i < objectCount; ++i) {
+		auto object = std::make_unique<CRollerCoaster>();
+		object->Load(in);
+		objects.push_back(std::move(object));
 	}
-	OutputDebugString(L"Load\n");
+
+	OutputDebugString(L"Load completed\n");
 }
+
 
 void CRollerCoasterScene::ProcessInput(HWND& hwnd, float timeElapsed)
 {

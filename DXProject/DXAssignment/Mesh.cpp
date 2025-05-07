@@ -94,11 +94,16 @@ void CPolygon::SetVertex(CVertex vertex)
 
 void CPolygon::Save(std::ostream& out) const
 {
+	int cnt{};
 	size_t vertexCount = vertexes.size();
 	out.write(reinterpret_cast<const char*>(&vertexCount), sizeof(size_t));
 	for (const auto& v : vertexes) {
 		v.Save(out);
+		++cnt;
 	}
+
+	std::wstring debugMessage = L"CPolygon Save cnt: " + std::to_wstring(cnt) + L"\n" + L"size: " + std::to_wstring(vertexCount) + L"\n";
+	OutputDebugString(debugMessage.c_str());
 }
 
 std::istream& CPolygon::Load(std::istream& in)
@@ -194,11 +199,16 @@ void CMesh::Render(HDC hDCFrameBuffer) const
 
 void CMesh::Save(std::ostream& out) const
 {
+	int cnt{};
 	size_t polygonCount = polygons.size();
 	out.write(reinterpret_cast<const char*>(&polygonCount), sizeof(size_t));
 	for (const auto& polygon : polygons) {
 		polygon.Save(out);
+		++cnt;
 	}
+
+	std::wstring debugMessage = L"CMesh Save cnt: " + std::to_wstring(cnt) + L"\n" + L"size: " + std::to_wstring(polygonCount) + L"\n";
+	OutputDebugString(debugMessage.c_str());
 }
 
 std::istream& CMesh::Load(std::istream& in)

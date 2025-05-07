@@ -6,4 +6,37 @@ binary∑Œ ¿˙¿Â
 
 
 
-
+CPolygon Save cnt: 4
+size: 4
+CPolygon Save cnt: 4
+size: 4
+CPolygon Save cnt: 4
+size: 4
+CPolygon Save cnt: 4
+size: 4
+CPolygon Save cnt: 4
+size: 4
+CPolygon Save cnt: 4
+size: 4
+CMesh Save cnt: 6
+size: 6
+CObject Save cnt: 1
+size: 1
+Scene Save cnt: 1
+CPolygon Save cnt: 4
+size: 4
+CPolygon Save cnt: 4
+size: 4
+CPolygon Save cnt: 4
+size: 4
+CPolygon Save cnt: 4
+size: 4
+CPolygon Save cnt: 4
+size: 4
+CPolygon Save cnt: 4
+size: 4
+CMesh Save cnt: 6
+size: 6
+CObject Save cnt: 1
+size: 1
+Scene Save cnt: 2

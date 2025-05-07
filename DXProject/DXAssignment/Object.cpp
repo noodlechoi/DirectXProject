@@ -196,11 +196,16 @@ void CObject::Render(HDC hDCFrameBuffer)
 void CObject::Save(std::ostream& out) const
 {
 	// mesh
+	int cnt{};
 	size_t meshCount = meshes.size();
 	out.write(reinterpret_cast<const char*>(&meshCount), sizeof(size_t));
 	for (const auto& mesh : meshes) {
 		mesh.Save(out);
+		++cnt;
 	}
+
+	std::wstring debugMessage = L"CObject Save cnt: " + std::to_wstring(cnt) + L"\n" + L"size: " + std::to_wstring(meshCount) + L"\n";
+	OutputDebugString(debugMessage.c_str());
 
 	 out.write(reinterpret_cast<const char*>(&world_matrix), sizeof(world_matrix));
 	 out.write(reinterpret_cast<const char*>(&color), sizeof(color));
@@ -273,9 +278,9 @@ void CRollerCoaster::Animate(float elapsedTime)
 	SetPosition(xmf3Position);
 	moving_direction = Vector3::Normalize(Vector3::Add(moving_direction, xmf3Movement));
 
-	// 경로까지 도달하면
-	std::wstring debugMessage2 = L"RotationAngle: " + std::to_wstring(RotationAngle.x) + std::to_wstring(RotationAngle.y) + std::to_wstring(RotationAngle.z) + L"\n";
-	OutputDebugString(debugMessage2.c_str());
+	//// 경로까지 도달하면
+	//std::wstring debugMessage2 = L"RotationAngle: " + std::to_wstring(RotationAngle.x) + std::to_wstring(RotationAngle.y) + std::to_wstring(RotationAngle.z) + L"\n";
+	//OutputDebugString(debugMessage2.c_str());
 	if (1.0f >= Vector3::Distance(xmf3Position, path[current_index])) {
 		current_index = (current_index + 1) % path.size();
 	}
