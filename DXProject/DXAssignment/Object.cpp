@@ -296,3 +296,61 @@ void CRollerCoaster::Animate(float elapsedTime)
 
 	CObject::Animate(elapsedTime);
 }
+
+CTankHead::CTankHead()
+{
+	SetType(eTYPE::Tank);
+
+	// 머리
+	SetMesh(CCubeMesh(5.0f, 5.0f, 2.0f));
+	SetPosition(0.0f, 0.0f, 2.0f);
+	SetColor(RGB(255, 0, 0));
+	SetMovingDirection(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	SetRotationAxis(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	SetMovingSpeed(0.0f);
+
+	//// 포 입구
+	SetMesh(CCubeMesh(5.0f, 2.0f, 2.0f));
+	SetPosition(0.0f, 0.0f, 2.0f);
+	SetColor(RGB(255, 0, 0));
+	SetMovingDirection(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	SetRotationAxis(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	SetMovingSpeed(0.0f);
+}
+
+void CTankHead::Animate(float elapsedTime)
+{
+}
+
+CTankBody::CTankBody()
+{
+	SetType(eTYPE::Tank);
+
+	// 몸
+	SetMesh(CCubeMesh(10.0f, 10.0f, 2.0f));
+	SetPosition(0.0f, 0.0f, 2.0f);
+	SetColor(RGB(255, 0, 255));
+	SetMovingDirection(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	SetRotationAxis(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	SetMovingSpeed(0.0f);
+}
+
+void CTankBody::Animate(float elapsedTime)
+{
+
+}
+
+CTank::CTank()
+{
+	SetType(eTYPE::Tank);
+}
+
+void CTank::Animate(float elapsedTime)
+{
+}
+
+void CTank::Render(HDC hDCFrameBuffer)
+{
+	body.Render(hDCFrameBuffer);
+	head.Render(hDCFrameBuffer);
+}

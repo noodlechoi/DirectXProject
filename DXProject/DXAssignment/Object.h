@@ -9,6 +9,7 @@ public:
 	enum class eTYPE {
 		Obstacle,
 		RollerCoaster,
+		Tank,
 	};
 public:
 	CObject();
@@ -82,7 +83,6 @@ protected:
 class CRollerCoaster : public CObject {
 public:
 	CRollerCoaster();
-	virtual ~CRollerCoaster() = default;
 
 	size_t GetPathNum() const { return path.size(); }
 
@@ -91,5 +91,27 @@ public:
 private:
 	std::vector<XMFLOAT3> path; // 롤러코스터 경로
 	size_t current_index{ 0 };   // 현재 경로 인덱스
+};
 
+// 기능이 있기 때문에 Object로 만듦
+class CTankHead : public CObject {
+public:
+	CTankHead();
+	void Animate(float) override;
+};
+
+class CTankBody : public CObject {
+public:
+	CTankBody();
+	void Animate(float) override;
+};
+
+class CTank : public CObject {
+public:
+	CTank();
+	void Animate(float) override;
+	void Render(HDC) override;
+private:
+	CTankHead head;
+	CTankBody body;
 };

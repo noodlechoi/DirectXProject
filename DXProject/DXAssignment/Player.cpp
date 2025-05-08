@@ -193,16 +193,23 @@ void CNonePlayer::OnUpdateTransform()
 
 CTankPlayer::CTankPlayer()
 {
-	// mesh 및 플레이어 설정
-	SetPosition(0.0f, 0.0f, 0.0f);
-	SetMesh(CCubeMesh(4.0f, 2.0f, 4.0f));
-	SetColor(RGB(255, 0, 255));
+
 	SetCamera(camera);
-	SetCameraOffset(XMFLOAT3(0.0f, 5.0f, -15.0f));
+	SetCameraOffset(XMFLOAT3(0.0f, 5.0f, -20.0f));
+
 }
 
 void CTankPlayer::OnUpdateTransform()
 {
 	CPlayer::OnUpdateTransform();
 	XMStoreFloat4x4(&world_matrix, XMMatrixMultiply(XMMatrixRotationRollPitchYaw(XMConvertToRadians(90.0f), 0.0f, 0.0f), XMLoadFloat4x4(&world_matrix)));
+}
+
+void CTankPlayer::Animate(float)
+{
+}
+
+void CTankPlayer::Render(HDC hDCFrameBuffer)
+{
+	tank_object.Render(hDCFrameBuffer);
 }

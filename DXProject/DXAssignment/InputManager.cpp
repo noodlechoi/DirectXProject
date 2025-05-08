@@ -281,6 +281,18 @@ LRESULT CRollerCoasterInputManager::ProcessingWindowMessage(HWND& hWnd, UINT& nM
 void CTankInputManager::ProcessInput(HWND& hwnd, std::unique_ptr<CPlayer>& player)
 {
 	static UCHAR pKeyBuffer[256];
+	if (GetKeyboardState(pKeyBuffer))
+	{
+		DWORD dwDirection = 0;
+		if (pKeyBuffer[VK_UP] & 0xF0) dwDirection |= DIR_FORWARD;
+		if (pKeyBuffer[VK_DOWN] & 0xF0) dwDirection |= DIR_BACKWARD;
+		if (pKeyBuffer[VK_LEFT] & 0xF0) dwDirection |= DIR_LEFT;
+		if (pKeyBuffer[VK_RIGHT] & 0xF0) dwDirection |= DIR_RIGHT;
+		if (pKeyBuffer[VK_PRIOR] & 0xF0) dwDirection |= DIR_UP;
+		if (pKeyBuffer[VK_NEXT] & 0xF0) dwDirection |= DIR_DOWN;
+
+		if (dwDirection) player->Move(dwDirection, 0.15f);
+	}
 
 	if (GetCapture() == hwnd)
 	{

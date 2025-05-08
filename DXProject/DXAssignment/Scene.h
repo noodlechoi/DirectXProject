@@ -65,7 +65,7 @@ public:
 	LRESULT ProcessingWindowMessage(HWND&, UINT&, WPARAM&, LPARAM&) override;
 };
 
-class CTankScene : CScene {
+class CTankScene : public CScene  {
 public:
 	CTankScene();
 

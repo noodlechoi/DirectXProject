@@ -66,4 +66,8 @@ class CTankPlayer : public CPlayer {
 public:
 	CTankPlayer();
 	void OnUpdateTransform() override;
+	void Animate(float) override;
+	void Render(HDC) override;
+private:
+	CTank tank_object;
 };

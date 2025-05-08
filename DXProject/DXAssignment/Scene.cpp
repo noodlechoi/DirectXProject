@@ -263,6 +263,17 @@ CTankScene::CTankScene() : CScene(15, std::make_unique<CTankInputManager>(), std
 
 void CTankScene::CreateObject()
 {
+	// ¹Ù´Ú
+	CCubeMesh cube{ 50.0f, 50.0f, 2.0f };
+	CObject object;
+	object.SetMesh(cube);
+	object.SetColor(RGB(0, 0, 0));
+	object.SetPosition(XMFLOAT3(0.0f, -10.0f, 0.0f));
+	object.SetMovingDirection(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	object.SetRotationAxis(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	object.SetMovingSpeed(0.0f);
+
+	objects.push_back(std::make_unique<CObject>(object));
 }
 
 void CTankScene::ProcessInput(HWND& hwnd, float timeElapsed)
