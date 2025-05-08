@@ -303,14 +303,10 @@ CTankHead::CTankHead()
 
 	// 머리
 	SetMesh(CCubeMesh(5.0f, 5.0f, 2.0f));
-	SetPosition(0.0f, 0.0f, 2.0f);
-	SetColor(RGB(255, 0, 0));
-	SetMovingDirection(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	SetRotationAxis(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	SetMovingSpeed(0.0f);
 
 	//// 포 입구
-	SetMesh(CCubeMesh(5.0f, 2.0f, 2.0f));
+	SetMesh(CCubeMesh(5.0f, 1.0f, 1.0f, 5.0f, 0.0f, 0.0f));
+
 	SetPosition(0.0f, 0.0f, 2.0f);
 	SetColor(RGB(255, 0, 0));
 	SetMovingDirection(XMFLOAT3(0.0f, 0.0f, 0.0f));
@@ -327,8 +323,8 @@ CTankBody::CTankBody()
 	SetType(eTYPE::Tank);
 
 	// 몸
-	SetMesh(CCubeMesh(10.0f, 10.0f, 2.0f));
-	SetPosition(0.0f, 0.0f, 2.0f);
+	SetMesh(CCubeMesh(8.0f, 8.0f, 2.0f));
+	SetPosition(0.0f, 0.0f, 0.0f);
 	SetColor(RGB(255, 0, 255));
 	SetMovingDirection(XMFLOAT3(0.0f, 0.0f, 0.0f));
 	SetRotationAxis(XMFLOAT3(0.0f, 0.0f, 0.0f));

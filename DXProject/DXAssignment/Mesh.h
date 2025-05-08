@@ -64,6 +64,10 @@ protected:
 class CCubeMesh : public CMesh {
 public:
 	CCubeMesh(float = 4.0f, float = 4.0f, float = 4.0f);
+	// 피벗도 같이 설정
+	CCubeMesh(float width, float height, float depth, float x, float y, float z);
+
+	void ChangePivot(float = 0.0f, float = 0.0f, float = 0.0f);
 };
 
 class CTextMesh : public CMesh {

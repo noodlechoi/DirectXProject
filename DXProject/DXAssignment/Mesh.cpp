@@ -271,6 +271,49 @@ CCubeMesh::CCubeMesh(float width, float height, float depth) : CMesh(6)
 
 }
 
+CCubeMesh::CCubeMesh(float width, float height, float depth, float x, float y, float z)
+{
+	float halfWidth = width * 0.5f;
+	float halfHeight = height * 0.5f;
+	float halfDepth = depth * 0.5f;
+
+	polygons.emplace_back(CPolygon(CVertex(x - halfWidth, y + halfHeight, z - halfDepth),
+		CVertex(x + halfWidth, y + halfHeight, z - halfDepth),
+		CVertex(x + halfWidth, y - halfHeight, z - halfDepth),
+		CVertex(x - halfWidth, y - halfHeight, z - halfDepth)));
+
+	polygons.emplace_back(CPolygon(CVertex(x - halfWidth, y + halfHeight, z + halfDepth),
+		CVertex(x + halfWidth, y + halfHeight, z + halfDepth),
+		CVertex(x + halfWidth, y + halfHeight, z - halfDepth),
+		CVertex(x - halfWidth, y + halfHeight, z - halfDepth)));
+
+	polygons.emplace_back(CPolygon(CVertex(x - halfWidth, y - halfHeight, z + halfDepth),
+		CVertex(x + halfWidth, y - halfHeight, z + halfDepth),
+		CVertex(x + halfWidth, y + halfHeight, z + halfDepth),
+		CVertex(x - halfWidth, y + halfHeight, z + halfDepth)));
+
+	polygons.emplace_back(CPolygon(CVertex(x - halfWidth, y - halfHeight, z - halfDepth),
+		CVertex(x + halfWidth, y - halfHeight, z - halfDepth),
+		CVertex(x + halfWidth, y - halfHeight, z + halfDepth),
+		CVertex(x - halfWidth, y - halfHeight, z + halfDepth)));
+
+	polygons.emplace_back(CPolygon(CVertex(x - halfWidth, y + halfHeight, z + halfDepth),
+		CVertex(x - halfWidth, y + halfHeight, z - halfDepth),
+		CVertex(x - halfWidth, y - halfHeight, z - halfDepth),
+		CVertex(x - halfWidth, y - halfHeight, z + halfDepth)));
+
+	polygons.emplace_back(CPolygon(CVertex(x + halfWidth, y + halfHeight, z - halfDepth),
+		CVertex(x + halfWidth, y + halfHeight, z + halfDepth),
+		CVertex(x + halfWidth, y - halfHeight, z + halfDepth),
+		CVertex(x + halfWidth, y - halfHeight, z - halfDepth)));
+
+
+}
+
+void CCubeMesh::ChangePivot(float x, float y, float z)
+{
+}
+
 CTextMesh::CTextMesh(float width, float height, float depth) :CMesh(6)
 {
 	float halfWidth = width * 0.5f;
