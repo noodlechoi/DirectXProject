@@ -32,7 +32,7 @@ public:
 
 	void SetMovingDirection(XMFLOAT3& xmMovingDirection) { XMStoreFloat3(&moving_direction, XMVector3Normalize(XMLoadFloat3(&moving_direction))); }
 	void SetMovingDirection(XMFLOAT3&& xmMovingDirection) { XMStoreFloat3(&moving_direction, XMVector3Normalize(XMLoadFloat3(&moving_direction))); }
-	void SetMovingSpeed(float fSpeed) { moving_speed = fSpeed; }
+	virtual void SetMovingSpeed(float fSpeed) { moving_speed = fSpeed; }
 	void SetMovingRange(float fRange) { moving_range = fRange; }
 
 	void SetRotationAxis(XMFLOAT3& xmf3RotationAxis) { XMStoreFloat3(&rotation_axis, XMVector3Normalize(XMLoadFloat3(&xmf3RotationAxis))); }
@@ -111,6 +111,7 @@ public:
 	CTank();
 	void Animate(float) override;
 	void Render(HDC) override;
+	void SetMovingSpeed(float) override;
 private:
 	CTankHead head;
 	CTankBody body;

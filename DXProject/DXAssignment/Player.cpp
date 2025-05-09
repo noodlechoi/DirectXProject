@@ -43,7 +43,7 @@ void CPlayer::Move(DWORD direction, float distance)
 		if (direction & DIR_UP) XMStoreFloat3(&shift, XMVectorAdd(XMLoadFloat3(&shift), XMVectorScale(XMLoadFloat3(&up), distance)));
 		if (direction & DIR_DOWN) XMStoreFloat3(&shift, XMVectorAdd(XMLoadFloat3(&shift), XMVectorScale(XMLoadFloat3(&up), -distance)));
 
-		Move(shift, true);
+		Move(shift, false);
 	}
 }
 
@@ -116,9 +116,30 @@ void CPlayer::SetCameraOffset(XMFLOAT3&& cameraOffset)
 	camera->GenerateViewMatrix();
 }
 
+void CPlayer::SetVelocity(XMFLOAT3& Velocity)
+{
+	velocity = Velocity;
+}
+
+void CPlayer::SetVelocity(XMFLOAT3&& Velocity)
+{
+	velocity = Velocity;
+}
+
+
+void CPlayer::VelocityToSpeed()
+{
+	moving_speed = std::sqrt(velocity.x * velocity.x + velocity.y * velocity.y + velocity.z * velocity.z);
+}
+
+float CPlayer::GetMovingSpeed() const
+{
+	return moving_speed;
+}
+
 void CPlayer::Update(float timeElapsed)
 {
-	Move(velocity, false);
+	Move(velocity, true);
 
 	camera->Update(this, position, timeElapsed);
 	camera->GenerateViewMatrix();
@@ -193,6 +214,8 @@ void CNonePlayer::OnUpdateTransform()
 
 CTankPlayer::CTankPlayer()
 {
+	SetMovingSpeed(2.0f);
+	tank_object.SetMovingSpeed(moving_speed);
 
 	SetCamera(camera);
 	SetCameraOffset(XMFLOAT3(0.0f, 5.0f, -20.0f));
@@ -205,8 +228,9 @@ void CTankPlayer::OnUpdateTransform()
 	XMStoreFloat4x4(&world_matrix, XMMatrixMultiply(XMMatrixRotationRollPitchYaw(XMConvertToRadians(90.0f), 0.0f, 0.0f), XMLoadFloat4x4(&world_matrix)));
 }
 
-void CTankPlayer::Animate(float)
+void CTankPlayer::Animate(float elapsedTime)
 {
+	tank_object.Animate(elapsedTime);
 }
 
 void CTankPlayer::Render(HDC hDCFrameBuffer)

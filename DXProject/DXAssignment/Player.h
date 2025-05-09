@@ -17,6 +17,10 @@ public:
 
 	void SetCameraOffset(XMFLOAT3&);
 	void SetCameraOffset(XMFLOAT3&&);
+	void SetVelocity(XMFLOAT3&);
+	void SetVelocity(XMFLOAT3&&);
+	float GetMovingSpeed() const;
+	void VelocityToSpeed();
 
 	void Update(float = 0.016f);
 

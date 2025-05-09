@@ -316,6 +316,9 @@ CTankHead::CTankHead()
 
 void CTankHead::Animate(float elapsedTime)
 {
+	std::wstring debugMessage = L"moving speed: " + std::to_wstring(moving_speed) + L"\n";
+	OutputDebugString(debugMessage.c_str());
+	CObject::Animate(elapsedTime);
 }
 
 CTankBody::CTankBody()
@@ -333,7 +336,7 @@ CTankBody::CTankBody()
 
 void CTankBody::Animate(float elapsedTime)
 {
-
+	CObject::Animate(elapsedTime);
 }
 
 CTank::CTank()
@@ -343,10 +346,18 @@ CTank::CTank()
 
 void CTank::Animate(float elapsedTime)
 {
+	body.Animate(elapsedTime);
+	head.Animate(elapsedTime);
 }
 
 void CTank::Render(HDC hDCFrameBuffer)
 {
 	body.Render(hDCFrameBuffer);
 	head.Render(hDCFrameBuffer);
+}
+
+void CTank::SetMovingSpeed(float speed)
+{
+	body.SetMovingSpeed(speed);
+	head.SetMovingSpeed(speed);
 }

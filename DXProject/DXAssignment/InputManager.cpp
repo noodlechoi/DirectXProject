@@ -193,7 +193,19 @@ LRESULT CStartInputManager::ProcessingWindowMessage(HWND& hWnd, UINT& nMessageID
 void CRollerCoasterInputManager::ProcessInput(HWND& hwnd, std::unique_ptr<CPlayer>& player)
 {
 	static UCHAR pKeyBuffer[256];
-	
+	if (GetKeyboardState(pKeyBuffer))
+	{
+		DWORD dwDirection = 0;
+		if (pKeyBuffer[VK_UP] & 0xF0) dwDirection |= DIR_FORWARD;
+		if (pKeyBuffer[VK_DOWN] & 0xF0) dwDirection |= DIR_BACKWARD;
+		if (pKeyBuffer[VK_LEFT] & 0xF0) dwDirection |= DIR_LEFT;
+		if (pKeyBuffer[VK_RIGHT] & 0xF0) dwDirection |= DIR_RIGHT;
+		if (pKeyBuffer[VK_PRIOR] & 0xF0) dwDirection |= DIR_UP;
+		if (pKeyBuffer[VK_NEXT] & 0xF0) dwDirection |= DIR_DOWN;
+
+		if (dwDirection) player->Move(dwDirection, 0.15f);
+	}
+
 	if (GetCapture() == hwnd)
 	{
 		SetCursor(NULL);
@@ -290,8 +302,15 @@ void CTankInputManager::ProcessInput(HWND& hwnd, std::unique_ptr<CPlayer>& playe
 		if (pKeyBuffer[VK_RIGHT] & 0xF0) dwDirection |= DIR_RIGHT;
 		if (pKeyBuffer[VK_PRIOR] & 0xF0) dwDirection |= DIR_UP;
 		if (pKeyBuffer[VK_NEXT] & 0xF0) dwDirection |= DIR_DOWN;
+		
+		if ((pKeyBuffer['w'] & 0xF0) || (pKeyBuffer['W'] & 0xF0) )  dwDirection |= DIR_FORWARD;
+		if ((pKeyBuffer['s'] & 0xF0) || (pKeyBuffer['S'] & 0xF0) )  dwDirection |= DIR_BACKWARD;
+		if ((pKeyBuffer['a'] & 0xF0) || (pKeyBuffer['A'] & 0xF0) )  dwDirection |= DIR_LEFT;
+		if ((pKeyBuffer['d'] & 0xF0) || (pKeyBuffer['D'] & 0xF0) )  dwDirection |= DIR_RIGHT;
 
-		if (dwDirection) player->Move(dwDirection, 0.15f);
+		std::wstring debugMessage = L"player moving speed: " + std::to_wstring(player->GetMovingSpeed()) + L"\n";
+		OutputDebugString(debugMessage.c_str());
+		if (dwDirection) player->Move(dwDirection, player->GetMovingSpeed());
 	}
 
 	if (GetCapture() == hwnd)
