@@ -9,7 +9,7 @@ public:
 
 	void LookAt(XMFLOAT3&, XMFLOAT3&);
 
-	void Move(DWORD, float);
+	virtual void Move(DWORD, float);
 	void Move(XMFLOAT3&, bool);
 	void Move(float, float, float);
 
@@ -70,6 +70,7 @@ class CTankPlayer : public CPlayer {
 public:
 	CTankPlayer();
 	void OnUpdateTransform() override;
+	void Move(DWORD, float) override;
 	void Animate(float) override;
 	void Render(HDC) override;
 private:

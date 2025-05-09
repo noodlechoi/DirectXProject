@@ -310,7 +310,9 @@ void CTankInputManager::ProcessInput(HWND& hwnd, std::unique_ptr<CPlayer>& playe
 
 		std::wstring debugMessage = L"player moving speed: " + std::to_wstring(player->GetMovingSpeed()) + L"\n";
 		OutputDebugString(debugMessage.c_str());
-		if (dwDirection) player->Move(dwDirection, player->GetMovingSpeed());
+		if (dwDirection) {
+			player->Move(dwDirection, 0.15f);
+		}
 	}
 
 	if (GetCapture() == hwnd)

@@ -321,6 +321,11 @@ void CTankHead::Animate(float elapsedTime)
 	CObject::Animate(elapsedTime);
 }
 
+void CTankHead::OnUpdateTransform()
+{
+	XMStoreFloat4x4(&world_matrix, XMMatrixMultiply(XMMatrixRotationRollPitchYaw(XMConvertToRadians(90.0f), 0.0f, 0.0f), XMLoadFloat4x4(&world_matrix)));
+}
+
 CTankBody::CTankBody()
 {
 	SetType(eTYPE::Tank);
@@ -336,12 +341,22 @@ CTankBody::CTankBody()
 
 void CTankBody::Animate(float elapsedTime)
 {
-	CObject::Animate(elapsedTime);
+}
+
+void CTankBody::OnUpdateTransform()
+{
+	XMStoreFloat4x4(&world_matrix, XMMatrixMultiply(XMMatrixRotationRollPitchYaw(XMConvertToRadians(90.0f), 0.0f, 0.0f), XMLoadFloat4x4(&world_matrix)));
 }
 
 CTank::CTank()
 {
 	SetType(eTYPE::Tank);
+}
+
+void CTank::Move(XMFLOAT3& shift, float distance)
+{
+	body.Move(shift, distance);
+	head.Move(shift, distance);
 }
 
 void CTank::Animate(float elapsedTime)
@@ -360,4 +375,10 @@ void CTank::SetMovingSpeed(float speed)
 {
 	body.SetMovingSpeed(speed);
 	head.SetMovingSpeed(speed);
+}
+
+void CTank::OnUpdateTransform()
+{
+	body.OnUpdateTransform();
+	head.OnUpdateTransform();
 }

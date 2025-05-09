@@ -43,7 +43,7 @@ void CPlayer::Move(DWORD direction, float distance)
 		if (direction & DIR_UP) XMStoreFloat3(&shift, XMVectorAdd(XMLoadFloat3(&shift), XMVectorScale(XMLoadFloat3(&up), distance)));
 		if (direction & DIR_DOWN) XMStoreFloat3(&shift, XMVectorAdd(XMLoadFloat3(&shift), XMVectorScale(XMLoadFloat3(&up), -distance)));
 
-		Move(shift, false);
+		Move(shift, true);
 	}
 }
 
@@ -139,7 +139,7 @@ float CPlayer::GetMovingSpeed() const
 
 void CPlayer::Update(float timeElapsed)
 {
-	Move(velocity, true);
+	Move(velocity, false);
 
 	camera->Update(this, position, timeElapsed);
 	camera->GenerateViewMatrix();
@@ -214,8 +214,8 @@ void CNonePlayer::OnUpdateTransform()
 
 CTankPlayer::CTankPlayer()
 {
-	SetMovingSpeed(2.0f);
-	tank_object.SetMovingSpeed(moving_speed);
+	//SetMovingSpeed(2.0f);
+	//tank_object.SetMovingSpeed(moving_speed);
 
 	SetCamera(camera);
 	SetCameraOffset(XMFLOAT3(0.0f, 5.0f, -20.0f));
@@ -225,7 +225,24 @@ CTankPlayer::CTankPlayer()
 void CTankPlayer::OnUpdateTransform()
 {
 	CPlayer::OnUpdateTransform();
+	tank_object.OnUpdateTransform();
 	XMStoreFloat4x4(&world_matrix, XMMatrixMultiply(XMMatrixRotationRollPitchYaw(XMConvertToRadians(90.0f), 0.0f, 0.0f), XMLoadFloat4x4(&world_matrix)));
+}
+
+void CTankPlayer::Move(DWORD direction, float distance)
+{
+	if (direction) {
+		XMFLOAT3 shift = XMFLOAT3(0, 0, 0);
+		if (direction & DIR_FORWARD) XMStoreFloat3(&shift, XMVectorAdd(XMLoadFloat3(&shift), XMVectorScale(XMLoadFloat3(&look), distance)));
+		if (direction & DIR_BACKWARD) XMStoreFloat3(&shift, XMVectorAdd(XMLoadFloat3(&shift), XMVectorScale(XMLoadFloat3(&look), -distance)));
+		if (direction & DIR_RIGHT) XMStoreFloat3(&shift, XMVectorAdd(XMLoadFloat3(&shift), XMVectorScale(XMLoadFloat3(&right), distance)));
+		if (direction & DIR_LEFT) XMStoreFloat3(&shift, XMVectorAdd(XMLoadFloat3(&shift), XMVectorScale(XMLoadFloat3(&right), -distance)));
+		if (direction & DIR_UP) XMStoreFloat3(&shift, XMVectorAdd(XMLoadFloat3(&shift), XMVectorScale(XMLoadFloat3(&up), distance)));
+		if (direction & DIR_DOWN) XMStoreFloat3(&shift, XMVectorAdd(XMLoadFloat3(&shift), XMVectorScale(XMLoadFloat3(&up), -distance)));
+
+		CPlayer::Move(shift, true);
+		tank_object.Move(shift, distance);
+	}
 }
 
 void CTankPlayer::Animate(float elapsedTime)

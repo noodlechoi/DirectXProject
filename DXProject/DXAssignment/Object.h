@@ -98,20 +98,24 @@ class CTankHead : public CObject {
 public:
 	CTankHead();
 	void Animate(float) override;
+	void OnUpdateTransform() override;
 };
 
 class CTankBody : public CObject {
 public:
 	CTankBody();
 	void Animate(float) override;
+	void OnUpdateTransform() override;
 };
 
 class CTank : public CObject {
 public:
 	CTank();
+	void Move(XMFLOAT3&, float) override;
 	void Animate(float) override;
 	void Render(HDC) override;
 	void SetMovingSpeed(float) override;
+	void OnUpdateTransform() override;
 private:
 	CTankHead head;
 	CTankBody body;
