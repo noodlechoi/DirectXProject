@@ -72,10 +72,9 @@ public:
 class CTankPlayer : public CPlayer {
 public:
 	CTankPlayer();
-	void Update(float = 0.016f) override;
 	void OnUpdateTransform() override;
 	void Animate(float)override;
-	void Render(HDC )override;
+	void Render(HDC)override;
 
 	void FireBullet(CObject* = nullptr);
 

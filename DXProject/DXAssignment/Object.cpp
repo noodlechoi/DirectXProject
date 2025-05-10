@@ -208,8 +208,6 @@ void CObject::Save(std::ostream& out) const
 		++cnt;
 	}
 
-	//std::wstring debugMessage = L"CObject Save cnt: " + std::to_wstring(cnt) + L"\n" + L"size: " + std::to_wstring(meshCount) + L"\n";
-	//OutputDebugString(debugMessage.c_str());
 
 	 out.write(reinterpret_cast<const char*>(&world_matrix), sizeof(world_matrix));
 	 out.write(reinterpret_cast<const char*>(&color), sizeof(color));
@@ -346,4 +344,22 @@ void CBulletObject::Reset()
 	rotation_angle = 0.0f;
 
 	is_active = false;
+}
+
+CEnemyTank::CEnemyTank()
+{
+
+}
+
+void CEnemyTank::Animate(float)
+{
+
+}
+
+void CEnemyTank::Render(HDC)
+{
+}
+
+void CEnemyTank::FireBullet(CObject*)
+{
 }

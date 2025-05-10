@@ -30,8 +30,8 @@ public:
 	void SetPosition(XMFLOAT3& );
 	void SetPosition(XMFLOAT3&& );
 
-	void SetMovingDirection(XMFLOAT3& xmMovingDirection) { XMStoreFloat3(&moving_direction, XMVector3Normalize(XMLoadFloat3(&moving_direction))); }
-	void SetMovingDirection(XMFLOAT3&& xmMovingDirection) { XMStoreFloat3(&moving_direction, XMVector3Normalize(XMLoadFloat3(&moving_direction))); }
+	void SetMovingDirection(XMFLOAT3& xmMovingDirection) { XMStoreFloat3(&moving_direction, XMVector3Normalize(XMLoadFloat3(&xmMovingDirection)));	}
+	void SetMovingDirection(XMFLOAT3&& xmMovingDirection) { XMStoreFloat3(&moving_direction, XMVector3Normalize(XMLoadFloat3(&xmMovingDirection))); }
 	virtual void SetMovingSpeed(float fSpeed) { moving_speed = fSpeed; }
 	void SetMovingRange(float fRange) { moving_range = fRange; }
 
@@ -118,4 +118,15 @@ public:
 	float						locking_time{4.0f};
 	CObject* locked_object{};
 
+};
+
+class CEnemyTank : public CObject {
+public:
+	CEnemyTank();
+	void Animate(float)override;
+	void Render(HDC)override;
+
+	void FireBullet(CObject* = nullptr);
+
+	std::list<CBulletObject> bullets;
 };

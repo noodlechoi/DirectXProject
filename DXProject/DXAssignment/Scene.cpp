@@ -3,7 +3,7 @@
 #include "Camera.h"
 #include "GraphicsPipeline.h"
 #include "Player.h"
-
+#include <random>
 
 template <typename T, typename Y>
 CScene::CScene(size_t objectNum, std::unique_ptr<T>&& manager, std::unique_ptr<Y>&& Player)
@@ -263,15 +263,36 @@ CTankScene::CTankScene() : CScene(15, std::make_unique<CTankInputManager>(), std
 
 void CTankScene::CreateObject()
 {
-	// ¹Ù´Ú
-	CCubeMesh cube{ 50.0f, 50.0f, 2.0f };
+	{
+		// ¹Ù´Ú
+		CCubeMesh cube{ 10.0f, 2.0f, 10.0f };
+		CObject object;
+		object.SetMesh(cube);
+		object.SetColor(RGB(0, 0, 0));
+		object.SetPosition(XMFLOAT3(0.0f, -2.0f, 0.0f));
+		object.SetMovingDirection(XMFLOAT3(0.0f, 0.0f, 0.0f));
+		object.SetRotationAxis(XMFLOAT3(0.0f, 0.0f, 0.0f));
+		object.SetMovingSpeed(0.0f);
+
+		objects.push_back(std::make_unique<CObject>(object));
+	}
+
+	// ÅÊÅ©
+	// Æ÷ ÀÔ±¸
+	CCubeMesh barrel{ 1.0f, 1.0f, 5.0f, 0.0f, 2.0f, 4.5f };
+	// ¸Ó¸®
+	CCubeMesh head{ 4.0f, 2.0f, 4.0f, 0.0f, 2.0f, 0.0f };
+	// ¸ö
+	CCubeMesh body{ 8.0f, 2.0f, 8.0f };
 	CObject object;
-	object.SetMesh(cube);
-	object.SetColor(RGB(0, 0, 0));
-	object.SetPosition(XMFLOAT3(0.0f, -10.0f, 0.0f));
+	object.SetMesh(barrel);
+	object.SetMesh(head);
+	object.SetMesh(body);
+	object.SetColor(RGB(0, 255, 0));
+	object.SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
 	object.SetMovingDirection(XMFLOAT3(0.0f, 0.0f, 0.0f));
 	object.SetRotationAxis(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	object.SetMovingSpeed(0.0f);
+	object.SetMovingSpeed(5.0f);
 
 	objects.push_back(std::make_unique<CObject>(object));
 }

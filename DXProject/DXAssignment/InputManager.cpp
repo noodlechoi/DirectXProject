@@ -326,7 +326,7 @@ void CTankInputManager::ProcessInput(HWND& hwnd, std::unique_ptr<CPlayer>& playe
 		if (cxMouseDelta || cyMouseDelta)
 		{
 			if (pKeyBuffer[VK_LBUTTON] & 0xF0)
-				player->AroundRotate(0.0f, cxMouseDelta, -cyMouseDelta);
+				player->Rotate(0.0f, cxMouseDelta, 0.0f);
 		}
 	}
 

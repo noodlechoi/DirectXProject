@@ -194,7 +194,7 @@ CRollerCosterPlayer::CRollerCosterPlayer()
 	SetPosition(0.0f, 0.0f, 0.0f);
 	SetMesh(CCubeMesh());
 	SetColor(RGB(255, 0, 255));
-	SetCamera(camera);
+	//SetCamera(camera);
 	SetCameraOffset(XMFLOAT3(0.0f, 5.0f, -15.0f));
 }
 
@@ -215,39 +215,23 @@ CTankPlayer::CTankPlayer()
 {
 	// mesh 및 플레이어 설정
 	// 포 입구
-	SetMesh(CCubeMesh(1.0f, 5.0f, 1.0f, 0.0f, 6.0f, -2.0f));
+	SetMesh(CCubeMesh(1.0f, 1.0f, 5.0f, 0.0f, 2.0f, 4.5f));
 	// 머리
-	SetMesh(CCubeMesh(4.0f, 4.0f, 2.0f, 0.0f, 0.0f, -2.0f));
+	SetMesh(CCubeMesh(4.0f, 2.0f, 4.0f, 0.0f, 2.0f, 0.0f));
 	// 몸
-	SetMesh(CCubeMesh(8.0f, 8.0f, 2.0f));
-	Rotate(90.0f, 90.0f);
+	SetMesh(CCubeMesh(8.0f, 2.0f, 8.0f));
+	//Rotate(90.0f, 90.0f);
 	SetPosition(0.0f, 0.0f, 0.0f);
 	SetColor(RGB(255, 0, 255));
-	SetCamera(camera);
 	SetCameraOffset(XMFLOAT3(0.0f, 5.0f, -20.0f));
+	//SetCamera(camera);
 
-}
-
-void CTankPlayer::Update(float timeElapsed)
-{
-	Move(velocity, false);
-
-	camera->AroundUpdate(this, position, timeElapsed);
-	camera->GenerateViewMatrix();
-
-	// 감속
-	XMVECTOR xmvVelocity = XMLoadFloat3(&velocity);
-	XMVECTOR xmvDeceleration = XMVector3Normalize(XMVectorScale(xmvVelocity, -1.0f));
-	float length = XMVectorGetX(XMVector3Length(xmvVelocity));
-	float deceleration = friction * timeElapsed;
-	if (deceleration > length) deceleration = length;
-	XMStoreFloat3(&velocity, XMVectorAdd(xmvVelocity, XMVectorScale(xmvDeceleration, deceleration)));
 }
 
 void CTankPlayer::OnUpdateTransform()
 {
 	CPlayer::OnUpdateTransform();
-	XMStoreFloat4x4(&world_matrix, XMMatrixMultiply(XMMatrixRotationRollPitchYaw(XMConvertToRadians(90.0f), 0.0f, 0.0f), XMLoadFloat4x4(&world_matrix)));
+	//XMStoreFloat4x4(&world_matrix, XMMatrixMultiply(XMMatrixRotationRollPitchYaw(XMConvertToRadians(90.0f), 0.0f, 0.0f), XMLoadFloat4x4(&world_matrix)));
 }
 
 void CTankPlayer::Animate(float elapsedTime)
@@ -270,18 +254,23 @@ void CTankPlayer::Render(HDC hDCFrameBuffer)
 
 void CTankPlayer::FireBullet(CObject* pLockedObject)
 {
-	XMFLOAT3 Position = GetPosition();
-	XMFLOAT3 Direction = GetUp();
-	XMFLOAT3 FirePosition = Vector3::Add(Position, Vector3::ScalarProduct(Direction, 6.0f, false));
 
+	//std::wstring debugMessage = L"CObject Save cnt: " + std::to_wstring(cnt) + L"\n" + L"size: " + std::to_wstring(meshCount) + L"\n";
+	//OutputDebugString(debugMessage.c_str());
+	XMFLOAT3 Position = GetPosition();
+	Position.y += 2.0f;
+	XMFLOAT3 Direction = GetLook();
+	XMFLOAT3 FirePosition = Vector3::Add(Position, Vector3::ScalarProduct(Direction, 5.0f, false));
+	
 	CBulletObject bullet;
 
 	bullet.SetWorldMatrix(world_matrix);
 
 	bullet.SetMesh(CCubeMesh(1.0f, 1.0f, 1.0f));
-	bullet.SetFirePosition(Direction);
-	bullet.SetMovingDirection(GetLook());
-	bullet.SetMovingSpeed(5.0f);
+	bullet.SetFirePosition(FirePosition);
+	bullet.SetMovingDirection(Direction);
+	bullet.SetRotationSpeed(100.0f);
+	bullet.SetMovingSpeed(20.0f);
 	bullet.SetColor(RGB(100, 0, 0));
 
 	bullets.emplace_back(bullet);
