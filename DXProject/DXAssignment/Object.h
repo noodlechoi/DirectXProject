@@ -10,6 +10,7 @@ public:
 		Obstacle,
 		RollerCoaster,
 		Tank,
+		Bullet,
 	};
 public:
 	CObject();
@@ -127,6 +128,10 @@ public:
 	void Render(HDC)override;
 
 	void FireBullet(CObject* = nullptr);
+	void SetNextDestination(XMFLOAT3);
 
 	std::list<CBulletObject> bullets;
+private:
+	XMFLOAT3 current_distination{};
+	XMFLOAT3 next_destination{};
 };

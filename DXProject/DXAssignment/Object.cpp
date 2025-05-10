@@ -297,6 +297,7 @@ void CRollerCoaster::Animate(float elapsedTime)
 
 CBulletObject::CBulletObject(float effectiveRange) : bullet_effective_range{effectiveRange}
 {
+	SetType(eTYPE::Bullet);
 }
 
 CBulletObject::~CBulletObject() 
@@ -348,18 +349,66 @@ void CBulletObject::Reset()
 
 CEnemyTank::CEnemyTank()
 {
+	SetType(eTYPE::Tank);
 
+	// 포 입구
+	SetMesh(CCubeMesh(1.0f, 1.0f, 5.0f, 0.0f, 2.0f, 4.5f));
+	// 머리
+	SetMesh(CCubeMesh(4.0f, 2.0f, 4.0f, 0.0f, 2.0f, 0.0f));
+	// 몸
+	SetMesh(CCubeMesh(8.0f, 2.0f, 8.0f));
+	SetColor(RGB(0, 255, 0));
+	SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	SetMovingDirection(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	SetRotationAxis(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	SetMovingSpeed(5.0f);
+
+	SetNextDestination({ 10.0f, 0.0f, 10.0f });
 }
 
-void CEnemyTank::Animate(float)
+void CEnemyTank::Animate(float elapsedTime)
 {
+	float distance = moving_speed * elapsedTime;
 
+	XMFLOAT3 xmf3Position = GetPosition();
+
+	// 회전 방향 변경
+	XMFLOAT3 normal_direction{ Vector3::Normalize(moving_direction) };
+	float dotProduct{ Vector3::DotProduct(GetLook(), normal_direction) };
+	if (!IsEqual(dotProduct, 1.0f)) {
+		float RotationAngle{ (float)XMConvertToDegrees(acos(dotProduct)) };
+		XMFLOAT4X4 mtxRotate = Matrix4x4::RotationYawPitchRoll(0.0f, RotationAngle, 0.0f);
+		world_matrix = Matrix4x4::Multiply(mtxRotate, world_matrix);
+	}
+
+	// 경로까지 이동
+	XMFLOAT3 xmf3Movement = Vector3::Normalize(Vector3::Subtract(current_distination, xmf3Position));
+	xmf3Position = Vector3::Add(xmf3Position, xmf3Movement, distance);
+	SetPosition(xmf3Position);
+	moving_direction = Vector3::Normalize(Vector3::Add(moving_direction, xmf3Movement));
+	xmf3Position = Vector3::Add(xmf3Position, xmf3Movement);
+
+	if (1.0f >= Vector3::Distance(xmf3Position, current_distination)) {
+
+		// 목적지 변경
+		current_distination = next_destination;
+	}
 }
 
-void CEnemyTank::Render(HDC)
+void CEnemyTank::Render(HDC hDCFrameBuffer)
 {
+	CObject::Render(hDCFrameBuffer);
+
+	for (CBulletObject& bullet : bullets) {
+		bullet.Render(hDCFrameBuffer);
+	}
 }
 
 void CEnemyTank::FireBullet(CObject*)
 {
+}
+
+void CEnemyTank::SetNextDestination(XMFLOAT3 nextDestination)
+{
+	next_destination = nextDestination;
 }

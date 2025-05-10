@@ -98,6 +98,9 @@ void CScene::Load()
 		case (int)CObject::eTYPE::RollerCoaster:
 			object = std::make_unique<CRollerCoaster>();
 			break;
+		case (int)CObject::eTYPE::Tank:
+			object = std::make_unique<CEnemyTank>();
+			break;
 		default:
 			object = std::make_unique<CObject>();
 			break;
@@ -278,23 +281,9 @@ void CTankScene::CreateObject()
 	}
 
 	// 攀农
-	// 器 涝备
-	CCubeMesh barrel{ 1.0f, 1.0f, 5.0f, 0.0f, 2.0f, 4.5f };
-	// 赣府
-	CCubeMesh head{ 4.0f, 2.0f, 4.0f, 0.0f, 2.0f, 0.0f };
-	// 个
-	CCubeMesh body{ 8.0f, 2.0f, 8.0f };
-	CObject object;
-	object.SetMesh(barrel);
-	object.SetMesh(head);
-	object.SetMesh(body);
-	object.SetColor(RGB(0, 255, 0));
-	object.SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	object.SetMovingDirection(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	object.SetRotationAxis(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	object.SetMovingSpeed(5.0f);
+	CEnemyTank object;
 
-	objects.push_back(std::make_unique<CObject>(object));
+	objects.push_back(std::make_unique<CEnemyTank>(object));
 }
 
 void CTankScene::ProcessInput(HWND& hwnd, float timeElapsed)
