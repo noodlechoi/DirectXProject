@@ -14,15 +14,18 @@ public:
 	void Move(float, float, float);
 
 	void Rotate(float = 0.0f, float = 0.0f, float = 0.0f);
+	void AroundRotate(float = 0.0f, float = 0.0f, float = 0.0f);
+
+
+	void SetVelocity(XMFLOAT3& Velocity) { velocity = Velocity; };
+	void SetVelocity(XMFLOAT3&& Velocity) { velocity = Velocity; };
 
 	void SetCameraOffset(XMFLOAT3&);
 	void SetCameraOffset(XMFLOAT3&&);
-	void SetVelocity(XMFLOAT3&);
-	void SetVelocity(XMFLOAT3&&);
 	float GetMovingSpeed() const;
-	void VelocityToSpeed();
+	float VelocityToSpeed();
 
-	void Update(float = 0.016f);
+	virtual void Update(float = 0.016f);
 
 	virtual void OnUpdateTransform();
 	virtual void Animate(float);
@@ -37,7 +40,6 @@ public:
 	XMFLOAT3					look{ XMFLOAT3(0.0f, 0.0f, 1.0f) };
 
 	XMFLOAT3					camera_offset{ XMFLOAT3(0.0f, 0.0f, 0.0f) };
-	XMFLOAT3					velocity { XMFLOAT3(0.0f, 0.0f, 0.0f)};
 
 	float						friction { 125.0f};
 
@@ -69,10 +71,6 @@ public:
 class CTankPlayer : public CPlayer {
 public:
 	CTankPlayer();
+	void Update(float = 0.016f) override;
 	void OnUpdateTransform() override;
-	void Move(DWORD, float) override;
-	void Animate(float) override;
-	void Render(HDC) override;
-private:
-	CTank tank_object;
 };

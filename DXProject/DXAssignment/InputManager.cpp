@@ -296,22 +296,28 @@ void CTankInputManager::ProcessInput(HWND& hwnd, std::unique_ptr<CPlayer>& playe
 	if (GetKeyboardState(pKeyBuffer))
 	{
 		DWORD dwDirection = 0;
-		if (pKeyBuffer[VK_UP] & 0xF0) dwDirection |= DIR_FORWARD;
+		/*if (pKeyBuffer[VK_UP] & 0xF0) dwDirection |= DIR_FORWARD;
 		if (pKeyBuffer[VK_DOWN] & 0xF0) dwDirection |= DIR_BACKWARD;
 		if (pKeyBuffer[VK_LEFT] & 0xF0) dwDirection |= DIR_LEFT;
 		if (pKeyBuffer[VK_RIGHT] & 0xF0) dwDirection |= DIR_RIGHT;
 		if (pKeyBuffer[VK_PRIOR] & 0xF0) dwDirection |= DIR_UP;
-		if (pKeyBuffer[VK_NEXT] & 0xF0) dwDirection |= DIR_DOWN;
+		if (pKeyBuffer[VK_NEXT] & 0xF0) dwDirection |= DIR_DOWN;*/
 		
-		if ((pKeyBuffer['w'] & 0xF0) || (pKeyBuffer['W'] & 0xF0) )  dwDirection |= DIR_FORWARD;
-		if ((pKeyBuffer['s'] & 0xF0) || (pKeyBuffer['S'] & 0xF0) )  dwDirection |= DIR_BACKWARD;
-		if ((pKeyBuffer['a'] & 0xF0) || (pKeyBuffer['A'] & 0xF0) )  dwDirection |= DIR_LEFT;
-		if ((pKeyBuffer['d'] & 0xF0) || (pKeyBuffer['D'] & 0xF0) )  dwDirection |= DIR_RIGHT;
+		if ((pKeyBuffer['W'] & 0xF0) )  dwDirection |= DIR_FORWARD;
+		if ((pKeyBuffer['S'] & 0xF0) )  dwDirection |= DIR_BACKWARD;
+		if ((pKeyBuffer['A'] & 0xF0) )  dwDirection |= DIR_LEFT;
+		if ((pKeyBuffer['D'] & 0xF0) )  dwDirection |= DIR_RIGHT;
 
-		std::wstring debugMessage = L"player moving speed: " + std::to_wstring(player->GetMovingSpeed()) + L"\n";
-		OutputDebugString(debugMessage.c_str());
 		if (dwDirection) {
 			player->Move(dwDirection, 0.15f);
+		}
+	}
+	if (togle) {
+		if (togle & DIR_E) {
+			OutputDebugString(L"E\n");
+		}
+		if (togle & DIR_Q) {
+			OutputDebugString(L"Q\n");
 		}
 	}
 
@@ -325,10 +331,8 @@ void CTankInputManager::ProcessInput(HWND& hwnd, std::unique_ptr<CPlayer>& playe
 		SetCursorPos(old_cursor_pos.x, old_cursor_pos.y);
 		if (cxMouseDelta || cyMouseDelta)
 		{
-			if (pKeyBuffer[VK_RBUTTON] & 0xF0)
-				player->Rotate(cyMouseDelta, 0.0f, -cxMouseDelta);
-			else
-				player->Rotate(cyMouseDelta, cxMouseDelta, 0.0f);
+			if (pKeyBuffer[VK_LBUTTON] & 0xF0)
+				player->AroundRotate(0.0f, cxMouseDelta, -cyMouseDelta);
 		}
 	}
 }
@@ -362,6 +366,14 @@ void CTankInputManager::ProcessingKeyboardMessage(HWND& hWnd, UINT& nMessageID, 
 		{
 		case VK_ESCAPE:
 			::PostQuitMessage(0);
+			break;
+		case 'e':
+		case 'E':
+			togle ^= DIR_E;
+			break;
+		case 'q':
+		case 'Q':
+			togle ^= DIR_Q;
 			break;
 		case VK_RETURN:
 			break;

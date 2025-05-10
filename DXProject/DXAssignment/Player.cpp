@@ -18,6 +18,17 @@ void CPlayer::SetPosition(float x, float y, float z)
 	CObject::SetPosition(x, y, z);
 }
 
+
+float CPlayer::VelocityToSpeed()
+{
+	return std::sqrt(velocity.x * velocity.x + velocity.y * velocity.y + velocity.z * velocity.z);
+}
+
+float CPlayer::GetMovingSpeed() const
+{
+	return moving_speed;
+}
+
 void CPlayer::LookAt(XMFLOAT3& lookAt, XMFLOAT3& up)
 {
 	XMFLOAT4X4 view;
@@ -96,6 +107,17 @@ void CPlayer::Rotate(float pitch, float yaw, float roll)
 	XMStoreFloat3(&look, xmvLook);
 }
 
+void CPlayer::AroundRotate(float pitch, float yaw, float roll)
+{
+
+	// 이동 후 각도의 반대로 rotate
+	XMFLOAT3 shiftRotate = { XMConvertToRadians(pitch), XMConvertToRadians(yaw), XMConvertToRadians(roll) };
+	camera->Move(shiftRotate.x, shiftRotate.y, shiftRotate.z);
+	//XMStoreFloat3(&camera_offset, XMVectorAdd(XMLoadFloat3(&position), XMLoadFloat3(&shiftRotate)));
+	camera->Rotate(-pitch, -yaw, -roll);
+
+}
+
 void CPlayer::SetCameraOffset(XMFLOAT3& cameraOffset)
 {
 	camera_offset = cameraOffset;
@@ -116,27 +138,6 @@ void CPlayer::SetCameraOffset(XMFLOAT3&& cameraOffset)
 	camera->GenerateViewMatrix();
 }
 
-void CPlayer::SetVelocity(XMFLOAT3& Velocity)
-{
-	velocity = Velocity;
-}
-
-void CPlayer::SetVelocity(XMFLOAT3&& Velocity)
-{
-	velocity = Velocity;
-}
-
-
-void CPlayer::VelocityToSpeed()
-{
-	moving_speed = std::sqrt(velocity.x * velocity.x + velocity.y * velocity.y + velocity.z * velocity.z);
-}
-
-float CPlayer::GetMovingSpeed() const
-{
-	return moving_speed;
-}
-
 void CPlayer::Update(float timeElapsed)
 {
 	Move(velocity, false);
@@ -144,6 +145,7 @@ void CPlayer::Update(float timeElapsed)
 	camera->Update(this, position, timeElapsed);
 	camera->GenerateViewMatrix();
 
+	// 감속
 	XMVECTOR xmvVelocity = XMLoadFloat3(&velocity);
 	XMVECTOR xmvDeceleration = XMVector3Normalize(XMVectorScale(xmvVelocity, -1.0f));
 	float length = XMVectorGetX(XMVector3Length(xmvVelocity));
@@ -183,7 +185,6 @@ void CAirplanePlayer::OnUpdateTransform()
 	CPlayer::OnUpdateTransform();
 
 	XMStoreFloat4x4(&world_matrix, XMMatrixMultiply(XMMatrixRotationRollPitchYaw(XMConvertToRadians(90.0f), 0.0f, 0.0f), XMLoadFloat4x4(&world_matrix)));
-
 }
 
 
@@ -199,8 +200,6 @@ CRollerCosterPlayer::CRollerCosterPlayer()
 
 void CRollerCosterPlayer::OnUpdateTransform()
 {
-	// 롤러코스터 라인에 따라 이동
-
 	CPlayer::OnUpdateTransform();
 
 	XMStoreFloat4x4(&world_matrix, XMMatrixMultiply(XMMatrixRotationRollPitchYaw(XMConvertToRadians(90.0f), 0.0f, 0.0f), XMLoadFloat4x4(&world_matrix)));
@@ -214,43 +213,39 @@ void CNonePlayer::OnUpdateTransform()
 
 CTankPlayer::CTankPlayer()
 {
-	//SetMovingSpeed(2.0f);
-	//tank_object.SetMovingSpeed(moving_speed);
-
+	// mesh 및 플레이어 설정
+	// 머리
+	SetMesh(CCubeMesh(4.0f, 4.0f, 2.0f, 0.0f, 0.0f, -2.0f));
+	// 포 입구
+	SetMesh(CCubeMesh(1.0f, 5.0f, 1.0f, 0.0f, 6.0f, 0.0f));
+	// 몸
+	SetMesh(CCubeMesh(8.0f, 8.0f, 2.0f));
+	Rotate(90.0f, 90.0f);
+	SetPosition(0.0f, 0.0f, 0.0f);
+	SetColor(RGB(255, 0, 255));
 	SetCamera(camera);
 	SetCameraOffset(XMFLOAT3(0.0f, 5.0f, -20.0f));
 
 }
 
+void CTankPlayer::Update(float timeElapsed)
+{
+	Move(velocity, false);
+
+	camera->AroundUpdate(this, position, timeElapsed);
+	camera->GenerateViewMatrix();
+
+	// 감속
+	XMVECTOR xmvVelocity = XMLoadFloat3(&velocity);
+	XMVECTOR xmvDeceleration = XMVector3Normalize(XMVectorScale(xmvVelocity, -1.0f));
+	float length = XMVectorGetX(XMVector3Length(xmvVelocity));
+	float deceleration = friction * timeElapsed;
+	if (deceleration > length) deceleration = length;
+	XMStoreFloat3(&velocity, XMVectorAdd(xmvVelocity, XMVectorScale(xmvDeceleration, deceleration)));
+}
+
 void CTankPlayer::OnUpdateTransform()
 {
 	CPlayer::OnUpdateTransform();
-	tank_object.OnUpdateTransform();
 	XMStoreFloat4x4(&world_matrix, XMMatrixMultiply(XMMatrixRotationRollPitchYaw(XMConvertToRadians(90.0f), 0.0f, 0.0f), XMLoadFloat4x4(&world_matrix)));
-}
-
-void CTankPlayer::Move(DWORD direction, float distance)
-{
-	if (direction) {
-		XMFLOAT3 shift = XMFLOAT3(0, 0, 0);
-		if (direction & DIR_FORWARD) XMStoreFloat3(&shift, XMVectorAdd(XMLoadFloat3(&shift), XMVectorScale(XMLoadFloat3(&look), distance)));
-		if (direction & DIR_BACKWARD) XMStoreFloat3(&shift, XMVectorAdd(XMLoadFloat3(&shift), XMVectorScale(XMLoadFloat3(&look), -distance)));
-		if (direction & DIR_RIGHT) XMStoreFloat3(&shift, XMVectorAdd(XMLoadFloat3(&shift), XMVectorScale(XMLoadFloat3(&right), distance)));
-		if (direction & DIR_LEFT) XMStoreFloat3(&shift, XMVectorAdd(XMLoadFloat3(&shift), XMVectorScale(XMLoadFloat3(&right), -distance)));
-		if (direction & DIR_UP) XMStoreFloat3(&shift, XMVectorAdd(XMLoadFloat3(&shift), XMVectorScale(XMLoadFloat3(&up), distance)));
-		if (direction & DIR_DOWN) XMStoreFloat3(&shift, XMVectorAdd(XMLoadFloat3(&shift), XMVectorScale(XMLoadFloat3(&up), -distance)));
-
-		CPlayer::Move(shift, true);
-		tank_object.Move(shift, distance);
-	}
-}
-
-void CTankPlayer::Animate(float elapsedTime)
-{
-	tank_object.Animate(elapsedTime);
-}
-
-void CTankPlayer::Render(HDC hDCFrameBuffer)
-{
-	tank_object.Render(hDCFrameBuffer);
 }

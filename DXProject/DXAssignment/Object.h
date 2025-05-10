@@ -43,6 +43,7 @@ public:
 	void SetType(eTYPE Type) { type = (int)Type; }
 	bool EqualType(eTYPE Type) { return type == (int)Type; }
 
+
 	int GetType() { return type; }
 	XMFLOAT3 GetPosition();
 	XMFLOAT3 GetLook();
@@ -73,6 +74,7 @@ protected:
 	XMFLOAT3 moving_direction;
 	float moving_speed{};
 	float moving_range{};
+	XMFLOAT3 velocity{ XMFLOAT3(0.0f, 0.0f, 0.0f) };
 
 	XMFLOAT3 rotation_axis;
 	float rotation_speed{};
@@ -91,32 +93,4 @@ public:
 private:
 	std::vector<XMFLOAT3> path; // 롤러코스터 경로
 	size_t current_index{ 0 };   // 현재 경로 인덱스
-};
-
-// 기능이 있기 때문에 Object로 만듦
-class CTankHead : public CObject {
-public:
-	CTankHead();
-	void Animate(float) override;
-	void OnUpdateTransform() override;
-};
-
-class CTankBody : public CObject {
-public:
-	CTankBody();
-	void Animate(float) override;
-	void OnUpdateTransform() override;
-};
-
-class CTank : public CObject {
-public:
-	CTank();
-	void Move(XMFLOAT3&, float) override;
-	void Animate(float) override;
-	void Render(HDC) override;
-	void SetMovingSpeed(float) override;
-	void OnUpdateTransform() override;
-private:
-	CTankHead head;
-	CTankBody body;
 };

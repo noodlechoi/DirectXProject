@@ -43,6 +43,8 @@ using namespace DirectX::PackedVector;
 #define DIR_RIGHT				0x08
 #define DIR_UP					0x10
 #define DIR_DOWN				0x20
+#define DIR_E					0x30
+#define DIR_Q					0x03
 
 #define EPSILON					1.0e-6f
 

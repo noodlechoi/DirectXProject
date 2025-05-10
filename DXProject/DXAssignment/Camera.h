@@ -29,6 +29,7 @@ public:
 	void Rotate(float  = 0.0f, float  = 0.0f, float  = 0.0f);
 	void Update(std::unique_ptr<CPlayer>& , XMFLOAT3& , float  = 0.016f);
 	void Update(CPlayer* , XMFLOAT3& , float  = 0.016f);
+	void AroundUpdate(CPlayer* , XMFLOAT3& , float  = 0.016f);
 private:
 	XMFLOAT3 position{ XMFLOAT3(0.0f, 0.0f, 0.0f) };
 	XMFLOAT3 right{ XMFLOAT3(1.0f, 0.0f, 0.0f) };

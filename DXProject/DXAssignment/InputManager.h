@@ -48,5 +48,6 @@ public:
 	void ProcessingKeyboardMessage(HWND&, UINT&, WPARAM&, LPARAM&) override;
 	virtual LRESULT ProcessingWindowMessage(HWND&, UINT&, WPARAM&, LPARAM&) override;
 private:
+	DWORD togle{};
 	POINT old_cursor_pos;
 };

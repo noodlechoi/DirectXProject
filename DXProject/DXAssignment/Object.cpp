@@ -208,8 +208,8 @@ void CObject::Save(std::ostream& out) const
 		++cnt;
 	}
 
-	std::wstring debugMessage = L"CObject Save cnt: " + std::to_wstring(cnt) + L"\n" + L"size: " + std::to_wstring(meshCount) + L"\n";
-	OutputDebugString(debugMessage.c_str());
+	//std::wstring debugMessage = L"CObject Save cnt: " + std::to_wstring(cnt) + L"\n" + L"size: " + std::to_wstring(meshCount) + L"\n";
+	//OutputDebugString(debugMessage.c_str());
 
 	 out.write(reinterpret_cast<const char*>(&world_matrix), sizeof(world_matrix));
 	 out.write(reinterpret_cast<const char*>(&color), sizeof(color));
@@ -295,90 +295,4 @@ void CRollerCoaster::Animate(float elapsedTime)
 	}
 
 	CObject::Animate(elapsedTime);
-}
-
-CTankHead::CTankHead()
-{
-	SetType(eTYPE::Tank);
-
-	// 머리
-	SetMesh(CCubeMesh(5.0f, 5.0f, 2.0f));
-
-	//// 포 입구
-	SetMesh(CCubeMesh(5.0f, 1.0f, 1.0f, 5.0f, 0.0f, 0.0f));
-
-	SetPosition(0.0f, 0.0f, 2.0f);
-	SetColor(RGB(255, 0, 0));
-	SetMovingDirection(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	SetRotationAxis(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	SetMovingSpeed(0.0f);
-}
-
-void CTankHead::Animate(float elapsedTime)
-{
-	std::wstring debugMessage = L"moving speed: " + std::to_wstring(moving_speed) + L"\n";
-	OutputDebugString(debugMessage.c_str());
-	CObject::Animate(elapsedTime);
-}
-
-void CTankHead::OnUpdateTransform()
-{
-	XMStoreFloat4x4(&world_matrix, XMMatrixMultiply(XMMatrixRotationRollPitchYaw(XMConvertToRadians(90.0f), 0.0f, 0.0f), XMLoadFloat4x4(&world_matrix)));
-}
-
-CTankBody::CTankBody()
-{
-	SetType(eTYPE::Tank);
-
-	// 몸
-	SetMesh(CCubeMesh(8.0f, 8.0f, 2.0f));
-	SetPosition(0.0f, 0.0f, 0.0f);
-	SetColor(RGB(255, 0, 255));
-	SetMovingDirection(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	SetRotationAxis(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	SetMovingSpeed(0.0f);
-}
-
-void CTankBody::Animate(float elapsedTime)
-{
-}
-
-void CTankBody::OnUpdateTransform()
-{
-	XMStoreFloat4x4(&world_matrix, XMMatrixMultiply(XMMatrixRotationRollPitchYaw(XMConvertToRadians(90.0f), 0.0f, 0.0f), XMLoadFloat4x4(&world_matrix)));
-}
-
-CTank::CTank()
-{
-	SetType(eTYPE::Tank);
-}
-
-void CTank::Move(XMFLOAT3& shift, float distance)
-{
-	body.Move(shift, distance);
-	head.Move(shift, distance);
-}
-
-void CTank::Animate(float elapsedTime)
-{
-	body.Animate(elapsedTime);
-	head.Animate(elapsedTime);
-}
-
-void CTank::Render(HDC hDCFrameBuffer)
-{
-	body.Render(hDCFrameBuffer);
-	head.Render(hDCFrameBuffer);
-}
-
-void CTank::SetMovingSpeed(float speed)
-{
-	body.SetMovingSpeed(speed);
-	head.SetMovingSpeed(speed);
-}
-
-void CTank::OnUpdateTransform()
-{
-	body.OnUpdateTransform();
-	head.OnUpdateTransform();
 }
