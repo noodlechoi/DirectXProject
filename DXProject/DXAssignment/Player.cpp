@@ -214,10 +214,10 @@ void CNonePlayer::OnUpdateTransform()
 CTankPlayer::CTankPlayer()
 {
 	// mesh 및 플레이어 설정
+	// 포 입구
+	SetMesh(CCubeMesh(1.0f, 5.0f, 1.0f, 0.0f, 6.0f, -2.0f));
 	// 머리
 	SetMesh(CCubeMesh(4.0f, 4.0f, 2.0f, 0.0f, 0.0f, -2.0f));
-	// 포 입구
-	SetMesh(CCubeMesh(1.0f, 5.0f, 1.0f, 0.0f, 6.0f, 0.0f));
 	// 몸
 	SetMesh(CCubeMesh(8.0f, 8.0f, 2.0f));
 	Rotate(90.0f, 90.0f);
@@ -248,4 +248,41 @@ void CTankPlayer::OnUpdateTransform()
 {
 	CPlayer::OnUpdateTransform();
 	XMStoreFloat4x4(&world_matrix, XMMatrixMultiply(XMMatrixRotationRollPitchYaw(XMConvertToRadians(90.0f), 0.0f, 0.0f), XMLoadFloat4x4(&world_matrix)));
+}
+
+void CTankPlayer::Animate(float elapsedTime)
+{
+	CPlayer::Animate(elapsedTime);
+
+	for (CBulletObject& bullet : bullets) {
+		bullet.Animate(elapsedTime);
+	}
+}
+
+void CTankPlayer::Render(HDC hDCFrameBuffer)
+{
+	CObject::Render(hDCFrameBuffer);
+
+	for (CBulletObject& bullet : bullets) {
+		bullet.Render(hDCFrameBuffer);
+	}
+}
+
+void CTankPlayer::FireBullet(CObject* pLockedObject)
+{
+	XMFLOAT3 Position = GetPosition();
+	XMFLOAT3 Direction = GetUp();
+	XMFLOAT3 FirePosition = Vector3::Add(Position, Vector3::ScalarProduct(Direction, 6.0f, false));
+
+	CBulletObject bullet;
+
+	bullet.SetWorldMatrix(world_matrix);
+
+	bullet.SetMesh(CCubeMesh(1.0f, 1.0f, 1.0f));
+	bullet.SetFirePosition(Direction);
+	bullet.SetMovingDirection(GetLook());
+	bullet.SetMovingSpeed(5.0f);
+	bullet.SetColor(RGB(100, 0, 0));
+
+	bullets.emplace_back(bullet);
 }

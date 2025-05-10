@@ -45,6 +45,7 @@ public:
 
 
 	int GetType() { return type; }
+	bool GetActive() { return is_active; }
 	XMFLOAT3 GetPosition();
 	XMFLOAT3 GetLook();
 	XMFLOAT3 GetUp();
@@ -93,4 +94,28 @@ public:
 private:
 	std::vector<XMFLOAT3> path; // 롤러코스터 경로
 	size_t current_index{ 0 };   // 현재 경로 인덱스
+};
+
+class CBulletObject : public CObject
+{
+public:
+	CBulletObject(float = 50.0f );
+	virtual ~CBulletObject();
+
+	virtual void Animate(float);
+
+	void SetFirePosition(XMFLOAT3 );
+	void SetWorldMatrix(XMFLOAT4X4 worldMatrix) { world_matrix = worldMatrix; }
+	void Reset();
+public:
+	float						bullet_effective_range{ 50.0f };
+	float						moving_distance{};
+	float						rotation_angle{};
+	XMFLOAT3					fire_position{ XMFLOAT3(0.0f, 0.0f, 1.0f) };
+
+	float						elapsed_time_after_fire{};
+	float						lock_delay_time{0.3f};
+	float						locking_time{4.0f};
+	CObject* locked_object{};
+
 };

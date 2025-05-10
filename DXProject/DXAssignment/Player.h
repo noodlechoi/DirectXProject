@@ -68,9 +68,16 @@ public:
 	void OnUpdateTransform() override;
 };
 
+#define BULLETS					50
 class CTankPlayer : public CPlayer {
 public:
 	CTankPlayer();
 	void Update(float = 0.016f) override;
 	void OnUpdateTransform() override;
+	void Animate(float)override;
+	void Render(HDC )override;
+
+	void FireBullet(CObject* = nullptr);
+
+	std::list<CBulletObject> bullets;
 };

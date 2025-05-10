@@ -296,3 +296,54 @@ void CRollerCoaster::Animate(float elapsedTime)
 
 	CObject::Animate(elapsedTime);
 }
+
+CBulletObject::CBulletObject(float effectiveRange) : bullet_effective_range{effectiveRange}
+{
+}
+
+CBulletObject::~CBulletObject() 
+{
+	locked_object = nullptr;
+}
+
+void CBulletObject::Animate(float elapsedTime)
+{
+	elapsed_time_after_fire += elapsedTime;
+
+	float distance = moving_speed * elapsedTime;
+
+	if ((elapsed_time_after_fire > lock_delay_time) && locked_object) {
+		XMVECTOR xmvPosition = XMLoadFloat3(&GetPosition());
+
+		XMVECTOR lockedObjectPosition = XMLoadFloat3(&locked_object->GetPosition());
+		XMVECTOR toLockedObject = XMVector3Normalize(lockedObjectPosition - xmvPosition);
+
+		XMVECTOR movingDirection = XMLoadFloat3(&moving_direction);
+		movingDirection = XMVector3Normalize(XMVectorLerp(movingDirection, toLockedObject, 0.25f));
+		XMStoreFloat3(&moving_direction, movingDirection);
+	}
+
+	XMFLOAT4X4 mtxRotate = Matrix4x4::RotationYawPitchRoll(0.0f, rotation_speed * elapsedTime, 0.0f);
+	world_matrix = Matrix4x4::Multiply(mtxRotate, world_matrix);
+	XMFLOAT3 xmf3Movement = Vector3::ScalarProduct(moving_direction, distance, false);
+	XMFLOAT3 xmf3Position = GetPosition();
+	xmf3Position = Vector3::Add(xmf3Position, xmf3Movement);
+	SetPosition(xmf3Position);
+	moving_distance += distance;
+}
+
+void CBulletObject::SetFirePosition(XMFLOAT3 firePosition)
+{
+	fire_position = firePosition;
+	SetPosition(firePosition);
+}
+
+void CBulletObject::Reset()
+{
+	locked_object = nullptr;
+	elapsed_time_after_fire = 0;
+	moving_distance = 0;
+	rotation_angle = 0.0f;
+
+	is_active = false;
+}

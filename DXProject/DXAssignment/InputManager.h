@@ -50,4 +50,5 @@ public:
 private:
 	DWORD togle{};
 	POINT old_cursor_pos;
+	bool isFire{};
 };

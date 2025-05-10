@@ -296,30 +296,24 @@ void CTankInputManager::ProcessInput(HWND& hwnd, std::unique_ptr<CPlayer>& playe
 	if (GetKeyboardState(pKeyBuffer))
 	{
 		DWORD dwDirection = 0;
-		/*if (pKeyBuffer[VK_UP] & 0xF0) dwDirection |= DIR_FORWARD;
+		if (pKeyBuffer[VK_UP] & 0xF0) dwDirection |= DIR_FORWARD;
 		if (pKeyBuffer[VK_DOWN] & 0xF0) dwDirection |= DIR_BACKWARD;
 		if (pKeyBuffer[VK_LEFT] & 0xF0) dwDirection |= DIR_LEFT;
 		if (pKeyBuffer[VK_RIGHT] & 0xF0) dwDirection |= DIR_RIGHT;
 		if (pKeyBuffer[VK_PRIOR] & 0xF0) dwDirection |= DIR_UP;
-		if (pKeyBuffer[VK_NEXT] & 0xF0) dwDirection |= DIR_DOWN;*/
-		
-		if ((pKeyBuffer['W'] & 0xF0) )  dwDirection |= DIR_FORWARD;
-		if ((pKeyBuffer['S'] & 0xF0) )  dwDirection |= DIR_BACKWARD;
-		if ((pKeyBuffer['A'] & 0xF0) )  dwDirection |= DIR_LEFT;
-		if ((pKeyBuffer['D'] & 0xF0) )  dwDirection |= DIR_RIGHT;
+		if (pKeyBuffer[VK_NEXT] & 0xF0) dwDirection |= DIR_DOWN;
 
 		if (dwDirection) {
 			player->Move(dwDirection, 0.15f);
 		}
 	}
-	if (togle) {
-		if (togle & DIR_E) {
-			OutputDebugString(L"E\n");
+
+	/*if (togle) {
+		if (togle & DIR_S) {
 		}
-		if (togle & DIR_Q) {
-			OutputDebugString(L"Q\n");
+		if (togle & DIR_A) {
 		}
-	}
+	}*/
 
 	if (GetCapture() == hwnd)
 	{
@@ -335,6 +329,12 @@ void CTankInputManager::ProcessInput(HWND& hwnd, std::unique_ptr<CPlayer>& playe
 				player->AroundRotate(0.0f, cxMouseDelta, -cyMouseDelta);
 		}
 	}
+
+	if (isFire) {
+		dynamic_cast<CTankPlayer*>(player.get())->FireBullet();
+		isFire = false;
+	}
+
 }
 
 void CTankInputManager::ProcessingMouseMessage(HWND& hWnd, UINT& nMessageID, WPARAM& wParam, LPARAM& lParam)
@@ -342,6 +342,8 @@ void CTankInputManager::ProcessingMouseMessage(HWND& hWnd, UINT& nMessageID, WPA
 	switch (nMessageID)
 	{
 	case WM_RBUTTONDOWN:
+		isFire = true;
+		break;
 	case WM_LBUTTONDOWN:
 		::SetCapture(hWnd);
 		::GetCursorPos(&old_cursor_pos);
@@ -367,13 +369,13 @@ void CTankInputManager::ProcessingKeyboardMessage(HWND& hWnd, UINT& nMessageID, 
 		case VK_ESCAPE:
 			::PostQuitMessage(0);
 			break;
-		case 'e':
-		case 'E':
-			togle ^= DIR_E;
+		case 's':
+		case 'S':
+			togle ^= DIR_S;
 			break;
-		case 'q':
-		case 'Q':
-			togle ^= DIR_Q;
+		case 'a':
+		case 'A':
+			togle ^= DIR_A;
 			break;
 		case VK_RETURN:
 			break;
