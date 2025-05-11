@@ -4,6 +4,9 @@
 #include "Camera.h"
 #include "InputManager.h"
 
+extern bool IsNextScene;
+
+
 void CInputManager::ProcessingMouseMessage(HWND& hWnd, UINT& nMessageID, WPARAM& wParam, LPARAM& lParam)
 {
 }
@@ -197,9 +200,6 @@ void CRollerCoasterInputManager::ProcessInput(HWND& hwnd, CScene* scene)
 	static UCHAR pKeyBuffer[256];
 	if (GetKeyboardState(pKeyBuffer))
 	{
-		if (isNextScene) {
-			scene->NextScene();
-		}
 		DWORD dwDirection = 0;
 		if (pKeyBuffer[VK_UP] & 0xF0) dwDirection |= DIR_FORWARD;
 		if (pKeyBuffer[VK_DOWN] & 0xF0) dwDirection |= DIR_BACKWARD;
@@ -262,7 +262,8 @@ void CRollerCoasterInputManager::ProcessingKeyboardMessage(HWND& hWnd, UINT& nMe
 		case VK_RETURN:
 			break;
 		case 'n':
-			isNextScene = true;
+		case 'N':
+			IsNextScene = true;
 			break;
 		case VK_CONTROL:
 			break;

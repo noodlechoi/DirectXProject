@@ -312,9 +312,9 @@ LRESULT CRollerCoasterScene::ProcessingWindowMessage(HWND& hWnd, UINT& nMessageI
 	return input_manager->ProcessingWindowMessage(hWnd, nMessageID, wParam, lParam);
 }
 
-void CRollerCoasterScene::NextScene()
+CScene* CRollerCoasterScene::NextScene()
 {
-
+	return new CTankScene();
 }
 
 CTankScene::CTankScene() : CScene(15, std::make_unique<CTankInputManager>(), std::make_unique<CTankPlayer>())

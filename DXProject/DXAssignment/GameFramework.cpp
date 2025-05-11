@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "GameFramework.h"
 
+bool IsNextScene{};
 
 CGameFramework::CGameFramework() : now_scene{std::make_unique<CRollerCoasterScene>()}
 {
@@ -55,6 +56,7 @@ void CGameFramework::ProcessFrame()
 	if (now_scene) {
 		now_scene->ProcessInput(h_wnd, timer.GetTimeElapsed());
 		now_scene->Render(hdc_frame_buffer);
+		
 	}
 
 	PresentFrameBuffer();
@@ -80,6 +82,11 @@ void CGameFramework::AnimateObjects()
 {
 	float timeElapsed = timer.GetTimeElapsed();
 	if (now_scene) now_scene->Animate(timeElapsed);
+	if (IsNextScene) {
+		now_scene.reset(now_scene->NextScene());
+		now_scene->BuildObjects();
+		IsNextScene = false;
+	}
 }
 
 void CGameFramework::BuildObjects()

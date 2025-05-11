@@ -4,6 +4,8 @@
 #include "Camera.h"
 #include "Player.h"
 
+
+
 class CGameFramework {
 public:
 	CGameFramework();

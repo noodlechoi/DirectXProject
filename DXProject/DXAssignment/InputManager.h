@@ -40,7 +40,6 @@ public:
 	virtual LRESULT ProcessingWindowMessage(HWND&, UINT&, WPARAM&, LPARAM&) override;
 private:
 	POINT old_cursor_pos;
-	bool isNextScene;
 };
 
 class CTankInputManager : public CInputManager {

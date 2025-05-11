@@ -3,6 +3,8 @@
 #include "GraphicsPipeline.h"
 #include "Object.h"
 
+extern bool IsNextScene;
+
 CObject::CObject() :
 	world_matrix{Matrix4x4::Identity()},
 	moving_direction{XMFLOAT3(0.0f,0.0f,1.0f)},
@@ -329,6 +331,9 @@ void CRollerCoaster::Animate(float elapsedTime)
 	//OutputDebugString(debugMessage2.c_str());
 	if (1.0f >= Vector3::Distance(xmf3Position, path[current_index])) {
 		current_index = (current_index + 1) % path.size();
+		if (0 == current_index) {
+			IsNextScene = true;
+		}
 	}
 
 	CObject::Animate(elapsedTime);

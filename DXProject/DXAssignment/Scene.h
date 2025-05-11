@@ -7,6 +7,7 @@ class CPlayer;
 // 씬과 플레이어, input을 관리하는 클래스
 class CScene {
 public:
+	CScene() {}
 	virtual void BuildObjects();
 	// 이 함수에서만 Object 생성
 	virtual void CreateObject() {};
@@ -16,13 +17,13 @@ public:
 	void PlayerRotate(float, float, float);
 
 	virtual void ProcessInput(HWND&, float) {};
-	virtual LRESULT ProcessingWindowMessage(HWND&, UINT&, WPARAM&, LPARAM&) = 0;
+	virtual LRESULT ProcessingWindowMessage(HWND&, UINT&, WPARAM&, LPARAM&);
 
 	CObject* PickObjectPointedByCursor(int , int);
 
 	virtual void Save() const;
 	virtual void Load();
-	virtual void NextScene() {}
+	virtual CScene* NextScene() { return new CScene; }
 
 	void SetFileName(std::string_view fileName) { file_name = fileName; }
 public:
@@ -79,7 +80,7 @@ public:
 
 	void ProcessInput(HWND&, float) override;
 	LRESULT ProcessingWindowMessage(HWND&, UINT&, WPARAM&, LPARAM&) override;
-	void NextScene() override;
+	CScene* NextScene() override;
 };
 
 class CTankScene : public CScene  {
