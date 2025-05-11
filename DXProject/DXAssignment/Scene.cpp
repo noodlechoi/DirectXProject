@@ -10,7 +10,6 @@ CScene::CScene(size_t objectNum, std::unique_ptr<T>&& manager, std::unique_ptr<Y
 {
 	input_manager.reset(manager.release());
 	player.reset(Player.release());
-	objects.reserve(objectNum);
 }
 
 void CScene::BuildObjects()
@@ -85,7 +84,6 @@ void CScene::Load()
 	// °´Ã¼ ¼ö ÀÐ±â
 	int objectCount{};
 	in.read(reinterpret_cast<char*>(&objectCount), sizeof(objectCount));
-	objects.reserve(objectCount);
 	int type{};
 	for (int i = 0; i < objectCount; ++i) {
 		// °´Ã¼ Å¸ÀÔ load
@@ -284,6 +282,33 @@ void CTankScene::CreateObject()
 	CEnemyTank object;
 
 	objects.push_back(std::make_unique<CEnemyTank>(object));
+}
+
+void CTankScene::CheckObjectByBulletCollisions()
+{
+	std::list<CBulletObject>& copyBullets = (dynamic_cast<CTankPlayer*>(player.get()))->bullets;
+	for (auto bulletIt = copyBullets.begin(); bulletIt != copyBullets.end();) {
+		bool isErase{ false };
+		for (auto objectIt = objects.begin(); objectIt != objects.end(); ++objectIt) {
+			if (objectIt->get()->OOBB.Intersects(bulletIt->OOBB)) {
+				isErase = true;
+				objects.erase(objectIt);
+				break;
+			}
+		}
+		if (isErase) {
+			bulletIt = copyBullets.erase(bulletIt);
+		}
+		else {
+			++bulletIt;
+		}
+	}
+}
+
+void CTankScene::Animate(float elapsedTime)
+{
+	CScene::Animate(elapsedTime);
+	CheckObjectByBulletCollisions();
 }
 
 void CTankScene::ProcessInput(HWND& hwnd, float timeElapsed)

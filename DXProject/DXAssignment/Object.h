@@ -65,6 +65,10 @@ public:
 	// meshes 빼고 저장 및 로드
 	virtual void Save(std::ostream&) const;
 	virtual std::istream& Load(std::istream&);
+
+	void UpdateBoundingBox();
+
+	BoundingOrientedBox	OOBB{ BoundingOrientedBox() };
 protected:
 	bool is_active{ true };
 
@@ -131,6 +135,7 @@ public:
 	void SetNextDestination(XMFLOAT3);
 
 	std::list<CBulletObject> bullets;
+
 private:
 	XMFLOAT3 current_distination{};
 	XMFLOAT3 next_destination{};

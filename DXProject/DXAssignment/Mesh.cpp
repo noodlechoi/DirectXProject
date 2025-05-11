@@ -268,7 +268,7 @@ CCubeMesh::CCubeMesh(float width, float height, float depth) : CMesh(6)
 		CVertex(+halfWidth, -halfHeight, -halfDepth)
 	));
 
-
+	OOBB = BoundingOrientedBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(halfWidth, halfHeight, halfDepth), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 }
 
 CCubeMesh::CCubeMesh(float width, float height, float depth, float x, float y, float z)
@@ -308,6 +308,7 @@ CCubeMesh::CCubeMesh(float width, float height, float depth, float x, float y, f
 		CVertex(x + halfWidth, y - halfHeight, z - halfDepth)));
 
 
+	OOBB = BoundingOrientedBox(XMFLOAT3(x, y, z), XMFLOAT3(halfWidth, halfHeight, halfDepth), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 }
 
 void CCubeMesh::ChangePivot(float x, float y, float z)

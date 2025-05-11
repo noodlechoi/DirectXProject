@@ -55,6 +55,8 @@ public:
 	virtual void Render(HDC) const;
 	virtual void Save(std::ostream&) const;
 	virtual std::istream& Load(std::istream&);
+
+	BoundingOrientedBox	OOBB{ BoundingOrientedBox() };
 protected:
 	int ref_num{ 1 };
 

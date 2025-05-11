@@ -178,6 +178,8 @@ void CObject::Animate(float elapsedTime)
 {
 	if (rotation_speed != 0.0f) Rotate(rotation_axis, rotation_speed * elapsedTime);
 	if (moving_speed != 0.0f) Move(moving_direction, moving_speed * elapsedTime);
+
+	UpdateBoundingBox();
 }
 
 void CObject::Render(HDC hDCFrameBuffer)
@@ -239,6 +241,16 @@ std::istream& CObject::Load(std::istream& in)
 	in.read(reinterpret_cast<char*>(&rotation_speed), sizeof(rotation_speed));
 
 	return in;
+}
+
+void CObject::UpdateBoundingBox()
+{
+	if (meshes.data()) {
+		for (CMesh& mesh : meshes) {
+			mesh.OOBB.Transform(OOBB, XMLoadFloat4x4(&world_matrix));
+			XMStoreFloat4(&OOBB.Orientation, XMQuaternionNormalize(XMLoadFloat4(&OOBB.Orientation)));
+		}
+	}
 }
 
 
@@ -329,6 +341,8 @@ void CBulletObject::Animate(float elapsedTime)
 	xmf3Position = Vector3::Add(xmf3Position, xmf3Movement);
 	SetPosition(xmf3Position);
 	moving_distance += distance;
+
+	CObject::Animate(elapsedTime);
 }
 
 void CBulletObject::SetFirePosition(XMFLOAT3 firePosition)
@@ -389,10 +403,11 @@ void CEnemyTank::Animate(float elapsedTime)
 	xmf3Position = Vector3::Add(xmf3Position, xmf3Movement);
 
 	if (1.0f >= Vector3::Distance(xmf3Position, current_distination)) {
-
 		// 목적지 변경
 		current_distination = next_destination;
 	}
+
+	CObject::Animate(elapsedTime);
 }
 
 void CEnemyTank::Render(HDC hDCFrameBuffer)

@@ -22,7 +22,7 @@ protected:
 	std::unique_ptr<CInputManager> input_manager{};
 	std::unique_ptr<CPlayer> player{};
 	// vector로 오브젝트 관리
-	std::vector<std::unique_ptr<CObject>> objects;
+	std::deque<std::unique_ptr<CObject>> objects;
 
 	// 이동 생성자
 	template <typename T, typename Y>
@@ -70,6 +70,9 @@ public:
 	CTankScene();
 
 	void CreateObject() override;
+	void CheckObjectByBulletCollisions();
+	void Animate(float) override;
+
 
 	void ProcessInput(HWND&, float) override;
 	LRESULT ProcessingWindowMessage(HWND&, UINT&, WPARAM&, LPARAM&) override;

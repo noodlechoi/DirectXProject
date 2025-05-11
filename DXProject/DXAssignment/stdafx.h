@@ -22,6 +22,8 @@
 #include <fstream>
 #include <string>
 #include <list>
+#include <algorithm>
+#include <deque>
 
 #include <Mmsystem.h>
 #pragma comment(lib, "winmm.lib")
