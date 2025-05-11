@@ -59,6 +59,7 @@ public:
 
 class CNonePlayer : public CPlayer {
 public:
+	CNonePlayer() {};
 	void OnUpdateTransform() override;
 };
 

@@ -253,6 +253,29 @@ void CObject::UpdateBoundingBox()
 	}
 }
 
+void CObject::GenerateRayForPicking(XMVECTOR& PickPosition, XMMATRIX&View, XMVECTOR& PickRayOrigin, XMVECTOR& PickRayDirection)
+{
+	XMMATRIX xmmtxToModel = XMMatrixInverse(NULL, XMLoadFloat4x4(&world_matrix) * View);
+
+	XMFLOAT3 xmf3CameraOrigin(0.0f, 0.0f, 0.0f);
+	PickRayOrigin = XMVector3TransformCoord(XMLoadFloat3(&xmf3CameraOrigin), xmmtxToModel);
+	PickRayDirection = XMVector3TransformCoord(PickPosition, xmmtxToModel);
+	PickRayDirection = XMVector3Normalize(PickRayDirection - PickRayOrigin);
+}
+
+int CObject::PickObjectByRayIntersection(XMVECTOR& PickPosition, XMMATRIX& View, float* HitDistance)
+{
+	int nIntersected = 0;
+	if (meshes.size())
+	{
+		XMVECTOR xmvPickRayOrigin, xmvPickRayDirection;
+		GenerateRayForPicking(PickPosition,View , xmvPickRayOrigin, xmvPickRayDirection);
+		for (CMesh& m : meshes) {
+			nIntersected = m.CheckRayIntersection(xmvPickRayOrigin, xmvPickRayDirection, HitDistance);
+		}
+	}
+	return(nIntersected);
+}
 
 CRollerCoaster::CRollerCoaster()
 {
@@ -276,16 +299,14 @@ void CRollerCoaster::Animate(float elapsedTime)
 
 	XMFLOAT3 xmf3Position = GetPosition();
 
-	// 회전 방향 변경
-	XMFLOAT3 dotProduct{ Vector3::DotProduct(GetRight(), moving_direction),
-		Vector3::DotProduct(GetUp(), moving_direction),
-		Vector3::DotProduct(GetLook(), moving_direction) 
-	};
-	// 각 좌표축에 대한 각도 구하기(일직선 상에 있으면 구하지 않기)
-	XMFLOAT3 RotationAngle{ ::IsEqual(dotProduct.x, 1.0f) ? 0.0f : (float)XMConvertToDegrees(acos(dotProduct.x)),
-		::IsEqual(dotProduct.y, 1.0f) ? 0.0f : (float)XMConvertToDegrees(acos(dotProduct.y)),
-		::IsEqual(dotProduct.z, 1.0f) ? 0.0f : (float)XMConvertToDegrees(acos(dotProduct.z)) 
-	};
+	//// 회전 방향 변경
+	//XMFLOAT3 normal_direction{ Vector3::Normalize(moving_direction) };
+	//float dotProduct{ Vector3::DotProduct(GetUp(), normal_direction) };
+	//if (!IsEqual(dotProduct, 1.0f)) {
+	//	float RotationAngle{ (float)XMConvertToDegrees(acos(dotProduct)) };
+	//	XMFLOAT4X4 mtxRotate = Matrix4x4::RotationYawPitchRoll(0.0f, 0.0f, RotationAngle);
+	//	world_matrix = Matrix4x4::Multiply(mtxRotate, world_matrix);
+	//}
 
 	// 회전 시 객체가 사라짐... -nan(ind) 나옴
 	//if(0 != RotationAngle.x || 0 != RotationAngle.y || 0 != RotationAngle.z)
@@ -296,6 +317,12 @@ void CRollerCoaster::Animate(float elapsedTime)
 	xmf3Position = Vector3::Add(xmf3Position, xmf3Movement, fDistance);
 	SetPosition(xmf3Position);
 	moving_direction = Vector3::Normalize(Vector3::Add(moving_direction, xmf3Movement));
+	if (xmf3Movement.y > 0) {
+		SetMovingSpeed(5.0f);
+	}
+	else if (xmf3Movement.y < 0) {
+		SetMovingSpeed(10.0f);
+	}
 
 	//// 경로까지 도달하면
 	//std::wstring debugMessage2 = L"RotationAngle: " + std::to_wstring(RotationAngle.x) + std::to_wstring(RotationAngle.y) + std::to_wstring(RotationAngle.z) + L"\n";
@@ -367,17 +394,22 @@ CEnemyTank::CEnemyTank()
 
 	// 포 입구
 	SetMesh(CCubeMesh(1.0f, 1.0f, 5.0f, 0.0f, 2.0f, 4.5f));
-	// 머리
-	SetMesh(CCubeMesh(4.0f, 2.0f, 4.0f, 0.0f, 2.0f, 0.0f));
 	// 몸
 	SetMesh(CCubeMesh(8.0f, 2.0f, 8.0f));
+	// 머리
+	SetMesh(CCubeMesh(4.0f, 2.0f, 4.0f, 0.0f, 2.0f, 0.0f));
 	SetColor(RGB(0, 255, 0));
 	SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
 	SetMovingDirection(XMFLOAT3(0.0f, 0.0f, 0.0f));
 	SetRotationAxis(XMFLOAT3(0.0f, 0.0f, 0.0f));
 	SetMovingSpeed(5.0f);
 
-	SetNextDestination({ 10.0f, 0.0f, 10.0f });
+
+	std::random_device rd;
+	auto rm = std::mt19937(rd());
+
+	auto uid_pos = std::uniform_int_distribution<int>{ -100, 100 };
+	SetNextDestination({ (float)uid_pos(rm), 0.0f, (float)uid_pos(rm) });
 }
 
 void CEnemyTank::Animate(float elapsedTime)
@@ -405,6 +437,12 @@ void CEnemyTank::Animate(float elapsedTime)
 	if (1.0f >= Vector3::Distance(xmf3Position, current_distination)) {
 		// 목적지 변경
 		current_distination = next_destination;
+
+		std::random_device rd;
+		auto rm = std::mt19937(rd());
+
+		auto uid_pos = std::uniform_int_distribution<int>{ -100, 100 };
+		SetNextDestination({ (float)uid_pos(rm), 0.0f, (float)uid_pos(rm) });
 	}
 
 	CObject::Animate(elapsedTime);
@@ -427,3 +465,4 @@ void CEnemyTank::SetNextDestination(XMFLOAT3 nextDestination)
 {
 	next_destination = nextDestination;
 }
+// ====================

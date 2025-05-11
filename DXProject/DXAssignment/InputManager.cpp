@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Player.h"
+#include "SCene.h"
 #include "Camera.h"
 #include "InputManager.h"
 
@@ -53,7 +54,7 @@ LRESULT CInputManager::ProcessingWindowMessage(HWND& hWnd, UINT& nMessageID, WPA
 // =========================
 
 
-void CSpaceShipInputManager::ProcessInput(HWND& hwnd, std::unique_ptr<CPlayer>& player)
+void CSpaceShipInputManager::ProcessInput(HWND& hwnd, CScene* scene)
 {
 	static UCHAR pKeyBuffer[256];
 	if (GetKeyboardState(pKeyBuffer))
@@ -66,7 +67,7 @@ void CSpaceShipInputManager::ProcessInput(HWND& hwnd, std::unique_ptr<CPlayer>& 
 		if (pKeyBuffer[VK_PRIOR] & 0xF0) dwDirection |= DIR_UP;
 		if (pKeyBuffer[VK_NEXT] & 0xF0) dwDirection |= DIR_DOWN;
 
-		if (dwDirection) player->Move(dwDirection, 0.15f);
+		if (dwDirection) scene->PlayerMove(dwDirection, 0.15f);
 	}
 
 	if (GetCapture() == hwnd)
@@ -80,9 +81,9 @@ void CSpaceShipInputManager::ProcessInput(HWND& hwnd, std::unique_ptr<CPlayer>& 
 		if (cxMouseDelta || cyMouseDelta)
 		{
 			if (pKeyBuffer[VK_RBUTTON] & 0xF0)
-				player->Rotate(cyMouseDelta, 0.0f, -cxMouseDelta);
+				scene->PlayerRotate(cyMouseDelta, 0.0f, -cxMouseDelta);
 			else
-				player->Rotate(cyMouseDelta, cxMouseDelta, 0.0f);
+				scene->PlayerRotate(cyMouseDelta, cxMouseDelta, 0.0f);
 		}
 	}
 }
@@ -153,7 +154,7 @@ LRESULT CSpaceShipInputManager::ProcessingWindowMessage(HWND& hWnd, UINT& nMessa
 }
 
 // ====================== 
-void CStartInputManager::ProcessInput(HWND& hwnd, std::unique_ptr<CPlayer>& player)
+void CStartInputManager::ProcessInput(HWND& hwnd, CScene* scene)
 {
 	
 }
@@ -190,11 +191,15 @@ LRESULT CStartInputManager::ProcessingWindowMessage(HWND& hWnd, UINT& nMessageID
 }
 
 // ======================
-void CRollerCoasterInputManager::ProcessInput(HWND& hwnd, std::unique_ptr<CPlayer>& player)
+void CRollerCoasterInputManager::ProcessInput(HWND& hwnd, CScene* scene)
 {
+
 	static UCHAR pKeyBuffer[256];
 	if (GetKeyboardState(pKeyBuffer))
 	{
+		if (isNextScene) {
+			scene->NextScene();
+		}
 		DWORD dwDirection = 0;
 		if (pKeyBuffer[VK_UP] & 0xF0) dwDirection |= DIR_FORWARD;
 		if (pKeyBuffer[VK_DOWN] & 0xF0) dwDirection |= DIR_BACKWARD;
@@ -203,7 +208,7 @@ void CRollerCoasterInputManager::ProcessInput(HWND& hwnd, std::unique_ptr<CPlaye
 		if (pKeyBuffer[VK_PRIOR] & 0xF0) dwDirection |= DIR_UP;
 		if (pKeyBuffer[VK_NEXT] & 0xF0) dwDirection |= DIR_DOWN;
 
-		if (dwDirection) player->Move(dwDirection, 0.15f);
+		if (dwDirection) scene->PlayerMove(dwDirection, 0.15f);
 	}
 
 	if (GetCapture() == hwnd)
@@ -217,9 +222,9 @@ void CRollerCoasterInputManager::ProcessInput(HWND& hwnd, std::unique_ptr<CPlaye
 		if (cxMouseDelta || cyMouseDelta)
 		{
 			if (pKeyBuffer[VK_RBUTTON] & 0xF0)
-				player->Rotate(cyMouseDelta, 0.0f, -cxMouseDelta);
+				scene->PlayerRotate(cyMouseDelta, 0.0f, -cxMouseDelta);
 			else
-				player->Rotate(cyMouseDelta, cxMouseDelta, 0.0f);
+				scene->PlayerRotate(cyMouseDelta, cxMouseDelta, 0.0f);
 		}
 	}
 }
@@ -256,6 +261,9 @@ void CRollerCoasterInputManager::ProcessingKeyboardMessage(HWND& hWnd, UINT& nMe
 			break;
 		case VK_RETURN:
 			break;
+		case 'n':
+			isNextScene = true;
+			break;
 		case VK_CONTROL:
 			break;
 		default:
@@ -290,7 +298,7 @@ LRESULT CRollerCoasterInputManager::ProcessingWindowMessage(HWND& hWnd, UINT& nM
 	return(0);
 }
 
-void CTankInputManager::ProcessInput(HWND& hwnd, std::unique_ptr<CPlayer>& player)
+void CTankInputManager::ProcessInput(HWND& hwnd, CScene* scene)
 {
 	static UCHAR pKeyBuffer[256];
 	if (GetKeyboardState(pKeyBuffer))
@@ -304,16 +312,16 @@ void CTankInputManager::ProcessInput(HWND& hwnd, std::unique_ptr<CPlayer>& playe
 		if (pKeyBuffer[VK_NEXT] & 0xF0) dwDirection |= DIR_DOWN;
 
 		if (dwDirection) {
-			player->Move(dwDirection, 0.15f);
+			scene->PlayerMove(dwDirection, 0.15f);
 		}
 	}
 
-	/*if (togle) {
-		if (togle & DIR_S) {
-		}
-		if (togle & DIR_A) {
-		}
-	}*/
+	//if (togle) {
+	//	if (togle & DIR_S) {
+	//	}
+	//	if (togle & DIR_A) {
+	//	}
+	//}
 
 	if (GetCapture() == hwnd)
 	{
@@ -326,12 +334,18 @@ void CTankInputManager::ProcessInput(HWND& hwnd, std::unique_ptr<CPlayer>& playe
 		if (cxMouseDelta || cyMouseDelta)
 		{
 			if (pKeyBuffer[VK_LBUTTON] & 0xF0)
-				player->Rotate(0.0f, cxMouseDelta, 0.0f);
+				scene->PlayerRotate(0.0f, cxMouseDelta, 0.0f);
 		}
 	}
 
 	if (isFire) {
-		dynamic_cast<CTankPlayer*>(player.get())->FireBullet();
+		if (togle & DIR_A) {
+			lock_object = scene->PickObjectPointedByCursor(LOWORD(old_cursor_pos.x), HIWORD(old_cursor_pos.x));
+		}
+		else {
+			lock_object = nullptr;
+		}
+		dynamic_cast<CTankPlayer*>(scene->player.get())->FireBullet(lock_object);
 		isFire = false;
 	}
 
@@ -342,6 +356,7 @@ void CTankInputManager::ProcessingMouseMessage(HWND& hWnd, UINT& nMessageID, WPA
 	switch (nMessageID)
 	{
 	case WM_RBUTTONDOWN:
+		::GetCursorPos(&old_cursor_pos);
 		isFire = true;
 		break;
 	case WM_LBUTTONDOWN:

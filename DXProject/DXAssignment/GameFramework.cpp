@@ -2,7 +2,7 @@
 #include "GameFramework.h"
 
 
-CGameFramework::CGameFramework() : now_scene{std::make_unique<CStartScene>()}
+CGameFramework::CGameFramework() : now_scene{std::make_unique<CRollerCoasterScene>()}
 {
 }
 
@@ -84,7 +84,7 @@ void CGameFramework::AnimateObjects()
 
 void CGameFramework::BuildObjects()
 {
-	now_scene = std::make_unique<CTankScene>();
+	now_scene = std::make_unique<CRollerCoasterScene>();
 	now_scene->BuildObjects();
 }
 

@@ -197,6 +197,52 @@ void CMesh::Render(HDC hDCFrameBuffer) const
 	}
 }
 
+BOOL CMesh::RayIntersectionByTriangle(XMVECTOR& RayOrigin, XMVECTOR& RayDirection, XMVECTOR v0, XMVECTOR v1, XMVECTOR v2, float* NearHitDistance)
+{
+	float fHitDistance;
+	BOOL bIntersected = TriangleTests::Intersects(RayOrigin, RayDirection, v0, v1, v2, fHitDistance);
+	if (bIntersected && (fHitDistance < *NearHitDistance)) *NearHitDistance = fHitDistance;
+
+	return(bIntersected);
+}
+
+int CMesh::CheckRayIntersection(XMVECTOR& xmvPickRayOrigin, XMVECTOR& xmvPickRayDirection, float* pfNearHitDistance)
+{
+	int nIntersections = 0;
+	bool bIntersected = OOBB.Intersects(xmvPickRayOrigin, xmvPickRayDirection, *pfNearHitDistance);
+	if (bIntersected) {
+		for(CPolygon& polygon : polygons) {
+			switch (polygon.vertexes.size()) {
+			case 3:
+			{
+				XMVECTOR v0 = XMLoadFloat3(&(polygon.vertexes[0].position));
+				XMVECTOR v1 = XMLoadFloat3(&(polygon.vertexes[1].position));
+				XMVECTOR v2 = XMLoadFloat3(&(polygon.vertexes[2].position));
+				BOOL bIntersected = RayIntersectionByTriangle(xmvPickRayOrigin, xmvPickRayDirection, v0, v1, v2, pfNearHitDistance);
+				if (bIntersected) nIntersections++;
+				break;
+			}
+			case 4:
+			{
+				XMVECTOR v0 = XMLoadFloat3(&(polygon.vertexes[0].position));
+				XMVECTOR v1 = XMLoadFloat3(&(polygon.vertexes[1].position));
+				XMVECTOR v2 = XMLoadFloat3(&(polygon.vertexes[2].position));
+				BOOL bIntersected = RayIntersectionByTriangle(xmvPickRayOrigin, xmvPickRayDirection, v0, v1, v2, pfNearHitDistance);
+				if (bIntersected) nIntersections++;
+				v0 = XMLoadFloat3(&(polygon.vertexes[0].position));
+				v1 = XMLoadFloat3(&(polygon.vertexes[2].position));
+				v2 = XMLoadFloat3(&(polygon.vertexes[3].position));
+				bIntersected = RayIntersectionByTriangle(xmvPickRayOrigin, xmvPickRayDirection, v0, v1, v2, pfNearHitDistance);
+				if (bIntersected) nIntersections++;
+				break;
+			}
+			}
+		}
+	}
+	return(nIntersections);
+}
+
+
 void CMesh::Save(std::ostream& out) const
 {
 	int cnt{};
@@ -224,6 +270,7 @@ std::istream& CMesh::Load(std::istream& in)
 
 	return in;
 }
+
 
 
 CCubeMesh::CCubeMesh(float width, float height, float depth) : CMesh(6)
@@ -315,7 +362,7 @@ void CCubeMesh::ChangePivot(float x, float y, float z)
 {
 }
 
-CTextMesh::CTextMesh(float width, float height, float depth) :CMesh(6)
+CTextMesh::CTextMesh(float width, float height, float depth, LPCTSTR Text) : CMesh(6), text{Text}
 {
 	float halfWidth = width * 0.5f;
 	float halfHeight = height * 0.5f;

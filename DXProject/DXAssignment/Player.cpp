@@ -273,5 +273,10 @@ void CTankPlayer::FireBullet(CObject* pLockedObject)
 	bullet.SetMovingSpeed(20.0f);
 	bullet.SetColor(RGB(100, 0, 0));
 
+	if (pLockedObject)	{
+		bullet.locked_object = pLockedObject;
+	}
+
 	bullets.emplace_back(bullet);
+
 }

@@ -2,6 +2,8 @@
 #include "InputManager.h"
 #include "Object.h"
 
+class CPlayer;
+
 // 씬과 플레이어, input을 관리하는 클래스
 class CScene {
 public:
@@ -10,15 +12,20 @@ public:
 	virtual void CreateObject() {};
 	virtual void Animate(float);
 	virtual void Render(HDC);
+	void PlayerMove(DWORD, float);
+	void PlayerRotate(float, float, float);
 
 	virtual void ProcessInput(HWND&, float) {};
 	virtual LRESULT ProcessingWindowMessage(HWND&, UINT&, WPARAM&, LPARAM&) = 0;
 
+	CObject* PickObjectPointedByCursor(int , int);
+
 	virtual void Save() const;
 	virtual void Load();
+	virtual void NextScene() {}
 
 	void SetFileName(std::string_view fileName) { file_name = fileName; }
-protected:
+public:
 	std::unique_ptr<CInputManager> input_manager{};
 	std::unique_ptr<CPlayer> player{};
 	// vector로 오브젝트 관리
@@ -27,7 +34,6 @@ protected:
 	// 이동 생성자
 	template <typename T, typename Y>
 	CScene(size_t, std::unique_ptr<T>&&, std::unique_ptr<Y>&&);
-
 	std::string file_name;
 };
 
@@ -44,16 +50,26 @@ public:
 // ==============================
 // 과제
 
-// 회전하는 이름
-class CStartScene : public CScene {
-public:
-	CStartScene();
-
-	void BuildObjects() override;
-
-	void ProcessInput(HWND&, float) override;
-	LRESULT ProcessingWindowMessage(HWND&, UINT&, WPARAM&, LPARAM&) override;
-};
+//// 회전하는 이름
+//class CStartScene : public CScene {
+//public:
+//	CStartScene();
+//
+//	void BuildObjects() override;
+//
+//	void ProcessInput(HWND&, float) override;
+//	LRESULT ProcessingWindowMessage(HWND&, UINT&, WPARAM&, LPARAM&) override;
+//};
+//
+//class CMenuScene : public CScene {
+//public:
+//	CMenuScene();
+//
+//	void BuildObjects() override;
+//
+//	void ProcessInput(HWND&, float) override;
+//	LRESULT ProcessingWindowMessage(HWND&, UINT&, WPARAM&, LPARAM&) override;
+//};
 
 class CRollerCoasterScene : public CScene {
 public:
@@ -63,6 +79,7 @@ public:
 
 	void ProcessInput(HWND&, float) override;
 	LRESULT ProcessingWindowMessage(HWND&, UINT&, WPARAM&, LPARAM&) override;
+	void NextScene() override;
 };
 
 class CTankScene : public CScene  {
@@ -72,7 +89,6 @@ public:
 	void CreateObject() override;
 	void CheckObjectByBulletCollisions();
 	void Animate(float) override;
-
 
 	void ProcessInput(HWND&, float) override;
 	LRESULT ProcessingWindowMessage(HWND&, UINT&, WPARAM&, LPARAM&) override;

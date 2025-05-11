@@ -67,6 +67,8 @@ public:
 	virtual std::istream& Load(std::istream&);
 
 	void UpdateBoundingBox();
+	void GenerateRayForPicking(XMVECTOR& , XMMATRIX& , XMVECTOR& , XMVECTOR& );
+	int PickObjectByRayIntersection(XMVECTOR& , XMMATRIX& , float* );
 
 	BoundingOrientedBox	OOBB{ BoundingOrientedBox() };
 protected:
@@ -122,7 +124,6 @@ public:
 	float						lock_delay_time{0.3f};
 	float						locking_time{4.0f};
 	CObject* locked_object{};
-
 };
 
 class CEnemyTank : public CObject {
@@ -140,3 +141,28 @@ private:
 	XMFLOAT3 current_distination{};
 	XMFLOAT3 next_destination{};
 };
+
+//#define EXPLOSION_DEBRISES		240
+//class CExplosiveObject : public CObject
+//{
+//public:
+//	CExplosiveObject();
+//
+//	bool						m_bBlowingUp{ false };
+//
+//	std::array<XMFLOAT4X4, EXPLOSION_DEBRISES> transform_matrix;
+//
+//	float						m_fElapsedTimes = 0.0f;
+//	float						m_fDuration = 2.0f;
+//	float						m_fExplosionSpeed = 10.0f;
+//	float						m_fExplosionRotation = 720.0f;
+//
+//	void Animate(float ) override;
+//	void Render(HDC )override;
+//
+//public:
+//	static CMesh* m_pExplosionMesh;
+//	static XMFLOAT3	m_pxmf3SphereVectors[EXPLOSION_DEBRISES];
+//
+//	static void PrepareExplosion();
+//};

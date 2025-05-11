@@ -1,8 +1,8 @@
 #include "stdafx.h"
 #include "Scene.h"
 #include "Camera.h"
-#include "GraphicsPipeline.h"
 #include "Player.h"
+#include "GraphicsPipeline.h"
 #include <random>
 
 template <typename T, typename Y>
@@ -44,10 +44,45 @@ void CScene::Render(HDC hDCFrameBuffer)
 	}
 }
 
+void CScene::PlayerMove(DWORD direction, float distance)
+{
+	player->Move(direction, distance);
+}
+
+void CScene::PlayerRotate(float pitch, float yaw, float roll)
+{
+	player->Rotate(pitch, yaw, roll);
+}
+
 
 LRESULT CScene::ProcessingWindowMessage(HWND& hWnd, UINT& nMessageID, WPARAM& wParam, LPARAM& lParam)
 {
 	return input_manager->ProcessingWindowMessage(hWnd, nMessageID, wParam, lParam);
+}
+
+CObject* CScene::PickObjectPointedByCursor(int xClient, int yClient)
+{
+	XMFLOAT3 xmf3PickPosition;
+	xmf3PickPosition.x = (((2.0f * xClient) / (float)player->camera->viewport.width) - 1) / player->camera->perspective_project_matrix._11;
+	xmf3PickPosition.y = -(((2.0f * yClient) / (float)player->camera->viewport.height) - 1) / player->camera->perspective_project_matrix._22;
+	xmf3PickPosition.z = 1.0f;
+
+	XMVECTOR xmvPickPosition = XMLoadFloat3(&xmf3PickPosition);
+	XMMATRIX xmmtxView = XMLoadFloat4x4(&player->camera->view_matrix);
+
+	int nIntersected = 0;
+	float fNearestHitDistance = FLT_MAX;
+	CObject* nearestObject = NULL;
+	for(std::unique_ptr<CObject>& object : objects) {
+		float fHitDistance = FLT_MAX;
+		nIntersected = object->PickObjectByRayIntersection(xmvPickPosition, xmmtxView, &fHitDistance);
+		if ((nIntersected > 0) && (fHitDistance < fNearestHitDistance))	{
+			fNearestHitDistance = fHitDistance;
+			nearestObject = object.get();
+		}
+	}
+
+	return nearestObject;
 }
 
 void CScene::Save() const {
@@ -171,7 +206,7 @@ void CSpaceShipScene::BuildObjects()
 
 void CSpaceShipScene::ProcessInput(HWND& hwnd, float timeElapsed)
 {
-	input_manager->ProcessInput(hwnd, player);
+	input_manager->ProcessInput(hwnd, this);
 	player->Update(timeElapsed);
 }
 
@@ -181,40 +216,60 @@ LRESULT CSpaceShipScene::ProcessingWindowMessage(HWND& hWnd, UINT& nMessageID, W
 }
 
 // ==================
+//
+//CStartScene::CStartScene() : CScene{1, std::make_unique<CStartInputManager>(), std::make_unique<CNonePlayer>() }
+//{
+//}
+//
+//void CStartScene::BuildObjects()
+//{
+//	// 회전하는 이름
+//	CObject object;
+//	object.SetActive(true);
+//	object.SetMesh(CTextMesh());
+//	object.SetColor(RGB(255, 0, 0));
+//	//object.->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
+//	object.SetRotationSpeed(30.0f);
+//	object.SetMovingDirection(XMFLOAT3(0.0f, 1.0f, 1.0f));
+//	object.SetMovingSpeed(0.0f);
+//	objects.emplace_back(object);
+//}
+//
+//
+//void CStartScene::ProcessInput(HWND& hwnd, float timeElapsed)
+//{
+//	input_manager->ProcessInput(hwnd, this);
+//	//player->Update(timeElapsed);
+//}
+//
+//LRESULT CStartScene::ProcessingWindowMessage(HWND& hWnd, UINT& nMessageID, WPARAM& wParam, LPARAM& lParam)
+//{
+//	return input_manager->ProcessingWindowMessage(hWnd, nMessageID, wParam, lParam);
+//}
+//
+//
+//CMenuScene::CMenuScene() : CScene{ 1, std::make_unique<CStartInputManager>(), std::make_unique<CNonePlayer>() }
+//{
+//}
+//
+//void CMenuScene::BuildObjects()
+//{
+//}
+//
+//void CMenuScene::ProcessInput(HWND&, float)
+//{
+//}
+//
+//LRESULT CMenuScene::ProcessingWindowMessage(HWND&, UINT&, WPARAM&, LPARAM&)
+//{
+//	return LRESULT();
+//}
 
-CStartScene::CStartScene() : CScene{1, std::make_unique<CStartInputManager>(), std::make_unique<CNonePlayer>() }
-{
-}
-
-void CStartScene::BuildObjects()
-{
-	// 회전하는 이름
-	CTextMesh textMesh;
-	objects[0]->SetActive(true);
-	objects[0]->SetMesh(CTextMesh());
-	objects[0]->SetColor(RGB(255, 0, 0));
-	//objects[0]->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
-	objects[0]->SetRotationSpeed(30.0f);
-	objects[0]->SetMovingDirection(XMFLOAT3(0.0f, 1.0f, 1.0f));
-	objects[0]->SetMovingSpeed(0.0f);
-}
-
-
-void CStartScene::ProcessInput(HWND& hwnd, float timeElapsed)
-{
-	input_manager->ProcessInput(hwnd, player);
-	player->Update(timeElapsed);
-}
-
-LRESULT CStartScene::ProcessingWindowMessage(HWND& hWnd, UINT& nMessageID, WPARAM& wParam, LPARAM& lParam)
-{
-	return input_manager->ProcessingWindowMessage(hWnd, nMessageID, wParam, lParam);
-}
 
 // ==================
 CRollerCoasterScene::CRollerCoasterScene() : CScene{ 10, std::make_unique<CRollerCoasterInputManager>(), std::make_unique<CRollerCosterPlayer>()}
 {
-	SetFileName("data / CRollerCoasterScene.dat");
+	SetFileName("data/CRollerCoasterScene.dat");
 }
 
 void CRollerCoasterScene::CreateObject()
@@ -246,7 +301,7 @@ void CRollerCoasterScene::CreateObject()
 
 void CRollerCoasterScene::ProcessInput(HWND& hwnd, float timeElapsed)
 {
-	input_manager->ProcessInput(hwnd, player);
+	input_manager->ProcessInput(hwnd, this);
 	XMFLOAT3 objectPosition = objects[0]->GetPosition();
 	player->position = XMFLOAT3(objectPosition.x, objectPosition.y + 4.0f, objectPosition.z);
 	player->Update(timeElapsed);
@@ -257,6 +312,11 @@ LRESULT CRollerCoasterScene::ProcessingWindowMessage(HWND& hWnd, UINT& nMessageI
 	return input_manager->ProcessingWindowMessage(hWnd, nMessageID, wParam, lParam);
 }
 
+void CRollerCoasterScene::NextScene()
+{
+
+}
+
 CTankScene::CTankScene() : CScene(15, std::make_unique<CTankInputManager>(), std::make_unique<CTankPlayer>())
 {
 	SetFileName("data/CTankScene.data");
@@ -264,24 +324,26 @@ CTankScene::CTankScene() : CScene(15, std::make_unique<CTankInputManager>(), std
 
 void CTankScene::CreateObject()
 {
-	{
-		// 바닥
-		CCubeMesh cube{ 10.0f, 2.0f, 10.0f };
-		CObject object;
-		object.SetMesh(cube);
-		object.SetColor(RGB(0, 0, 0));
-		object.SetPosition(XMFLOAT3(0.0f, -2.0f, 0.0f));
-		object.SetMovingDirection(XMFLOAT3(0.0f, 0.0f, 0.0f));
-		object.SetRotationAxis(XMFLOAT3(0.0f, 0.0f, 0.0f));
-		object.SetMovingSpeed(0.0f);
+	//{
+	//	// 바닥
+	//	CCubeMesh cube{ 50.0f, 2.0f, 50.0f };
+	//	CObject object;
+	//	object.SetMesh(cube);
+	//	object.SetColor(RGB(0, 0, 0));
+	//	object.SetPosition(XMFLOAT3(0.0f, -2.0f, 0.0f));
+	//	object.SetMovingDirection(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	//	object.SetRotationAxis(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	//	object.SetMovingSpeed(0.0f);
 
-		objects.push_back(std::make_unique<CObject>(object));
-	}
+	//	objects.push_back(std::make_unique<CObject>(object));
+	//}
 
 	// 탱크
-	CEnemyTank object;
+	for (int i = 0; i < 15; ++i) {
+		CEnemyTank object;
 
-	objects.push_back(std::make_unique<CEnemyTank>(object));
+		objects.emplace_back(std::make_unique<CEnemyTank>(object));
+	}
 }
 
 void CTankScene::CheckObjectByBulletCollisions()
@@ -313,8 +375,9 @@ void CTankScene::Animate(float elapsedTime)
 
 void CTankScene::ProcessInput(HWND& hwnd, float timeElapsed)
 {
-	input_manager->ProcessInput(hwnd, player);
+	input_manager->ProcessInput(hwnd, this);
 	player->Update(timeElapsed);
+
 }
 
 LRESULT CTankScene::ProcessingWindowMessage(HWND& hWnd, UINT& nMessageID, WPARAM& wParam, LPARAM& lParam)

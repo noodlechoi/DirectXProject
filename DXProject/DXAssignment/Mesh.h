@@ -53,6 +53,10 @@ public:
 	int GetRefNum() const { return ref_num; }
 	CPolygon* GetPolygon()  { return polygons.data(); };
 	virtual void Render(HDC) const;
+
+	BOOL RayIntersectionByTriangle(XMVECTOR& , XMVECTOR& , XMVECTOR , XMVECTOR , XMVECTOR , float* );
+	int CheckRayIntersection(XMVECTOR& , XMVECTOR& , float* );
+
 	virtual void Save(std::ostream&) const;
 	virtual std::istream& Load(std::istream&);
 
@@ -74,9 +78,9 @@ public:
 
 class CTextMesh : public CMesh {
 public:
-	CTextMesh(float = 24.0f, float = 8.0f, float = 4.0f);
+	CTextMesh(float = 24.0f, float = 8.0f, float = 4.0f, LPCTSTR = {L"3D 게임프로그래밍 1"});
 
 	void Render(HDC) const override;
-	LPCTSTR text{L"3D 게임프로그래밍 1"};
+	LPCTSTR text{};
 };
 
