@@ -8,7 +8,8 @@ public:
 	static void SetViewport(CViewport& viewPort) { viewport = viewPort; }
 
 	static XMFLOAT3 ScreenTransform(XMFLOAT3& );
-	static XMFLOAT3 Project(const XMFLOAT3& );
+	static XMFLOAT3 Project(XMFLOAT3& );
+	static XMFLOAT3 Transform(XMFLOAT3&);
 private:
 	CGraphicsPipeline() = delete;
 

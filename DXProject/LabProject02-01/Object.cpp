@@ -10,24 +10,14 @@ CObject::CObject() :
 {
 }
 
-CObject::~CObject()
-{
-	if (meshes.data()) {
-		for (auto& m : meshes) {
-			m.Release();
-		}
-	}
-}
 
 void CObject::SetMesh(CMesh&& mesh)
 {
-	mesh.AddRef();
 	meshes.push_back(mesh);
 }
 
 void CObject::SetMesh(CMesh& mesh)
 {
-	mesh.AddRef();
 	meshes.push_back(mesh);
 }
 
@@ -76,7 +66,7 @@ void CObject::Render(HDC hDCFrameBuffer , std::unique_ptr< CCamera>& camera)
 		HPEN hPen = ::CreatePen(PS_SOLID, 0, color);
 		HPEN hOldPen = (HPEN)::SelectObject(hDCFrameBuffer, hPen);
 
-		for (const auto& m : meshes) {
+		for (CMesh& m : meshes) {
 			m.Render(hDCFrameBuffer);
 		}
 

@@ -18,11 +18,10 @@ public:
 	CPolygon() {}
 	CPolygon(int vertexNum);
 	CPolygon(CVertex, CVertex, CVertex, CVertex);
+
 	CPolygon(const CPolygon&);
 	CPolygon& operator=(const CPolygon&);
-	// 이동 생성자
 	CPolygon(const CPolygon&&);
-	// 이동 할당 연산자
 	CPolygon& operator=(const CPolygon&&);
 
 	void SetVertex(CVertex);
@@ -30,20 +29,14 @@ public:
 	std::vector<CVertex> vertexes;
 };
 
-// Mesh - 공유 자원(com 객체처럼 작동)
 class CMesh {
 public:
 	CMesh(int polygonNum);
 
-	void AddRef() { ++ref_num; }
-	void Release() { --ref_num; if (0 >= ref_num) delete this; }
-
-	//void SetPolygon(CPolygon);
+	void SetPolygon(CPolygon);
 	void SetPolygon(CPolygon&&);
-	virtual void Render(HDC) const;
+	virtual void Render(HDC);
 protected:
-	int ref_num{ 1 };
-
 	std::vector<CPolygon> polygons;
 };
 

@@ -27,6 +27,8 @@ public:
 	void Move(float , float , float );
 	void Rotate(float  = 0.0f, float  = 0.0f, float  = 0.0f);
 	void Update(CPlayer& , XMFLOAT3& , float  = 0.016f);
+
+	bool IsInFrustum(BoundingOrientedBox&);
 private:
 	XMFLOAT3 position{ XMFLOAT3(0.0f, 0.0f, 0.0f) };
 	XMFLOAT3 right{ XMFLOAT3(1.0f, 0.0f, 0.0f) };

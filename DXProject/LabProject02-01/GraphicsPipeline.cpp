@@ -23,11 +23,18 @@ XMFLOAT3 CGraphicsPipeline::ScreenTransform(XMFLOAT3& project)
 	return screen;
 }
 
-XMFLOAT3 CGraphicsPipeline::Project(const XMFLOAT3& model)
+XMFLOAT3 CGraphicsPipeline::Project(XMFLOAT3& model)
 {
-	XMMATRIX modelToProject = XMMatrixMultiply(XMLoadFloat4x4(&world_matrix), XMLoadFloat4x4(&view_project_matrix));
-	XMFLOAT3 project;
-	XMStoreFloat3(&project, XMVector3TransformCoord(XMLoadFloat3(&model), modelToProject));
+	XMFLOAT4X4 transformMatrix = Matrix4x4::Multiply(world_matrix, view_project_matrix);
+	XMFLOAT3 project = Vector3::TransformCoord(model, transformMatrix);
 
 	return project;
+}
+
+XMFLOAT3 CGraphicsPipeline::Transform(XMFLOAT3& model)
+{
+	XMFLOAT3 project = Project(model);
+	XMFLOAT3 screen = ScreenTransform(project);
+
+	return screen;
 }

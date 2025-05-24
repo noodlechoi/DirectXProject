@@ -32,14 +32,12 @@ CPolygon::CPolygon(int vertexNum)
 	vertexes.reserve(vertexNum);
 }
 
-// 나중에 리펙토링
 CPolygon::CPolygon(CVertex v1, CVertex v2, CVertex v3, CVertex v4)
 {
-	vertexes.reserve(3);
-	vertexes.push_back(v1);
-	vertexes.push_back(v2);
-	vertexes.push_back(v3);
-	vertexes.push_back(v4);
+	vertexes.reserve(4);
+	for (const CVertex& v : { v1, v2, v3, v4 }) {
+		vertexes.emplace_back(v);
+	}
 }
 
 CPolygon::CPolygon(const CPolygon& other)
@@ -57,8 +55,8 @@ CPolygon& CPolygon::operator=(const CPolygon& other)
 		throw;
 	}
 
-	vertexes.reserve(other.vertexes.size());
 	vertexes = other.vertexes;
+
 	return *this;
 }
 
@@ -71,14 +69,18 @@ CPolygon& CPolygon::operator=(const CPolygon&& other)
 	if (this == &other)
 		return *this;
 
+	if (vertexes.size() != other.vertexes.size()) {
+		throw;
+	}
+
 	vertexes = std::move(other.vertexes);
+
 	return *this;
 }
 
-
 void CPolygon::SetVertex(CVertex vertex)
 {
-	vertexes.push_back(vertex);
+	vertexes.emplace_back(vertex);
 }
 
 CMesh::CMesh(int polygonNum)
@@ -86,14 +88,14 @@ CMesh::CMesh(int polygonNum)
 	polygons.reserve(polygonNum);
 }
 
-//void CMesh::SetPolygon(CPolygon polygon)
-//{
-//	polygons.push_back(polygon);
-//}
+void CMesh::SetPolygon(CPolygon polygon)
+{
+	polygons.emplace_back(polygon);
+}
 
 void CMesh::SetPolygon(CPolygon&& polygon)
 {
-	polygons.push_back(polygon);
+	polygons.emplace_back(polygon);
 }
 
 void Draw2DLine(HDC hDCFrameBuffer, XMFLOAT3& previousProject, XMFLOAT3& currentProject)
@@ -104,17 +106,18 @@ void Draw2DLine(HDC hDCFrameBuffer, XMFLOAT3& previousProject, XMFLOAT3& current
 	::LineTo(hDCFrameBuffer, (long)current.x, (long)current.y);
 }
 
-void CMesh::Render(HDC hDCFrameBuffer) const
+void CMesh::Render(HDC hDCFrameBuffer)
 {
 	XMFLOAT3 initialProject, previousProject;
 	// 보이는지 확인
 	bool isPreviousInside{ false }, isInitialInside{ false }, isCurrentInside{ false }, isIntersectInside{ false };
 
-	for (const auto& polygon : polygons) {
+	for (CPolygon& polygon : polygons) {
+		// 처음 점 처리
 		initialProject = previousProject = CGraphicsPipeline::Project(polygon.vertexes[0].position);
 		isPreviousInside = isInitialInside = (-1.0f <= initialProject.x) && (initialProject.x <= 1.0f) && (-1.0f <= initialProject.y) && (initialProject.y <= 1.0f);
-		for (const auto& v : polygon.vertexes) {
-			XMFLOAT3 currentProject = CGraphicsPipeline::Project(v.position);
+		for (auto v = polygon.vertexes.begin() + 1; v != polygon.vertexes.end(); ++ v) {
+			XMFLOAT3 currentProject = CGraphicsPipeline::Project(v->position);
 			isCurrentInside = (-1.0f <= currentProject.x) && (currentProject.x <= 1.0f) && (-1.0f <= currentProject.y) && (currentProject.y <= 1.0f);
 
 			if (((0.0f <= currentProject.z) && (currentProject.z <= 1.0f)) && ((isCurrentInside || isPreviousInside))) ::Draw2DLine(hDCFrameBuffer, previousProject, currentProject);
@@ -168,6 +171,4 @@ CCubeMesh::CCubeMesh(float width, float height, float depth) : CMesh(6)
 		CVertex(+halfWidth, -halfHeight, +halfDepth),
 		CVertex(+halfWidth, -halfHeight, -halfDepth)
 	));
-
-
 }

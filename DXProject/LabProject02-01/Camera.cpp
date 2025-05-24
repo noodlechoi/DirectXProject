@@ -137,3 +137,8 @@ void CCamera::Update(CPlayer& player, XMFLOAT3& lookAt, float timeElapsed)
 		SetLookAt(player.position, player.up);
 	}
 }
+
+bool CCamera::IsInFrustum(BoundingOrientedBox& boundingBox)
+{
+	return frustum_world.Intersects(boundingBox);
+}

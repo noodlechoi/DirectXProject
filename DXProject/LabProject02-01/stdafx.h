@@ -149,6 +149,7 @@ namespace Vector3
 		return(xmf3Result);
 	}
 
+	// matrix 행렬을 통해 vector 변환 뒤, w = 1로 투영
 	inline XMFLOAT3 TransformCoord(XMFLOAT3& xmf3Vector, XMFLOAT4X4& xmmtx4x4Matrix)
 	{
 		return(TransformCoord(xmf3Vector, XMLoadFloat4x4(&xmmtx4x4Matrix)));
