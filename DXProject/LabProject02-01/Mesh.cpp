@@ -130,6 +130,57 @@ void CMesh::Render(HDC hDCFrameBuffer)
 }
 
 
+BOOL CMesh::RayIntersectionByTriangle(XMVECTOR& pickRayOrigin, XMVECTOR& pickRayDirection, XMVECTOR v0, XMVECTOR v1, XMVECTOR v2, float& nearHitDistance)
+{
+	float hitDistance;
+	BOOL isIntersected = TriangleTests::Intersects(pickRayOrigin, pickRayDirection, v0, v1, v2, hitDistance);
+	if (isIntersected && (hitDistance < nearHitDistance)) {
+		nearHitDistance = hitDistance;
+	}
+
+	return isIntersected;
+}
+
+size_t CMesh::CheckRayIntersection(XMVECTOR& pickRayOrigin, XMVECTOR& pickRayDirection, float& nearHitDistance)
+{
+	size_t intersectedNum{};
+	for (CPolygon& polygon : polygons) {
+		switch (polygon.GetVertexSize()) {
+		case 3:
+		{
+			XMVECTOR v0 = XMLoadFloat3(&(polygon.vertexes[0].position));
+			XMVECTOR v1 = XMLoadFloat3(&(polygon.vertexes[1].position));
+			XMVECTOR v2 = XMLoadFloat3(&(polygon.vertexes[2].position));
+			if (RayIntersectionByTriangle(pickRayOrigin, pickRayDirection, v0, v1, v2, nearHitDistance)) {
+				++intersectedNum;
+			}
+		}
+			break;
+		case 4:
+		{
+			XMVECTOR v0 = XMLoadFloat3(&(polygon.vertexes[0].position));
+			XMVECTOR v1 = XMLoadFloat3(&(polygon.vertexes[1].position));
+			XMVECTOR v2 = XMLoadFloat3(&(polygon.vertexes[2].position));
+			if (RayIntersectionByTriangle(pickRayOrigin, pickRayDirection, v0, v1, v2, nearHitDistance)) {
+				++intersectedNum;
+			}
+			v0 = XMLoadFloat3(&(polygon.vertexes[0].position));
+			v1 = XMLoadFloat3(&(polygon.vertexes[2].position));
+			v2 = XMLoadFloat3(&(polygon.vertexes[3].position));
+			if (RayIntersectionByTriangle(pickRayOrigin, pickRayDirection, v0, v1, v2, nearHitDistance)) {
+				++intersectedNum;
+			}
+		}
+			break;
+		default:
+			break;
+		}
+	}
+
+	return intersectedNum;
+}
+
+
 CCubeMesh::CCubeMesh(float width, float height, float depth) : CMesh(6)
 {
 	float halfWidth = width * 0.5f;
@@ -171,4 +222,6 @@ CCubeMesh::CCubeMesh(float width, float height, float depth) : CMesh(6)
 		CVertex(+halfWidth, -halfHeight, +halfDepth),
 		CVertex(+halfWidth, -halfHeight, -halfDepth)
 	));
+
+	AABB = BoundingBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(halfWidth, halfHeight, halfDepth));
 }

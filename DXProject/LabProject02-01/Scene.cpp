@@ -81,7 +81,7 @@ void CSpaceShipScene::Render(HDC hDCFrameBuffer, std::unique_ptr<CCamera>& camer
 	CGraphicsPipeline::SetViewPerspectiveProjectTransform(camera->view_perspective_project_matrix);
 
 	for (auto& object : objects) {
-		object.Render(hDCFrameBuffer, camera);
+		object.Render(hDCFrameBuffer, *camera);
 	}
 }
 

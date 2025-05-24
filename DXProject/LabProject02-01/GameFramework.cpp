@@ -60,7 +60,7 @@ void CGameFramework::ProcessFrame()
 		now_scene->Render(hdc_frame_buffer, player->GetCamera());
 	}
 
-	if (player) player->Render(hdc_frame_buffer, player->GetCamera());
+	if (player) player->Render(hdc_frame_buffer, *player->GetCamera());
 
 	PresentFrameBuffer();
 

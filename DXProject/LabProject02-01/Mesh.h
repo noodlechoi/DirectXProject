@@ -25,6 +25,7 @@ public:
 	CPolygon& operator=(const CPolygon&&);
 
 	void SetVertex(CVertex);
+	size_t GetVertexSize() const { return vertexes.size(); }
 public:
 	std::vector<CVertex> vertexes;
 };
@@ -35,7 +36,15 @@ public:
 
 	void SetPolygon(CPolygon);
 	void SetPolygon(CPolygon&&);
+
 	virtual void Render(HDC);
+	
+	// 삼각형 면 광선 교차 확인
+	BOOL RayIntersectionByTriangle(XMVECTOR&, XMVECTOR&, XMVECTOR, XMVECTOR, XMVECTOR, float&);
+	// 교차된 면 개수 반환. 모델좌표계로 변환한 광선을 알고 있음
+	size_t CheckRayIntersection(XMVECTOR&, XMVECTOR&, float&);
+
+	BoundingBox AABB{ BoundingBox() };
 protected:
 	std::vector<CPolygon> polygons;
 };

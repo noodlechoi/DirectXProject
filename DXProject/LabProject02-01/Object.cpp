@@ -10,15 +10,11 @@ CObject::CObject() :
 {
 }
 
-
-void CObject::SetMesh(CMesh&& mesh)
+void CObject::SetMesh(CMesh mesh)
 {
-	meshes.push_back(mesh);
-}
-
-void CObject::SetMesh(CMesh& mesh)
-{
-	meshes.push_back(mesh);
+	meshes.emplace_back(mesh);
+	BoundingBox meshesAABB = MergeMeshesBoundingBox();
+	BoundingOrientedBox::CreateFromBoundingBox(OBB, meshesAABB);
 }
 
 void CObject::SetPosition(float x, float y, float z)
@@ -42,25 +38,78 @@ void CObject::Move(XMFLOAT3& direction, float speed)
 
 void CObject::Rotate(float pitch, float yaw, float roll)
 {
-	XMMATRIX xmmtxRotate = XMMatrixRotationRollPitchYaw(XMConvertToRadians(pitch), XMConvertToRadians(yaw), XMConvertToRadians(roll));
-	XMStoreFloat4x4(&world_matrix, XMMatrixMultiply(xmmtxRotate, XMLoadFloat4x4(&world_matrix)));
+	XMFLOAT4X4 rotate = Matrix4x4::RotationYawPitchRoll(pitch, yaw, roll);
+	world_matrix = Matrix4x4::Multiply(rotate, world_matrix);
 }
 
 void CObject::Rotate(XMFLOAT3& rotationAxis, float angle)
 {
-	XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&rotationAxis), XMConvertToRadians(angle));
-	XMStoreFloat4x4(&world_matrix, XMMatrixMultiply(xmmtxRotate, XMLoadFloat4x4(&world_matrix)));
+	XMFLOAT4X4 rotate = Matrix4x4::RotationAxis(rotationAxis, angle);
+	world_matrix = Matrix4x4::Multiply(rotate, world_matrix);
 }
 
-void CObject::Animate(float elapsedTime)
+BoundingBox CObject::MergeMeshesBoundingBox()
 {
-	if (rotation_speed != 0.0f) Rotate(rotation_axis, rotation_speed * elapsedTime);
-	if (moving_speed != 0.0f) Move(moving_direction, moving_speed * elapsedTime);
+	BoundingBox mergedAABB;
+	bool isInited{ false };
+
+	for (const CMesh& mesh : meshes) {
+		if (!isInited) {
+			mergedAABB = mesh.AABB;
+			isInited = true;
+		}
+		else {
+			BoundingBox::CreateMerged(mergedAABB, mergedAABB, mesh.AABB);
+		}
+	}
+
+	return mergedAABB;
 }
 
-void CObject::Render(HDC hDCFrameBuffer , std::unique_ptr< CCamera>& camera)
+void CObject::UpdateBoundingBox()
 {
-	if (meshes.data()) {
+	OBB.Transform(OBB, XMLoadFloat4x4(&world_matrix));
+	XMStoreFloat4(&OBB.Orientation, XMQuaternionNormalize(XMLoadFloat4(&OBB.Orientation)));
+}
+
+void CObject::GenerateRayForPicking(XMVECTOR& pickPosition, XMMATRIX& viewMatrix, XMVECTOR& pickRayOrigin, XMVECTOR& pickRayDirection)
+{
+	XMMATRIX toModelMatrix = XMMatrixInverse(nullptr, XMLoadFloat4x4(&world_matrix) * viewMatrix);
+
+	XMFLOAT3 cameraOrigin(0.0f, 0.0f, 0.0f);
+	pickRayOrigin = XMVector3TransformCoord(XMLoadFloat3(&cameraOrigin), toModelMatrix);
+	pickRayDirection = XMVector3TransformCoord(pickPosition, toModelMatrix);
+	pickRayDirection = XMVector3Normalize(pickRayDirection - pickRayOrigin);
+}
+
+int CObject::PickObjectByRayIntersection(XMVECTOR& pickPosition, XMMATRIX& viewMatrix, float& hitDistance)
+{
+	size_t intersectedNum{};
+	if (meshes.size()) {
+		XMVECTOR pickRayOrigin, pickRayDirection;
+		GenerateRayForPicking(pickPosition, viewMatrix, pickRayOrigin, pickRayDirection);
+		if (OBB.Intersects(pickRayOrigin, pickRayDirection, hitDistance)) {
+			for (CMesh& mesh : meshes) {
+				intersectedNum = mesh.CheckRayIntersection(pickRayOrigin, pickRayDirection, hitDistance);
+			}
+		}
+	}
+
+	return intersectedNum;
+}
+
+
+void CObject::Animate(float timeElapsed)
+{
+	if (rotation_speed != 0.0f) Rotate(rotation_axis, rotation_speed * timeElapsed);
+	if (moving_speed != 0.0f) Move(moving_direction, moving_speed * timeElapsed);
+
+	UpdateBoundingBox();
+}
+
+void CObject::Render(HDC hDCFrameBuffer ,CCamera& camera)
+{
+	if(camera.IsInFrustum(OBB)) {
 		CGraphicsPipeline::SetWorldTransform(world_matrix);
 
 		HPEN hPen = ::CreatePen(PS_SOLID, 0, color);
