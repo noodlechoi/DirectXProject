@@ -111,7 +111,7 @@ void CPlayer::Update(float timeElapsed)
 {
 	Move(velocity, false);
 
-	camera->Update(this, position, timeElapsed);
+	camera->Update(*this, position, timeElapsed);
 	camera->GenerateViewMatrix();
 
 	XMVECTOR xmvVelocity = XMLoadFloat3(&velocity);

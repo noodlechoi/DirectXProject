@@ -24,11 +24,9 @@ public:
 	void SetLookAt(XMFLOAT3& , XMFLOAT3& , XMFLOAT3& );
 
 	void Move(XMFLOAT3& );
-	void Move(XMFLOAT3&& );
 	void Move(float , float , float );
 	void Rotate(float  = 0.0f, float  = 0.0f, float  = 0.0f);
-	void Update(std::unique_ptr<CPlayer>& , XMFLOAT3& , float  = 0.016f);
-	void Update(CPlayer* , XMFLOAT3& , float  = 0.016f);
+	void Update(CPlayer& , XMFLOAT3& , float  = 0.016f);
 private:
 	XMFLOAT3 position{ XMFLOAT3(0.0f, 0.0f, 0.0f) };
 	XMFLOAT3 right{ XMFLOAT3(1.0f, 0.0f, 0.0f) };
@@ -41,8 +39,13 @@ private:
 	float aspect_ratio{ float(FRAMEBUFFER_WIDTH) / float(FRAMEBUFFER_HEIGHT) };
 public:
 	CViewport viewport;
-
-	XMFLOAT4X4 view_matrix;
+	// frustum
+	BoundingFrustum frustum_view{ BoundingFrustum() };
+	BoundingFrustum frustum_world{ BoundingFrustum() };
+	// 피킹에 필요
+	XMFLOAT4X4 inverse_view_matrix;
+	
+	XMFLOAT4X4 view_matrix;	// 카메라 변환 행렬
 	XMFLOAT4X4 perspective_project_matrix;
 	XMFLOAT4X4 view_perspective_project_matrix;
 };
