@@ -1,12 +1,36 @@
 #include "stdafx.h"
-#include "Scene.h"
 #include "Camera.h"
 #include "GraphicsPipeline.h"
+#include "Player.h"
+#include "Scene.h"
 
-template <typename T>
-CScene::CScene(std::unique_ptr<T>&& manager)
+template <typename T, typename Y>
+CScene::CScene(size_t objectNum, T&& manager, Y&& Player)
 {
 	input_manager.reset(manager.release());
+	player.reset(Player.release());
+}
+
+
+void CScene::Animate(float elapsedTime)
+{
+	player->Animate(elapsedTime);
+
+	for (auto& object : objects) {
+		object->Animate(elapsedTime);
+	}
+}
+
+void CScene::Render(HDC hDCFrameBuffer)
+{
+	CGraphicsPipeline::SetViewport(player->camera->viewport);
+	CGraphicsPipeline::SetViewPerspectiveProjectTransform(player->camera->view_perspective_project_matrix);
+
+	player->Render(hDCFrameBuffer, *player->camera);
+
+	for (auto& object : objects) {
+		object->Render(hDCFrameBuffer, *player->camera);
+	}
 }
 
 LRESULT CScene::ProcessingWindowMessage(HWND& hWnd, UINT& nMessageID, WPARAM& wParam, LPARAM& lParam)
@@ -14,7 +38,7 @@ LRESULT CScene::ProcessingWindowMessage(HWND& hWnd, UINT& nMessageID, WPARAM& wP
 	return input_manager->ProcessingWindowMessage(hWnd, nMessageID, wParam, lParam);
 }
 
-CSpaceShipScene::CSpaceShipScene() : CScene(std::make_unique<CSpaceShipInputManager>())
+CSpaceShipScene::CSpaceShipScene() : CScene(5, std::make_unique<CSpaceShipInputManager>(), std::make_unique<CAirplanePlayer>())
 {
 }
 
@@ -68,27 +92,10 @@ void CSpaceShipScene::BuildObjects()
 	objects[4].SetMovingSpeed(0.0f);
 }
 
-void CSpaceShipScene::Animate(float elapsedTime)
+void CSpaceShipScene::ProcessInput(HWND& hwnd, float timeElapsed)
 {
-	for (auto& object : objects) {
-		object.Animate(elapsedTime);
-	}
-}
-
-void CSpaceShipScene::Render(HDC hDCFrameBuffer, std::unique_ptr<CCamera>& camera)
-{
-	CGraphicsPipeline::SetViewport(camera->viewport);
-	CGraphicsPipeline::SetViewPerspectiveProjectTransform(camera->view_perspective_project_matrix);
-
-	for (auto& object : objects) {
-		object.Render(hDCFrameBuffer, *camera);
-	}
-}
-
-
-void CSpaceShipScene::ProcessInput(HWND& hwnd, std::unique_ptr<CPlayer>& player)
-{
-	input_manager->ProcessInput(hwnd, player);
+	input_manager->ProcessInput(hwnd, *player);
+	player->Update(timeElapsed);
 }
 
 LRESULT CSpaceShipScene::ProcessingWindowMessage(HWND& hWnd, UINT& nMessageID, WPARAM& wParam, LPARAM& lParam)

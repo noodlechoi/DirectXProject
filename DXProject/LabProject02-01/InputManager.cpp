@@ -53,7 +53,7 @@ LRESULT CInputManager::ProcessingWindowMessage(HWND& hWnd, UINT& nMessageID, WPA
 // =========================
 
 
-void CSpaceShipInputManager::ProcessInput(HWND& hwnd, std::unique_ptr<CPlayer>& player)
+void CSpaceShipInputManager::ProcessInput(HWND& hwnd, CPlayer& player)
 {
 	static UCHAR pKeyBuffer[256];
 	if (GetKeyboardState(pKeyBuffer))
@@ -66,7 +66,7 @@ void CSpaceShipInputManager::ProcessInput(HWND& hwnd, std::unique_ptr<CPlayer>& 
 		if (pKeyBuffer[VK_PRIOR] & 0xF0) dwDirection |= DIR_UP;
 		if (pKeyBuffer[VK_NEXT] & 0xF0) dwDirection |= DIR_DOWN;
 
-		if (dwDirection) player->Move(dwDirection, 0.15f);
+		if (dwDirection) player.Move(dwDirection, 0.15f);
 	}
 
 	if (GetCapture() == hwnd)
@@ -80,9 +80,9 @@ void CSpaceShipInputManager::ProcessInput(HWND& hwnd, std::unique_ptr<CPlayer>& 
 		if (cxMouseDelta || cyMouseDelta)
 		{
 			if (pKeyBuffer[VK_RBUTTON] & 0xF0)
-				player->Rotate(cyMouseDelta, 0.0f, -cxMouseDelta);
+				player.Rotate(cyMouseDelta, 0.0f, -cxMouseDelta);
 			else
-				player->Rotate(cyMouseDelta, cxMouseDelta, 0.0f);
+				player.Rotate(cyMouseDelta, cxMouseDelta, 0.0f);
 		}
 	}
 }

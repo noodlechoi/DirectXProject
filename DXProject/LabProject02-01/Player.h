@@ -3,6 +3,7 @@
 
 class CPlayer : public CObject {
 public:
+	CPlayer();
 	void SetPosition(float, float, float);
 
 	void LookAt(XMFLOAT3&, XMFLOAT3&);
@@ -20,7 +21,6 @@ public:
 
 	virtual void OnUpdateTransform();
 	virtual void Animate(float);
-	//	virtual void Render(HDC hDCFrameBuffer, std::unique_ptr<CCamera>&);
 
 	void SetCamera(std::unique_ptr<CCamera>& pCamera) { camera = std::move(pCamera); }
 	std::unique_ptr<CCamera>& GetCamera() { return camera; }
@@ -45,6 +45,6 @@ public:
 class CAirplanePlayer : public CPlayer
 {
 public:
-
+	CAirplanePlayer();
 	void OnUpdateTransform() override;
 };

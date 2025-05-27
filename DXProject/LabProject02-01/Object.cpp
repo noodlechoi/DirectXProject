@@ -13,8 +13,9 @@ CObject::CObject() :
 void CObject::SetMesh(CMesh mesh)
 {
 	meshes.emplace_back(mesh);
-	BoundingBox meshesAABB = MergeMeshesBoundingBox();
-	BoundingOrientedBox::CreateFromBoundingBox(OBB, meshesAABB);
+	BoundingBox temp;
+	BoundingBox::CreateMerged(temp, temp, mesh.AABB);
+	BoundingOrientedBox::CreateFromBoundingBox(OBB, temp);
 }
 
 void CObject::SetPosition(float x, float y, float z)
