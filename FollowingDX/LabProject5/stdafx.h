@@ -43,3 +43,5 @@ using Microsoft::WRL::ComPtr;
 
 #define FRAME_BUFFER_WIDTH	800
 #define FRAME_BUFFER_HEIGHT 600
+
+#define CHECK_HRESULT_EXCEPTION(hr) if(FAILED(hr)) throw hr;

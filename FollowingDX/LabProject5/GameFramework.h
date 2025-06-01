@@ -1,5 +1,7 @@
 #pragma once
+
 // 포인터 ComPtr로 바꾸기
+// d3d device를 다루고 Scene을 관리
 class CGameFramework
 {
 public:
@@ -55,12 +57,12 @@ private:
 
 	// 렌더 타겟 버퍼, 서술자 힙 인터페이스 포인터, 렌더 타겟 서술자 원소 크기
 	ID3D12Resource* render_target_buffers[swap_chain_buffer_num]{};
-	ID3D12DescriptorHeap* rtv_heap{};
+	ID3D12DescriptorHeap* rtv_descriptor_heap{};
 	UINT rtv_increment_size{};
 
 	// 깊이-스텐실 버퍼, 서술자 힙 인터페이스 포인터, 깊이-스텐실 서술자 원소 크기
 	ID3D12Resource* depth_stencil_buffer{};
-	ID3D12DescriptorHeap* dsv_heap{};
+	ID3D12DescriptorHeap* dsv_descriptor_heap{};
 	UINT dsv_increment_size{};
 
 	// 명령 큐, 명형 할당자, 명령 리스트 인터페이스 포인터
