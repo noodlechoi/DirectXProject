@@ -310,8 +310,58 @@ void CGameFramework::FrameAdvance()
 	D3D12_RESOURCE_BARRIER resourceBarrier{};
 	resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 	resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+	// render target state로 리소스 변경
+	resourceBarrier.Transition.pResource = render_target_buffers[swap_chain_buffer_index];
+	resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+	resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	resourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+	command_list->ResourceBarrier(1, &resourceBarrier);
+	
+	// 뷰포트 씨저 사각형 설정
+	command_list->RSSetViewports(1, &viewport);
+	command_list->RSSetScissorRects(1, &scissor_rect);
 
+	// 현재 렌더 타겟에 해당하는 서술자의 CPU 주소(핸들) 값을 계산
+	D3D12_CPU_DESCRIPTOR_HANDLE rtvCPUDesciptorHandle = rtv_descriptor_heap->GetCPUDescriptorHandleForHeapStart();
+	rtvCPUDesciptorHandle.ptr += (swap_chain_buffer_index * rtv_increment_size);
 
+	// 원하는 색상으로 렌더 타겟 지우기
+	//float clearColor[4] = { 0.0f, 0.125f, 0.3f, 1.0f };	// == Colors::Azure
+	command_list->ClearRenderTargetView(rtvCPUDesciptorHandle, Colors::Azure, 0, NULL);
+	
+	// 깊이-스텐실 서술자의 CPU 주소를 계산한다.
+	D3D12_CPU_DESCRIPTOR_HANDLE dsvCPUDescriptorHandle = dsv_descriptor_heap->GetCPUDescriptorHandleForHeapStart();
+	
+	// 원하는 값으로 깊이 스텐실 지우기
+	command_list->ClearDepthStencilView(dsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0F, 0, 0, NULL);
+	
+	// 렌더 타겟 뷰와 깊이 스텐실 뷰를 출력 병합 단계(OM)에 연결
+	command_list->OMSetRenderTargets(1, &rtvCPUDesciptorHandle, TRUE, &dsvCPUDescriptorHandle);
+
+	// 렌더링 코드
+
+	// 현재 렌더 타겟에 대한 렌더링이 끝나기를 기다림. GPU가 버퍼를 더 이상 사용하지 않으면 렌더 타겟 -> 프레젠트 상태로 변경
+	resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+	resourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+	command_list->ResourceBarrier(1, &resourceBarrier);
+	
+	CHECK_HRESULT_EXCEPTION(command_list->Close());
+
+	ID3D12CommandList* commandLists[]{ command_list };
+	command_queue->ExecuteCommandLists(1, commandLists);
+
+	waitForGpuComplete();
+
+	DXGI_PRESENT_PARAMETERS dxgiPresentParameters;
+	dxgiPresentParameters.DirtyRectsCount = 0;
+	dxgiPresentParameters.pDirtyRects = NULL;
+	dxgiPresentParameters.pScrollOffset = NULL;
+	dxgiPresentParameters.pScrollRect = NULL;
+	// 스왑체인 프리젠트. 현재 렌더 타겟의 내용이 전면 버퍼로 옮겨지고 렌더 타겟 인덱스가 바뀜
+
+	swap_chain_buffer_index = swap_chain->GetCurrentBackBufferIndex();
+	swap_chain->Present1(1, 0, &dxgiPresentParameters);
 }
 
 void CGameFramework::waitForGpuComplete()
