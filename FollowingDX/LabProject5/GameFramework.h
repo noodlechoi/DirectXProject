@@ -1,6 +1,6 @@
 #pragma once
+#include "Timer.h"
 
-// 포인터 ComPtr로 바꾸기
 // d3d device를 다루고 Scene을 관리
 class CGameFramework
 {
@@ -38,12 +38,14 @@ public:
 	void OnProcessKeyboardMessage(HWND , UINT , WPARAM , LPARAM );
 	LRESULT CALLBACK OnProcessWindowMessage(HWND, UINT, WPARAM, LPARAM);
 private:
+	// window api 관련
 	HINSTANCE h_instance;
 	HWND h_wnd;
 
 	int client_width{FRAME_BUFFER_WIDTH};
 	int client_height{FRAME_BUFFER_HEIGHT};
 
+	// directX 관련
 	ComPtr<IDXGIFactory4> dxgi_factory{};
 	ComPtr<IDXGISwapChain3> swap_chain{};
 	ComPtr<ID3D12Device> d3d_device{};
@@ -81,5 +83,9 @@ private:
 	// 뷰포트와 씨저 사각형
 	D3D12_VIEWPORT viewport{};
 	D3D12_RECT scissor_rect{};
+
+	// Timer 관련
+	CTimer timer;
+	_TCHAR frame_rate_str[50];
 };
 
