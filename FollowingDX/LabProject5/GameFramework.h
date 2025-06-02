@@ -44,9 +44,9 @@ private:
 	int client_width{FRAME_BUFFER_WIDTH};
 	int client_height{FRAME_BUFFER_HEIGHT};
 
-	IDXGIFactory4* dxgi_factory{};
-	IDXGISwapChain3* swap_chain{};
-	ID3D12Device* d3d_device{};
+	ComPtr<IDXGIFactory4> dxgi_factory{};
+	ComPtr<IDXGISwapChain3> swap_chain{};
+	ComPtr<ID3D12Device> d3d_device{};
 
 	// MSAA 다중 샘플링 활성화 및 다중 샘플링 레벨 설정
 	bool msaa4x_enabled{};
@@ -56,25 +56,25 @@ private:
 	UINT swap_chain_buffer_index{};
 
 	// 렌더 타겟 버퍼, 서술자 힙 인터페이스 포인터, 렌더 타겟 서술자 원소 크기
-	ID3D12Resource* render_target_buffers[swap_chain_buffer_num]{};
-	ID3D12DescriptorHeap* rtv_descriptor_heap{};
+	ComPtr<ID3D12Resource> render_target_buffers[swap_chain_buffer_num]{};
+	ComPtr<ID3D12DescriptorHeap> rtv_descriptor_heap{};
 	UINT rtv_increment_size{};
 
 	// 깊이-스텐실 버퍼, 서술자 힙 인터페이스 포인터, 깊이-스텐실 서술자 원소 크기
-	ID3D12Resource* depth_stencil_buffer{};
-	ID3D12DescriptorHeap* dsv_descriptor_heap{};
+	ComPtr<ID3D12Resource> depth_stencil_buffer{};
+	ComPtr<ID3D12DescriptorHeap> dsv_descriptor_heap{};
 	UINT dsv_increment_size{};
 
 	// 명령 큐, 명형 할당자, 명령 리스트 인터페이스 포인터
-	ID3D12CommandQueue* command_queue{};
-	ID3D12CommandAllocator* command_allocator{};
-	ID3D12GraphicsCommandList* command_list{};
+	ComPtr<ID3D12CommandQueue> command_queue{};
+	ComPtr<ID3D12CommandAllocator> command_allocator{};
+	ComPtr<ID3D12GraphicsCommandList> command_list{};
 
 	// 그래픽스 파이프라인 상태 객체에 대한 인터페이스 포인터
-	ID3D12PipelineState* pipeline_state{};
+	ComPtr<ID3D12PipelineState> pipeline_state{};
 
 	// 펜스 인터페이스 포인터, 펜스 값, 이벤트 핸들
-	ID3D12Fence* fence{};
+	ComPtr<ID3D12Fence> fence{};
 	UINT64 fence_value{};
 	HANDLE fence_event{};
 

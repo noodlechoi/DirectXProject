@@ -42,35 +42,7 @@ void CGameFramework::OnDestroy()
 
 	::CloseHandle(fence_event);
 
-	for (int i = 0; i < swap_chain_buffer_num; ++i)
-		if (render_target_buffers[i])
-			render_target_buffers[i]->Release();
-	if (rtv_descriptor_heap)
-		rtv_descriptor_heap->Release();
-	if (dsv_descriptor_heap)
-		dsv_descriptor_heap->Release();
-	if (depth_stencil_buffer)
-		depth_stencil_buffer->Release();
-
-	if (command_allocator)
-		command_allocator->Release();
-	if (command_queue)
-		command_queue->Release();
-	if (pipeline_state)
-		pipeline_state->Release();
-	if (command_list)
-		command_list->Release();
-
-	if(fence)
-		fence->Release();
-
 	swap_chain->SetFullscreenState(FALSE, nullptr);
-	if (swap_chain)
-		swap_chain->Release();
-	if (dxgi_factory)
-		dxgi_factory->Release();
-	if (d3d_device)
-		d3d_device->Release();
 #if defined(_DEBUG)
 	// 리소스 누수 확인
 	IDXGIDebug1* dxgi_debug = nullptr;
@@ -111,7 +83,7 @@ void CGameFramework::CreateSwapChain()
 	dxgiFullScreenDesc.Windowed = TRUE;
 
 	// 스왑체인 생성
-	dxgi_factory->CreateSwapChainForHwnd(command_queue, h_wnd, &dxgiSwapChainDesc, &dxgiFullScreenDesc, nullptr, (IDXGISwapChain1**)&swap_chain);
+	dxgi_factory->CreateSwapChainForHwnd(command_queue.Get(), h_wnd, &dxgiSwapChainDesc, &dxgiFullScreenDesc, nullptr, (IDXGISwapChain1**)swap_chain.GetAddressOf());
 
 	// alt+enter 키 비활성화
 	dxgi_factory->MakeWindowAssociation(h_wnd, DXGI_MWA_NO_ALT_ENTER);
@@ -204,7 +176,7 @@ void CGameFramework::CreateCommandQueueAndList()
 	CHECK_HRESULT_EXCEPTION(d3d_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, __uuidof(ID3D12CommandAllocator), (void**)&command_allocator));
 
 	//리스트 생성
-	CHECK_HRESULT_EXCEPTION(d3d_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, command_allocator, NULL, __uuidof(ID3D12GraphicsCommandList), (void**)&command_list));
+	CHECK_HRESULT_EXCEPTION(d3d_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, command_allocator.Get(), NULL, __uuidof(ID3D12GraphicsCommandList), (void**)command_list.GetAddressOf()));
 
 	// 리스트가 생성되면 Open상태가 됨
 	CHECK_HRESULT_EXCEPTION(command_list->Close());
@@ -240,7 +212,7 @@ void CGameFramework::CreateRenderTargetViews()
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvCPUDescriptorHandle = rtv_descriptor_heap->GetCPUDescriptorHandleForHeapStart();
 	for (UINT i = 0; i < swap_chain_buffer_num; ++i) {
 		CHECK_HRESULT_EXCEPTION(swap_chain->GetBuffer(i, __uuidof(ID3D12Resource), (void**)&render_target_buffers[i]));
-		d3d_device->CreateRenderTargetView(render_target_buffers[i], NULL, rtvCPUDescriptorHandle);
+		d3d_device->CreateRenderTargetView(render_target_buffers[i].Get(), NULL, rtvCPUDescriptorHandle);
 		rtvCPUDescriptorHandle.ptr += rtv_increment_size;
 	}
 }
@@ -277,7 +249,7 @@ void CGameFramework::CreateDepthStencilView()
 	// 뷰 생성
 	// 힙 시작 핸들 값
 	D3D12_CPU_DESCRIPTOR_HANDLE dsvCPUDesctiptorHandle = dsv_descriptor_heap->GetCPUDescriptorHandleForHeapStart();
-	d3d_device->CreateDepthStencilView(depth_stencil_buffer, NULL, dsvCPUDesctiptorHandle);
+	d3d_device->CreateDepthStencilView(depth_stencil_buffer.Get(), NULL, dsvCPUDesctiptorHandle);
 }
 
 // 렌더링할 메쉬와 게임 객체 생성 및 소멸 함수
@@ -310,14 +282,14 @@ void CGameFramework::FrameAdvance()
 
 	// 명령 리셋
 	CHECK_HRESULT_EXCEPTION(command_allocator->Reset());
-	CHECK_HRESULT_EXCEPTION(command_list->Reset(command_allocator, NULL));
+	CHECK_HRESULT_EXCEPTION(command_list->Reset(command_allocator.Get(), NULL));
 
 	// 현재 렌더 타겟에 대한 프리젠트가 끝나기를 기다림. 프리젠트가 끝나면 렌더 타겟 상태로 바꿈
 	D3D12_RESOURCE_BARRIER resourceBarrier{};
 	resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 	resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 	// render target state로 리소스 변경
-	resourceBarrier.Transition.pResource = render_target_buffers[swap_chain_buffer_index];
+	resourceBarrier.Transition.pResource = render_target_buffers[swap_chain_buffer_index].Get();
 	resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
 	resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	resourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
@@ -354,7 +326,7 @@ void CGameFramework::FrameAdvance()
 	
 	CHECK_HRESULT_EXCEPTION(command_list->Close());
 
-	ID3D12CommandList* commandLists[]{ command_list };
+	ID3D12CommandList* commandLists[]{ command_list.Get()};
 	command_queue->ExecuteCommandLists(1, commandLists);
 
 	waitForGpuComplete();
@@ -376,7 +348,7 @@ void CGameFramework::waitForGpuComplete()
 
 	const UINT64 fenceValue = fence_value;
 	// GPU가 펜스 값을 설정하는 명령을 명령어 큐에 추가
-	CHECK_HRESULT_EXCEPTION(command_queue->Signal(fence, fenceValue));
+	CHECK_HRESULT_EXCEPTION(command_queue->Signal(fence.Get(), fenceValue));
 	// GPU 펜스 값이 CPU 펜스 값보다 작으면 계속 이벤트를 기다림
 	if (fence->GetCompletedValue() < fenceValue) {
 		CHECK_HRESULT_EXCEPTION(fence->SetEventOnCompletion(fenceValue, fence_event));
