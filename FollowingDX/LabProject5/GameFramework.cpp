@@ -16,12 +16,18 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 	h_wnd = hMainWnd;
 
 	// Direct3D 디바이스, 명령 큐와 명령 리스트 생성, 스왑 체인 등 생성 함수 호출
-	CreateD3DDevice();
-	CreateCommandQueueAndList();
-	CreateSwapChain();
-	CreateRtvAndDsvHeaps();
-	CreateRenderTargetViews();
-	CreateDepthStencilView();
+	try {
+		CreateD3DDevice();
+		CreateCommandQueueAndList();
+		CreateSwapChain();
+		CreateRtvAndDsvHeaps();
+		CreateRenderTargetViews();
+		CreateDepthStencilView();
+	}
+	catch (const std::exception& e)
+	{
+		OutputDebugStringW((LPCWSTR)e.what());
+	}
 
 	// 렌더링 게임 객체 생성
 	BuildObjects();
@@ -129,7 +135,7 @@ void CGameFramework::CreateD3DDevice()
 	dxgiFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
 #endif
 	// factory 생성
-	result = ::CreateDXGIFactory2(dxgiFactoryFlags, __uuidof(IDXGIFactory4), (void**)dxgi_factory);
+	CHECK_HRESULT_EXCEPTION(CreateDXGIFactory2(dxgiFactoryFlags, __uuidof(IDXGIFactory4), (void**)&dxgi_factory));
 
 	// 어댑터(그래픽카드)
 	IDXGIAdapter1* adapter{};
@@ -141,7 +147,7 @@ void CGameFramework::CreateD3DDevice()
 	}
 	if (!adapter) {	// 12를 지원하는 디바이스를 생성할 수 없으면 WARP 디바이스 생성
 		dxgi_factory->EnumWarpAdapter(__uuidof(IDXGIAdapter1), (void**)&adapter);
-		D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_11_0, __uuidof(ID3D12Device), (void**)d3d_device);
+		D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_11_0, __uuidof(ID3D12Device), (void**)&d3d_device);
 	}
 
 	// 디바이스가 지원하는 다중 샘플 품질 수준 확인
@@ -157,7 +163,7 @@ void CGameFramework::CreateD3DDevice()
 	msaa4x_enabled = (msaa4x_quality_level > 1) ? true : false;
 
 	// 동기화를 위한 fence 생성
-	result = d3d_device->CreateFence(0, D3D12_FENCE_FLAG_NONE, __uuidof(ID3D12Fence), (void**)fence);
+	result = d3d_device->CreateFence(0, D3D12_FENCE_FLAG_NONE, __uuidof(ID3D12Fence), (void**)&fence);
 	fence_value = 0;
 
 	// 펜스와 동기화를 위한 이벤트 객체 생성. signal 시 이벤트 값을 자동적으로 FALSE가 되도록 생성
@@ -192,7 +198,7 @@ void CGameFramework::CreateCommandQueueAndList()
 	commandQueueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;	// GPU가 모든 명령 직접 실행
 
 	// 직접 명령 큐 생성
-	CHECK_HRESULT_EXCEPTION(d3d_device->CreateCommandQueue(&commandQueueDesc, __uuidof(ID3D12CommandQueue), (void**)command_queue));
+	CHECK_HRESULT_EXCEPTION(d3d_device->CreateCommandQueue(&commandQueueDesc, __uuidof(ID3D12CommandQueue), (void**)&command_queue));
 
 	// 할당자 생성
 	CHECK_HRESULT_EXCEPTION(d3d_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, __uuidof(ID3D12CommandAllocator), (void**)&command_allocator));
@@ -214,7 +220,7 @@ void CGameFramework::CreateRtvAndDsvHeaps()
 	descriptorHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 	descriptorHeapDesc.NodeMask = 0;
 
-	CHECK_HRESULT_EXCEPTION(d3d_device->CreateDescriptorHeap(&descriptorHeapDesc, __uuidof(ID3D12DescriptorHeap), (void**)rtv_descriptor_heap));
+	CHECK_HRESULT_EXCEPTION(d3d_device->CreateDescriptorHeap(&descriptorHeapDesc, __uuidof(ID3D12DescriptorHeap), (void**)&rtv_descriptor_heap));
 
 	// 렌더 타겟 서술자 힙 원소의 크기 저장
 	rtv_increment_size = d3d_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
@@ -222,7 +228,7 @@ void CGameFramework::CreateRtvAndDsvHeaps()
 	// 깊이-스탠실 서술자 힙(1개) 생성
 	descriptorHeapDesc.NumDescriptors = 1;
 	descriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
-	CHECK_HRESULT_EXCEPTION(d3d_device->CreateDescriptorHeap(&descriptorHeapDesc, __uuidof(ID3D12DescriptorHeap), (void**)dsv_descriptor_heap));
+	CHECK_HRESULT_EXCEPTION(d3d_device->CreateDescriptorHeap(&descriptorHeapDesc, __uuidof(ID3D12DescriptorHeap), (void**)&dsv_descriptor_heap));
 
 	// 원소 크기 저장
 	dsv_increment_size = d3d_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
@@ -326,8 +332,8 @@ void CGameFramework::FrameAdvance()
 	rtvCPUDesciptorHandle.ptr += (swap_chain_buffer_index * rtv_increment_size);
 
 	// 원하는 색상으로 렌더 타겟 지우기
-	//float clearColor[4] = { 0.0f, 0.125f, 0.3f, 1.0f };	// == Colors::Azure
-	command_list->ClearRenderTargetView(rtvCPUDesciptorHandle, Colors::Azure, 0, NULL);
+	float clearColor[4] = { 0.0f, 0.125f, 0.3f, 1.0f };
+	command_list->ClearRenderTargetView(rtvCPUDesciptorHandle, clearColor, 0, NULL);
 	
 	// 깊이-스텐실 서술자의 CPU 주소를 계산한다.
 	D3D12_CPU_DESCRIPTOR_HANDLE dsvCPUDescriptorHandle = dsv_descriptor_heap->GetCPUDescriptorHandleForHeapStart();
@@ -359,7 +365,6 @@ void CGameFramework::FrameAdvance()
 	dxgiPresentParameters.pScrollOffset = NULL;
 	dxgiPresentParameters.pScrollRect = NULL;
 	// 스왑체인 프리젠트. 현재 렌더 타겟의 내용이 전면 버퍼로 옮겨지고 렌더 타겟 인덱스가 바뀜
-
 	swap_chain_buffer_index = swap_chain->GetCurrentBackBufferIndex();
 	swap_chain->Present1(1, 0, &dxgiPresentParameters);
 }
