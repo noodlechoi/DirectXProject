@@ -48,3 +48,5 @@ using Microsoft::WRL::ComPtr;
 #define FRAME_BUFFER_HEIGHT 600
 
 #define CHECK_HRESULT_EXCEPTION(hr) if(FAILED(hr)) throw hr;
+
+#define _WITH_SWAPCHAIN_FULLSCREEN_STATE

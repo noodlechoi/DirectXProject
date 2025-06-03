@@ -20,14 +20,13 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 	try {
 		CreateD3DDevice();
 		CreateCommandQueueAndList();
-		CreateSwapChain();
 		CreateRtvAndDsvHeaps();
-		CreateRenderTargetViews();
+		CreateSwapChain();
 		CreateDepthStencilView();
 	}
-	catch (const std::exception& e)
+	catch (...)
 	{
-		OutputDebugStringW((LPCWSTR)e.what());
+		OutputDebugString(L"Oncreate 함수 오류\n");
 	}
 
 	// 렌더링 게임 객체 생성
@@ -61,35 +60,30 @@ void CGameFramework::CreateSwapChain()
 	client_width = rc.right - rc.left;
 	client_height = rc.bottom - rc.top;
 
-	DXGI_SWAP_CHAIN_DESC1 dxgiSwapChainDesc{};
-	//::ZeroMemory(&dxgiSwapChainDesc, sizeof(DXGI_SWAP_CHAIN_DESC1));
-	dxgiSwapChainDesc.Width = client_width;
-	dxgiSwapChainDesc.Height = client_height;
-	dxgiSwapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	dxgiSwapChainDesc.SampleDesc.Count = msaa4x_enabled ? 4 : 1;		// MSAA 활성화 여부에 따라 샘플링 수 설정
-	dxgiSwapChainDesc.SampleDesc.Quality = msaa4x_enabled ? (msaa4x_quality_level - 1) : 0;
-	dxgiSwapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;	// 후면 버퍼에 대한 표면 사용 방식과 CPU 접근 방법: 렌더 타겟으로 사용
-	dxgiSwapChainDesc.BufferCount = swap_chain_buffer_num;
-	dxgiSwapChainDesc.Scaling = DXGI_SCALING_NONE;						// 해상도 확대 스케일링?
-	dxgiSwapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;		// 스왑 처리 방식: 버리기
-	dxgiSwapChainDesc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;			// 기본
-	dxgiSwapChainDesc.Flags = 0;										// 스왑체인 동작 설정
+	// 따라하기05
+	DXGI_SWAP_CHAIN_DESC swapChainDesc{};
+	swapChainDesc.BufferCount = swap_chain_buffer_num;
+	swapChainDesc.BufferDesc.Width = client_width;
+	swapChainDesc.BufferDesc.Height = client_height;
+	swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	swapChainDesc.BufferDesc.RefreshRate.Numerator = 60;
+	swapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
+	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+	swapChainDesc.OutputWindow = h_wnd;
+	swapChainDesc.SampleDesc.Count = (msaa4x_enabled) ? 4 : 1;
+	swapChainDesc.SampleDesc.Quality = (msaa4x_enabled) ? (msaa4x_quality_level - 1) : 0;
+	swapChainDesc.Windowed = TRUE;
+	// 전체 화면 모드에서 바탕화면의 해상도를 후면 버퍼의 크기에 맞게 변경
+	swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
-	DXGI_SWAP_CHAIN_FULLSCREEN_DESC dxgiFullScreenDesc{};
-	//::ZeroMemory(&dxgiFullScreenDesc, sizeof(DXGI_SWAP_CHAIN_FULLSCREEN_DESC));
-	dxgiFullScreenDesc.RefreshRate.Numerator = 60;
-	dxgiFullScreenDesc.RefreshRate.Denominator = 1;
-	dxgiFullScreenDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_LOWER_FIELD_FIRST;	// 하위 필드로 이미지 생성
-	dxgiFullScreenDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
-	dxgiFullScreenDesc.Windowed = TRUE;
-
-	// 스왑체인 생성
-	dxgi_factory->CreateSwapChainForHwnd(command_queue.Get(), h_wnd, &dxgiSwapChainDesc, &dxgiFullScreenDesc, nullptr, (IDXGISwapChain1**)swap_chain.GetAddressOf());
-
-	// alt+enter 키 비활성화
-	dxgi_factory->MakeWindowAssociation(h_wnd, DXGI_MWA_NO_ALT_ENTER);
-	// 스왑 체인 현재 후면 버퍼 인덱스 저장
+	CHECK_HRESULT_EXCEPTION(dxgi_factory->CreateSwapChain(command_queue.Get(), &swapChainDesc, (IDXGISwapChain**)swap_chain.GetAddressOf()));
 	swap_chain_buffer_index = swap_chain->GetCurrentBackBufferIndex();
+	CHECK_HRESULT_EXCEPTION(dxgi_factory->MakeWindowAssociation(h_wnd, DXGI_MWA_NO_ALT_ENTER));	// alt+enter에 응답하지 않게 설정
+#ifndef _WITH_SWAPCHAIN_FULLSCREEN_STATE 
+	CreateRenderTargetViews();
+#endif // 
+
 }
 
 
@@ -216,6 +210,7 @@ void CGameFramework::CreateRenderTargetViews()
 		d3d_device->CreateRenderTargetView(render_target_buffers[i].Get(), NULL, rtvCPUDescriptorHandle);
 		rtvCPUDescriptorHandle.ptr += rtv_increment_size;
 	}
+
 }
 
 void CGameFramework::CreateDepthStencilView()
@@ -288,6 +283,38 @@ void CGameFramework::waitForGpuComplete()
 		CHECK_HRESULT_EXCEPTION(fence->SetEventOnCompletion(fenceValue, fence_event));
 		::WaitForSingleObject(fence_event, INFINITE);
 	}
+}
+
+void CGameFramework::ChangeSwapChainState()
+{
+	waitForGpuComplete();
+
+	BOOL fullScreenState{};
+	swap_chain->GetFullscreenState(&fullScreenState, NULL);
+	swap_chain->SetFullscreenState(!fullScreenState, NULL);	// full -> window, window -> full
+
+	DXGI_MODE_DESC targetParameters;
+	targetParameters.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	targetParameters.Width = client_width;
+	targetParameters.Height = client_height;
+	targetParameters.RefreshRate.Numerator = 60;
+	targetParameters.RefreshRate.Denominator = 1;
+	targetParameters.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+	targetParameters.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+	swap_chain->ResizeTarget(&targetParameters);
+
+	// ResizeBuffers가 성공하기 위해 모든 직/간접 참조를 해제해야 함
+	for (int i = 0; i < swap_chain_buffer_num; ++i) {
+		if (render_target_buffers[i]) render_target_buffers[i].Reset();
+	}
+
+	DXGI_SWAP_CHAIN_DESC swapChainDesc;
+	swap_chain->GetDesc(&swapChainDesc);
+	swap_chain->ResizeBuffers(swap_chain_buffer_num, client_width, client_height, swapChainDesc.BufferDesc.Format, swapChainDesc.Flags);
+
+	swap_chain_buffer_index = swap_chain->GetCurrentBackBufferIndex();
+
+	CreateRenderTargetViews();
 }
 
 
@@ -394,6 +421,7 @@ void CGameFramework::OnProcessKeyboardMessage(HWND hWnd, UINT MessageID, WPARAM 
 		 case VK_F8:
 			 break;
 		 case VK_F9:
+			 ChangeSwapChainState();
 			 break;
 		 default:
 			 break;

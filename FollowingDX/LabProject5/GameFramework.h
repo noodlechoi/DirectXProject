@@ -33,6 +33,9 @@ public:
 	// 윈도우 메시지 처리 함수
 	void waitForGpuComplete();
 
+	// Set State
+	void ChangeSwapChainState();
+
 	//CPU, GPU 동기화 함수
 	void OnProcessMouseMessage(HWND , UINT , WPARAM , LPARAM );
 	void OnProcessKeyboardMessage(HWND , UINT , WPARAM , LPARAM );
