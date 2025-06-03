@@ -4,6 +4,9 @@
 CGameFramework::CGameFramework()
 {
 	_tcscpy_s(frame_rate_str, _T("LapProject ("));
+
+	viewport = { 0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f };
+	scissor_rect = { 0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT };
 }
 
 CGameFramework::~CGameFramework()
@@ -77,16 +80,14 @@ void CGameFramework::CreateSwapChain()
 	// 전체 화면 모드에서 바탕화면의 해상도를 후면 버퍼의 크기에 맞게 변경
 	swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
-	CHECK_HRESULT_EXCEPTION(dxgi_factory->CreateSwapChain(command_queue.Get(), &swapChainDesc, (IDXGISwapChain**)swap_chain.GetAddressOf()));
+	ThrowIfFailed(dxgi_factory->CreateSwapChain(command_queue.Get(), &swapChainDesc, (IDXGISwapChain**)swap_chain.GetAddressOf()));
 	swap_chain_buffer_index = swap_chain->GetCurrentBackBufferIndex();
-	CHECK_HRESULT_EXCEPTION(dxgi_factory->MakeWindowAssociation(h_wnd, DXGI_MWA_NO_ALT_ENTER));	// alt+enter에 응답하지 않게 설정
+	ThrowIfFailed(dxgi_factory->MakeWindowAssociation(h_wnd, DXGI_MWA_NO_ALT_ENTER));	// alt+enter에 응답하지 않게 설정
 #ifndef _WITH_SWAPCHAIN_FULLSCREEN_STATE 
 	CreateRenderTargetViews();
 #endif // 
 
 }
-
-
 
 void CGameFramework::CreateD3DDevice()
 {
@@ -102,7 +103,7 @@ void CGameFramework::CreateD3DDevice()
 	dxgiFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
 #endif
 	// factory 생성
-	CHECK_HRESULT_EXCEPTION(CreateDXGIFactory2(dxgiFactoryFlags, __uuidof(IDXGIFactory4), (void**)&dxgi_factory));
+	ThrowIfFailed(CreateDXGIFactory2(dxgiFactoryFlags, __uuidof(IDXGIFactory4), (void**)&dxgi_factory));
 
 	// 어댑터(그래픽카드)
 	IDXGIAdapter1* adapter{};
@@ -131,7 +132,8 @@ void CGameFramework::CreateD3DDevice()
 
 	// 동기화를 위한 fence 생성
 	result = d3d_device->CreateFence(0, D3D12_FENCE_FLAG_NONE, __uuidof(ID3D12Fence), (void**)&fence);
-	fence_value = 0;
+	for(int i = 0; i < swap_chain_buffer_num; ++i)
+		fence_value[i] = 0;
 
 	// 펜스와 동기화를 위한 이벤트 객체 생성. signal 시 이벤트 값을 자동적으로 FALSE가 되도록 생성
 	/*
@@ -165,16 +167,16 @@ void CGameFramework::CreateCommandQueueAndList()
 	commandQueueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;	// GPU가 모든 명령 직접 실행
 
 	// 직접 명령 큐 생성
-	CHECK_HRESULT_EXCEPTION(d3d_device->CreateCommandQueue(&commandQueueDesc, __uuidof(ID3D12CommandQueue), (void**)&command_queue));
+	ThrowIfFailed(d3d_device->CreateCommandQueue(&commandQueueDesc, __uuidof(ID3D12CommandQueue), (void**)&command_queue));
 
 	// 할당자 생성
-	CHECK_HRESULT_EXCEPTION(d3d_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, __uuidof(ID3D12CommandAllocator), (void**)&command_allocator));
+	ThrowIfFailed(d3d_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, __uuidof(ID3D12CommandAllocator), (void**)&command_allocator));
 
 	//리스트 생성
-	CHECK_HRESULT_EXCEPTION(d3d_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, command_allocator.Get(), NULL, __uuidof(ID3D12GraphicsCommandList), (void**)command_list.GetAddressOf()));
+	ThrowIfFailed(d3d_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, command_allocator.Get(), NULL, __uuidof(ID3D12GraphicsCommandList), (void**)command_list.GetAddressOf()));
 
 	// 리스트가 생성되면 Open상태가 됨
-	CHECK_HRESULT_EXCEPTION(command_list->Close());
+	ThrowIfFailed(command_list->Close());
 }
 
 
@@ -187,7 +189,7 @@ void CGameFramework::CreateRtvAndDsvHeaps()
 	descriptorHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 	descriptorHeapDesc.NodeMask = 0;
 
-	CHECK_HRESULT_EXCEPTION(d3d_device->CreateDescriptorHeap(&descriptorHeapDesc, __uuidof(ID3D12DescriptorHeap), (void**)&rtv_descriptor_heap));
+	ThrowIfFailed(d3d_device->CreateDescriptorHeap(&descriptorHeapDesc, __uuidof(ID3D12DescriptorHeap), (void**)&rtv_descriptor_heap));
 
 	// 렌더 타겟 서술자 힙 원소의 크기 저장
 	rtv_increment_size = d3d_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
@@ -195,7 +197,7 @@ void CGameFramework::CreateRtvAndDsvHeaps()
 	// 깊이-스탠실 서술자 힙(1개) 생성
 	descriptorHeapDesc.NumDescriptors = 1;
 	descriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
-	CHECK_HRESULT_EXCEPTION(d3d_device->CreateDescriptorHeap(&descriptorHeapDesc, __uuidof(ID3D12DescriptorHeap), (void**)&dsv_descriptor_heap));
+	ThrowIfFailed(d3d_device->CreateDescriptorHeap(&descriptorHeapDesc, __uuidof(ID3D12DescriptorHeap), (void**)&dsv_descriptor_heap));
 
 	// 원소 크기 저장
 	dsv_increment_size = d3d_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
@@ -206,7 +208,7 @@ void CGameFramework::CreateRenderTargetViews()
 	// 스왑체인의 각 후면 버퍼에 대한 렌더 타겟 뷰 생성
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvCPUDescriptorHandle = rtv_descriptor_heap->GetCPUDescriptorHandleForHeapStart();
 	for (UINT i = 0; i < swap_chain_buffer_num; ++i) {
-		CHECK_HRESULT_EXCEPTION(swap_chain->GetBuffer(i, __uuidof(ID3D12Resource), (void**)&render_target_buffers[i]));
+		ThrowIfFailed(swap_chain->GetBuffer(i, __uuidof(ID3D12Resource), (void**)&render_target_buffers[i]));
 		d3d_device->CreateRenderTargetView(render_target_buffers[i].Get(), NULL, rtvCPUDescriptorHandle);
 		rtvCPUDescriptorHandle.ptr += rtv_increment_size;
 	}
@@ -240,7 +242,7 @@ void CGameFramework::CreateDepthStencilView()
 	clearValue.DepthStencil.Depth = 1.0f;
 	clearValue.DepthStencil.Stencil = 0;
 	// 버퍼 생성
-	CHECK_HRESULT_EXCEPTION(d3d_device->CreateCommittedResource(&heapProperties, D3D12_HEAP_FLAG_NONE, &resourceDesc, D3D12_RESOURCE_STATE_DEPTH_WRITE, &clearValue, __uuidof(ID3D12Resource), (void**)&depth_stencil_buffer));
+	ThrowIfFailed(d3d_device->CreateCommittedResource(&heapProperties, D3D12_HEAP_FLAG_NONE, &resourceDesc, D3D12_RESOURCE_STATE_DEPTH_WRITE, &clearValue, __uuidof(ID3D12Resource), (void**)&depth_stencil_buffer));
 
 	// 뷰 생성
 	// 힙 시작 핸들 값
@@ -251,12 +253,14 @@ void CGameFramework::CreateDepthStencilView()
 // 렌더링할 메쉬와 게임 객체 생성 및 소멸 함수
 void CGameFramework::BuildObjects()
 {
+	now_scene = std::make_unique<CScene>();
+	if (now_scene) now_scene->BuildObjects(d3d_device.Get());
 
+	timer.Reset();
 }
 
 void CGameFramework::ReleaseObjects()
 {
-
 }
 
 // 사용자 입력, 애니메이션, 렌더링 함수
@@ -267,20 +271,18 @@ void CGameFramework::ProcessInput()
 
 void CGameFramework::AnimateObjects()
 {
-
+	if (now_scene) now_scene->AnimateObjects(timer.GetTimeElapsed());
 }
 
 void CGameFramework::waitForGpuComplete()
 {
 	// CPU 펜스 값 증가
-	++fence_value;
-
-	const UINT64 fenceValue = fence_value;
+	const UINT64 fenceValue = ++fence_value[swap_chain_buffer_index];
 	// GPU가 펜스 값을 설정하는 명령을 명령어 큐에 추가
-	CHECK_HRESULT_EXCEPTION(command_queue->Signal(fence.Get(), fenceValue));
+	ThrowIfFailed(command_queue->Signal(fence.Get(), fenceValue));
 	// GPU 펜스 값이 CPU 펜스 값보다 작으면 계속 이벤트를 기다림
 	if (fence->GetCompletedValue() < fenceValue) {
-		CHECK_HRESULT_EXCEPTION(fence->SetEventOnCompletion(fenceValue, fence_event));
+		ThrowIfFailed(fence->SetEventOnCompletion(fenceValue, fence_event));
 		::WaitForSingleObject(fence_event, INFINITE);
 	}
 }
@@ -317,6 +319,18 @@ void CGameFramework::ChangeSwapChainState()
 	CreateRenderTargetViews();
 }
 
+void CGameFramework::MoveToNextFrame()
+{
+	swap_chain_buffer_index = swap_chain->GetCurrentBackBufferIndex();
+
+	UINT64 fenceValue = ++fence_value[swap_chain_buffer_index];
+	ThrowIfFailed(command_queue->Signal(fence.Get(), fenceValue));
+	if (fence->GetCompletedValue() < fenceValue) {
+		ThrowIfFailed(fence->SetEventOnCompletion(fenceValue, fence_event));
+		WaitForSingleObject(fence_event, INFINITE);
+	}
+}
+
 
 void CGameFramework::FrameAdvance()
 {
@@ -327,8 +341,12 @@ void CGameFramework::FrameAdvance()
 	AnimateObjects();
 
 	// 명령 리셋
-	CHECK_HRESULT_EXCEPTION(command_allocator->Reset());
-	CHECK_HRESULT_EXCEPTION(command_list->Reset(command_allocator.Get(), NULL));
+	ThrowIfFailed(command_allocator->Reset());
+	ThrowIfFailed(command_list->Reset(command_allocator.Get(), NULL));
+
+	// 뷰포트 씨저 사각형 설정
+	command_list->RSSetViewports(1, &viewport);
+	command_list->RSSetScissorRects(1, &scissor_rect);
 
 	// 현재 렌더 타겟에 대한 프리젠트가 끝나기를 기다림. 프리젠트가 끝나면 렌더 타겟 상태로 바꿈
 	D3D12_RESOURCE_BARRIER resourceBarrier{};
@@ -341,28 +359,25 @@ void CGameFramework::FrameAdvance()
 	resourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 	command_list->ResourceBarrier(1, &resourceBarrier);
 
-	// 뷰포트 씨저 사각형 설정
-	command_list->RSSetViewports(1, &viewport);
-	command_list->RSSetScissorRects(1, &scissor_rect);
-
 	// 현재 렌더 타겟에 해당하는 서술자의 CPU 주소(핸들) 값을 계산
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvCPUDesciptorHandle = rtv_descriptor_heap->GetCPUDescriptorHandleForHeapStart();
 	rtvCPUDesciptorHandle.ptr += (swap_chain_buffer_index * rtv_increment_size);
+
+	// 깊이-스텐실 서술자의 CPU 주소를 계산한다.
+	D3D12_CPU_DESCRIPTOR_HANDLE dsvCPUDescriptorHandle = dsv_descriptor_heap->GetCPUDescriptorHandleForHeapStart();
+
+	// 렌더 타겟 뷰와 깊이 스텐실 뷰를 출력 병합 단계(OM)에 연결
+	command_list->OMSetRenderTargets(1, &rtvCPUDesciptorHandle, FALSE, &dsvCPUDescriptorHandle);
 
 	// 원하는 색상으로 렌더 타겟 지우기
 	float clearColor[4] = { 0.0f, 0.125f, 0.3f, 1.0f };
 	command_list->ClearRenderTargetView(rtvCPUDesciptorHandle, clearColor, 0, NULL);
 
-	// 깊이-스텐실 서술자의 CPU 주소를 계산한다.
-	D3D12_CPU_DESCRIPTOR_HANDLE dsvCPUDescriptorHandle = dsv_descriptor_heap->GetCPUDescriptorHandleForHeapStart();
-
 	// 원하는 값으로 깊이 스텐실 지우기
 	command_list->ClearDepthStencilView(dsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0F, 0, 0, NULL);
 
-	// 렌더 타겟 뷰와 깊이 스텐실 뷰를 출력 병합 단계(OM)에 연결
-	command_list->OMSetRenderTargets(1, &rtvCPUDesciptorHandle, TRUE, &dsvCPUDescriptorHandle);
-
 	// 렌더링 코드
+	if (now_scene) now_scene->Render(command_list.Get());
 
 	// 현재 렌더 타겟에 대한 렌더링이 끝나기를 기다림. GPU가 버퍼를 더 이상 사용하지 않으면 렌더 타겟 -> 프레젠트 상태로 변경
 	resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
@@ -370,22 +385,17 @@ void CGameFramework::FrameAdvance()
 	resourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 	command_list->ResourceBarrier(1, &resourceBarrier);
 
-	CHECK_HRESULT_EXCEPTION(command_list->Close());
+	ThrowIfFailed(command_list->Close());
 
 	ID3D12CommandList* commandLists[]{ command_list.Get() };
 	command_queue->ExecuteCommandLists(1, commandLists);
 
 	waitForGpuComplete();
 
-	DXGI_PRESENT_PARAMETERS dxgiPresentParameters;
-	dxgiPresentParameters.DirtyRectsCount = 0;
-	dxgiPresentParameters.pDirtyRects = NULL;
-	dxgiPresentParameters.pScrollOffset = NULL;
-	dxgiPresentParameters.pScrollRect = NULL;
-
 	// 스왑체인 프리젠트. 현재 렌더 타겟의 내용이 전면 버퍼로 옮겨지고 렌더 타겟 인덱스가 바뀜
-	swap_chain->Present1(1, 0, &dxgiPresentParameters);
-	swap_chain_buffer_index = swap_chain->GetCurrentBackBufferIndex();
+	swap_chain->Present(0, 0);
+
+	MoveToNextFrame();
 
 	timer.GetFrameRate(frame_rate_str + 12, 37);
 	::SetWindowText(h_wnd, frame_rate_str);

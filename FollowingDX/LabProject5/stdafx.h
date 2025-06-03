@@ -31,6 +31,9 @@
 
 #include <dxgidebug.h>
 
+// STL
+#include <memory>
+
 using namespace DirectX;
 using namespace DirectX::PackedVector;
 
@@ -47,6 +50,10 @@ using Microsoft::WRL::ComPtr;
 #define FRAME_BUFFER_WIDTH	800
 #define FRAME_BUFFER_HEIGHT 600
 
-#define CHECK_HRESULT_EXCEPTION(hr) if(FAILED(hr)) throw hr;
 
 #define _WITH_SWAPCHAIN_FULLSCREEN_STATE
+
+static inline void ThrowIfFailed(HRESULT hr)
+{
+	if (FAILED(hr)) throw std::exception();
+}
