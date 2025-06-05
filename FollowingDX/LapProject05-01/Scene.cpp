@@ -125,7 +125,7 @@ void CScene::Render(ID3D12GraphicsCommandList* commandList)
 {
 	PrepareRender(commandList);
 
-	commandList->DrawInstanced(3, 1, 0, 0);
+	commandList->DrawInstanced(6, 1, 0, 0);
 }
 
 bool CScene::OnProcessMouseMessage(HWND, UINT, WPARAM, LPARAM)
