@@ -9,9 +9,6 @@ CGameObject::CGameObject()
 
 CGameObject::~CGameObject()
 {
-	if (mesh) {
-		mesh->Release();
-	}
 }
 
 
