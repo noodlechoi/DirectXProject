@@ -33,6 +33,7 @@
 
 // STL
 #include <memory>
+#include <deque>
 
 using namespace DirectX;
 using namespace DirectX::PackedVector;
@@ -57,3 +58,5 @@ static inline void ThrowIfFailed(HRESULT hr)
 {
 	if (FAILED(hr)) throw std::exception();
 }
+
+extern ID3D12Resource* CreateBufferResource(ID3D12Device*, ID3D12GraphicsCommandList*, void*, UINT, D3D12_HEAP_TYPE, D3D12_RESOURCE_STATES, ID3D12Resource**);

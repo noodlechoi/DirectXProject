@@ -253,8 +253,22 @@ void CGameFramework::CreateDepthStencilView()
 // 렌더링할 메쉬와 게임 객체 생성 및 소멸 함수
 void CGameFramework::BuildObjects()
 {
+	command_list->Reset(command_allocator.Get(), NULL);
+
+	// 씬 객체 생성
 	now_scene = std::make_unique<CScene>();
-	if (now_scene) now_scene->BuildObjects(d3d_device.Get());
+	if (now_scene) now_scene->BuildObjects(d3d_device.Get(), command_list.Get());
+
+	// 그래픽 명령 리스트 명령 큐에 추가
+	command_list->Close();
+	ID3D12CommandList* commandLists[] = { command_list.Get()};
+	command_queue->ExecuteCommandLists(1, commandLists);
+
+	//그래픽 명령 리스트들이 모두 실행될 때까지 기다린다.
+	waitForGpuComplete();
+
+	//그래픽 리소스들을 생성하는 과정에 생성된 업로드 버퍼들을 소멸시킨다.
+	if (now_scene) now_scene->ReleaseUploadBuffers();
 
 	timer.Reset();
 }

@@ -1,20 +1,28 @@
-float4 VSMain(uint vertexID : SV_VertexID ) : SV_POSITION
+struct VS_INPUT {
+    float3 position : POSITION;
+    float4 color : COLOR;
+};
+
+struct VS_OUTPUT
 {
-    float4 output;
+    float4 position : SV_POSITION;
+    float4 color : COLOR;
+};
+
+VS_OUTPUT VSMain(VS_INPUT input)
+{
+    VS_OUTPUT output;
     
-    // 프리미티브를 구성하는 정점의 인덱스(SV_VertexID)에 따라 정점을 반환한다.
-    // 정점의 위치 좌표는 변환이 된 좌표(SV_POSITION)이다. 투영좌표계 좌표이다.
-    if (vertexID == 0)
-        output = float4(0.0f, 0.5f, 0.5f, 1.0f);
-    else if (vertexID == 1) 
-        output = float4(0.5f, -0.5f, 0.5f, 1.0f);
-    else if (vertexID == 2) 
-        output = float4(-0.5f, -0.5f, 0.5f, 1.0f);
-            
-    return output;
+    //정점의 위치 벡터는 투영좌표계로 표현되어 있으므로 변환하지 않고 그대로 출력한다. 
+    output.position = float4(input.position, 1.0f);
+    
+    //입력되는 픽셀의 색상(래스터라이저 단계에서 보간하여 얻은 색상)을 그대로 출력한다. 
+    output.color = input.color;
+    
+    return (output);
 }
 
-float4 PSMain(float4 input : SV_POSITION) : SV_TARGET
+float4 PSMain(VS_OUTPUT input) : SV_TARGET
 {
-    return float4(1.0f, 1.0f, 0.0f, 1.0f);
+    return input.color;
 }
