@@ -1,4 +1,6 @@
 #include "stdafx.h"
+#include "Object.h"
+#include "Camera.h"
 #include "Shader.h"
 
 CShader::CShader()
@@ -6,6 +8,11 @@ CShader::CShader()
 }
 
 CShader::~CShader()
+{
+}
+
+CShader::CShader(CShader&& other) 
+	: ref_num{ other.ref_num }, pipeline_states{ std::move(other.pipeline_states) }
 {
 }
 
@@ -19,7 +26,7 @@ D3D12_INPUT_LAYOUT_DESC CShader::CreateInputLayout()
 D3D12_RASTERIZER_DESC CShader::CreateRasterizerState()
 {
 	D3D12_RASTERIZER_DESC rasterizerDesc{};
-	rasterizerDesc.FillMode = D3D12_FILL_MODE_WIREFRAME;
+	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 	rasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
 	rasterizerDesc.FrontCounterClockwise = FALSE;
 	rasterizerDesc.DepthBias = 0;
@@ -142,6 +149,11 @@ void CShader::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList, XMFL
 	commandList->SetGraphicsRoot32BitConstants(0, 16, &TWorldMatrix, 0);
 }
 
+void CShader::ReleaseUploadBuffers()
+{
+}
+
+
 void CShader::OnPrepareRender(ID3D12GraphicsCommandList* commandList)
 {
 	commandList->SetPipelineState(pipeline_states.Get());
@@ -182,3 +194,96 @@ D3D12_SHADER_BYTECODE CDiffusedShader::CreatePixelShader(ID3DBlob** shaderBlob)
 	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSDiffused", "ps_5_1", shaderBlob));
 }
 
+CObjectShader::CObjectShader()
+{
+}
+
+CObjectShader::CObjectShader(CObjectShader&& other) : CShader(std::move(other)), objects{ std::move(other.objects) }
+{
+}
+
+void CObjectShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
+{
+	//가로x세로x높이가 12x12x12인 정육면체 메쉬를 생성한다.
+	std::shared_ptr<CMesh> pCubeMesh = std::make_shared<CCubeMeshDiffused>(device, commandList);
+	/*x-축, y-축, z-축 양의 방향의 객체 개수이다. 각 값을 1씩 늘리거나 줄이면서 실행할 때 프레임 레이트가 어떻게 변하는 가를 살펴보기 바란다.*/
+	int xObjects = 1, yObjects = 1, zObjects = 1, i = 0;
+	//x-축, y-축, z-축으로 21개씩 총 21 x 21 x 21 = 9261개의 정육면체를 생성하고 배치한다. 
+	float fxPitch = 12.0f * 2.5f;
+	float fyPitch = 12.0f * 2.5f;
+	float fzPitch = 12.0f * 2.5f;
+	CRotatingObject* pRotatingObject = NULL;
+	for (int x = -xObjects; x <= xObjects; x++)
+	{
+		for (int y = -yObjects; y <= yObjects; y++)
+		{
+			for (int z = -zObjects; z <= zObjects; z++)
+			{
+				objects.push_back(std::unique_ptr<CGameObject>());
+				pRotatingObject = new CRotatingObject();
+				pRotatingObject->SetMesh(pCubeMesh);
+				//각 정육면체 객체의 위치를 설정한다.
+				pRotatingObject->SetPosition(fxPitch * x, fyPitch * y, fzPitch * z);
+				pRotatingObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
+				pRotatingObject->SetRotationSpeed(10.0f * (i % 10) + 3.0f);
+				objects[i++].reset(pRotatingObject);
+			}
+		}
+	}
+	CreateShaderVariables(device, commandList);
+}
+
+void CObjectShader::AnimateObjects(float fTimeElapsed)
+{
+	for (auto& object : objects) {
+		if (object)	{
+			object->Animate(fTimeElapsed);
+		}
+	}
+}
+
+D3D12_INPUT_LAYOUT_DESC CObjectShader::CreateInputLayout()
+{
+	const UINT inputElementDescNum = 2;
+	D3D12_INPUT_ELEMENT_DESC* inputElementDescs = new D3D12_INPUT_ELEMENT_DESC[inputElementDescNum];
+
+	//정점은 위치 벡터(POSITION)와 색상(COLOR)을 가진다. 
+	inputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	inputElementDescs[1] = { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+
+	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
+	inputLayoutDesc.pInputElementDescs = inputElementDescs;
+	inputLayoutDesc.NumElements = inputElementDescNum;
+
+	return inputLayoutDesc;
+}
+
+D3D12_SHADER_BYTECODE CObjectShader::CreateVertexShader(ID3DBlob** shaderBlob)
+{
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSDiffused", "vs_5_1", shaderBlob));
+}
+
+D3D12_SHADER_BYTECODE CObjectShader::CreatePixelShader(ID3DBlob** shaderBlob)
+{
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSDiffused", "ps_5_1", shaderBlob));
+}
+
+void CObjectShader::ReleaseUploadBuffers()
+{
+	for (auto& object : objects) {
+		if (object) {
+			object->ReleaseUploadBuffers();
+		}
+	}
+}
+
+void CObjectShader::Render(ID3D12GraphicsCommandList* commandList)
+{
+	CShader::Render(commandList);
+
+	for (auto& object : objects) {
+		if (object) {
+			object->Render(commandList);
+		}
+	}
+}
