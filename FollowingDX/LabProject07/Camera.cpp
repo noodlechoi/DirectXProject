@@ -22,12 +22,12 @@ void CCamera::ReleaseShaderVariables()
 void CCamera::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
 {
 	XMFLOAT4X4 viewMatrix, projectionMatrix;
-	XMStoreFloat4x4(&viewMatrix, XMMatrixTranspose(XMLoadFloat4x4(&viewMatrix)));
-	XMStoreFloat4x4(&projectionMatrix, XMMatrixTranspose(XMLoadFloat4x4(&projectionMatrix)));
+	XMStoreFloat4x4(&viewMatrix, XMMatrixTranspose(XMLoadFloat4x4(&view_matrix)));
+	XMStoreFloat4x4(&projectionMatrix, XMMatrixTranspose(XMLoadFloat4x4(&projection_matrix)));
 
 	// root signiture index = 1
 	commandList->SetGraphicsRoot32BitConstants(1, 16, &viewMatrix, 0);
-	commandList->SetGraphicsRoot32BitConstants(1, 16, &projectionMatrix, 0);
+	commandList->SetGraphicsRoot32BitConstants(1, 16, &projectionMatrix, 16);
 }
 
 void CCamera::GenerateViewMatrix(XMFLOAT3 position, XMFLOAT3 lookAt, XMFLOAT3 up)

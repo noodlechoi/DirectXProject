@@ -4,9 +4,6 @@
 CGameFramework::CGameFramework()
 {
 	_tcscpy_s(frame_rate_str, _T("LapProject ("));
-
-	viewport = { 0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f };
-	scissor_rect = { 0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT };
 }
 
 CGameFramework::~CGameFramework()
@@ -146,17 +143,6 @@ void CGameFramework::CreateD3DDevice()
 	*/
 	fence_event = ::CreateEvent(NULL, FALSE, FALSE, NULL);
 
-	// 뷰포트를 윈도우 클라이언트 전체 영역으로 설정
-	viewport.TopLeftX = 0;
-	viewport.TopLeftY = 0;
-	viewport.Width = static_cast<float>(client_width);
-	viewport.Height = static_cast<float>(client_height);
-	viewport.MinDepth = 0.0f;
-	viewport.MaxDepth = 1.0f;
-
-	// 씨저 사각형을 클라이언트 영역 전체로 설정
-	scissor_rect = { 0, 0, client_width, client_height };
-
 	if (adapter) adapter->Release();
 }
 
@@ -254,17 +240,16 @@ void CGameFramework::CreateDepthStencilView()
 void CGameFramework::BuildObjects()
 {
 	command_list->Reset(command_allocator.Get(), NULL);
-
-	// 씬 객체 생성
-	now_scene = std::make_unique<CScene>();
-	if (now_scene) now_scene->BuildObjects(d3d_device.Get(), command_list.Get());
-
 	// 카메라 객체 생성
 	camera = std::make_unique<CCamera>();
 	camera->SetViewport(0, 0, client_width, client_height);
 	camera->SetScissorRect(0, 0, client_width, client_height);
 	camera->GenerateProjectionMatrix(1.0f, 500.0f, (float)client_width / (float)client_height, 90.0f);
 	camera->GenerateViewMatrix(XMFLOAT3(0.0f, 0.0f, -2.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 1.0f, 0.0f));
+
+	// 씬 객체 생성
+	now_scene = std::make_unique<CScene>();
+	if (now_scene) now_scene->BuildObjects(d3d_device.Get(), command_list.Get());
 
 	// 그래픽 명령 리스트 명령 큐에 추가
 	command_list->Close();
@@ -394,7 +379,7 @@ void CGameFramework::FrameAdvance()
 	command_list->ClearDepthStencilView(dsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0F, 0, 0, NULL);
 
 	// 렌더링 코드
-	if (now_scene) now_scene->Render(command_list.Get());
+	if (now_scene) now_scene->Render(command_list.Get(), camera.get());
 
 	// 현재 렌더 타겟에 대한 렌더링이 끝나기를 기다림. GPU가 버퍼를 더 이상 사용하지 않으면 렌더 타겟 -> 프레젠트 상태로 변경
 	resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
