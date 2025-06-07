@@ -37,15 +37,15 @@ void CCamera::GenerateViewMatrix(XMFLOAT3 position, XMFLOAT3 lookAt, XMFLOAT3 up
 
 void CCamera::GenerateProjectionMatrix(float nearPlaneDistance, float farPlaneDistance, float aspectRatio, float fovAngle)
 {
-	projection_matrix = Matrix4x4::PerspectiveFovLH(XMConvertToRadians(fovAngle), aspectRatio, nearPlaneDistance, farPlaneDistance);
+	projection_matrix = Matrix4x4::PerspectiveFovLH(fovAngle, aspectRatio, nearPlaneDistance, farPlaneDistance);
 }
 
 void CCamera::SetViewport(int x, int y, int width, int height, float minZ, float maxZ)
 {
-	viewport.TopLeftX = (float)x;
-	viewport.TopLeftY = (float)y;
-	viewport.Width = (float)width;
-	viewport.Height = (float)height;
+	viewport.TopLeftX = float(x);
+	viewport.TopLeftY = float(y);
+	viewport.Width = float(width);
+	viewport.Height = float(height);
 	viewport.MinDepth = minZ;
 	viewport.MaxDepth = maxZ;
 }

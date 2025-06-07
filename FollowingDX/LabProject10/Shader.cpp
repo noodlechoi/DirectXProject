@@ -204,11 +204,9 @@ CObjectShader::CObjectShader(CObjectShader&& other) : CShader(std::move(other)),
 
 void CObjectShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
 {
-	//가로x세로x높이가 12x12x12인 정육면체 메쉬를 생성한다.
 	std::shared_ptr<CMesh> pCubeMesh = std::make_shared<CCubeMeshDiffused>(device, commandList);
-	/*x-축, y-축, z-축 양의 방향의 객체 개수이다. 각 값을 1씩 늘리거나 줄이면서 실행할 때 프레임 레이트가 어떻게 변하는 가를 살펴보기 바란다.*/
-	int xObjects = 1, yObjects = 1, zObjects = 1, i = 0;
-	//x-축, y-축, z-축으로 21개씩 총 21 x 21 x 21 = 9261개의 정육면체를 생성하고 배치한다. 
+	int xObjects = 6, yObjects = 6, zObjects = 6, i = 0;
+	//x-축, y-축, z-축으로 총 13x13x13 = 2197개의 정육면체를 생성하고 배치. 65 frame
 	float fxPitch = 12.0f * 2.5f;
 	float fyPitch = 12.0f * 2.5f;
 	float fzPitch = 12.0f * 2.5f;

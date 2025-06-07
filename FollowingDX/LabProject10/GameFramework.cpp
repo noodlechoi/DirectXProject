@@ -245,7 +245,7 @@ void CGameFramework::BuildObjects()
 	camera->SetViewport(0, 0, client_width, client_height);
 	camera->SetScissorRect(0, 0, client_width, client_height);
 	camera->GenerateProjectionMatrix(1.0f, 500.0f, float(client_width) / float(client_height), 90.0f);
-	camera->GenerateViewMatrix(XMFLOAT3(0.0f, 20.0f, -200.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 1.0f, 0.0f));
+	camera->GenerateViewMatrix(XMFLOAT3(0.0f, 0.0f, -20.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 1.0f, 0.0f));
 
 	// ¾À °´Ã¼ »ý¼º
 	now_scene = std::make_unique<CScene>();
