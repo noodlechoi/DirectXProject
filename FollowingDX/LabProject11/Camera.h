@@ -53,4 +53,6 @@ public:
 
 class CThirdPersonCamera : public CCamera
 {
+public:
+	CThirdPersonCamera();
 };

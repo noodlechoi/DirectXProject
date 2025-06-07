@@ -5,7 +5,7 @@
 class CPlayer : public CGameObject
 {
 public:
-	CPlayer(float, float);
+	CPlayer(CCamera*, float, float);
 
 	void CreateShaderVariables(ID3D12Device*, ID3D12GraphicsCommandList*) override;
 

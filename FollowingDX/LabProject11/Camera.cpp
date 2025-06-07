@@ -105,3 +105,7 @@ void CCamera::Update(XMFLOAT3&, float)
 CFirstPersonCamera::CFirstPersonCamera() : CCamera()
 {
 }
+
+CThirdPersonCamera::CThirdPersonCamera() : CCamera()
+{
+}

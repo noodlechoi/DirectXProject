@@ -1,9 +1,9 @@
 #include "stdafx.h"
 #include "Player.h"
 
-CPlayer::CPlayer(float width, float height) : camera{ std::make_unique<CFirstPersonCamera>() }
+CPlayer::CPlayer(CCamera* otherCamera, float width, float height)
 {
-	// 카메라 객체 생성
+	camera.reset(otherCamera);
 	camera->SetViewport(0, 0, width, height);
 	camera->SetScissorRect(0, 0, width, height);
 	camera->GenerateProjectionMatrix(1.0f, 500.0f, float(width) / float(height), 90.0f);
@@ -40,7 +40,7 @@ void CPlayer::Render(ID3D12GraphicsCommandList* commandList)
 	CGameObject::Render(commandList);
 }
 
-CSpaceShipPlayer::CSpaceShipPlayer(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, float width, float height) : CPlayer(width, height)
+CSpaceShipPlayer::CSpaceShipPlayer(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, float width, float height) : CPlayer(new CThirdPersonCamera, width, height)
 {
 	std::shared_ptr<CMesh> cubeMesh = std::make_shared<CAirPlaneMeshDiffused>(device, commandList);
 	SetMesh(cubeMesh);
