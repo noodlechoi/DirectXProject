@@ -32,7 +32,7 @@ public:
 	void AddRef() { ref_num++; }
 	void Release() { if (--ref_num <= 0) delete this; }
 
-	void ReleaseUploadBuffer();
+	void ReleaseUploadBuffers();
 
 	virtual void Render(ID3D12GraphicsCommandList*);
 private:

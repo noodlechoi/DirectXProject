@@ -130,7 +130,7 @@
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="GameFramework.h" />
-    <ClInclude Include="GameObject.h" />
+    <ClInclude Include="Object.h" />
     <ClInclude Include="LabProject07.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Resource.h" />
@@ -150,7 +150,7 @@
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="GameFramework.cpp" />
-    <ClCompile Include="GameObject.cpp" />
+    <ClCompile Include="Object.cpp" />
     <ClCompile Include="LabProject07.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Scene.cpp" />

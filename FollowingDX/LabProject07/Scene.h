@@ -1,6 +1,8 @@
 #pragma once
-#include "Shader.h"
+#include "Camera.h"
+#include "Object.h"
 
+// 게임 오브젝트를 관리하는 클래스
 class CScene
 {
 public:
@@ -16,16 +18,15 @@ public:
 	void ReleaseUploadBuffers();
 
 	void BuildObjects(ID3D12Device*, ID3D12GraphicsCommandList*);
-	void ReleaseObjects();
 
 	bool ProcessInput();
 	void AnimateObjects(float);
 
 	// 멤버 변수 set
 	void PrepareRender(ID3D12GraphicsCommandList*);
-	void Render(ID3D12GraphicsCommandList*);
+	void Render(ID3D12GraphicsCommandList*, CCamera*);
 protected:
-	std::deque<std::unique_ptr<CShader>> shaders{};
+	std::deque<std::unique_ptr<CGameObject>> objects{};
 
 	ComPtr<ID3D12RootSignature> graphics_root_signature{};
 };
