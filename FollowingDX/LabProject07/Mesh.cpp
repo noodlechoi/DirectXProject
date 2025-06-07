@@ -30,13 +30,16 @@ CMesh::CMesh(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
 {
 }
 
-void CMesh::ReleaseUploadBuffers()
+void CMesh::ReleaseUploadBuffer()
 {
 	if (vertex_upload_buffer) vertex_upload_buffer.Reset();
+	vertex_upload_buffer = nullptr;
 }
 
 void CMesh::Render(ID3D12GraphicsCommandList* commandList)
 {
+	// 프리미티브 유형 설정
+	commandList->IASetPrimitiveTopology(primitive_topology);
 	// 정점 버퍼 뷰 설정
 	commandList->IASetVertexBuffers(slot_num, 1, &vertex_buffer_view);
 	// 렌더링(입력 조립기 작동)

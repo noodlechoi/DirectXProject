@@ -59,7 +59,6 @@ static inline void ThrowIfFailed(HRESULT hr)
 	if (FAILED(hr)) throw std::exception();
 }
 
-// data를 upload buffer로 복사한 뒤, 그 버퍼를 리턴
 extern ID3D12Resource* CreateBufferResource(ID3D12Device*, ID3D12GraphicsCommandList*, void*, UINT, D3D12_HEAP_TYPE, D3D12_RESOURCE_STATES, ID3D12Resource**);
 
 namespace Vector3

@@ -1,6 +1,7 @@
 #pragma once
 #include "Timer.h"
 #include "Scene.h"
+#include "Camera.h"
 
 // d3d device를 다루고 Scene을 관리
 class CGameFramework
@@ -86,6 +87,10 @@ private:
 	// 후면 버퍼마다 펜스값 관리
 	UINT64 fence_value[swap_chain_buffer_num]{};
 	HANDLE fence_event{};
+
+	// 뷰포트와 씨저 사각형
+	D3D12_VIEWPORT viewport{};
+	D3D12_RECT scissor_rect{};
 
 	// Timer 관련
 	CTimer timer;

@@ -11,7 +11,16 @@ CShader::~CShader()
 
 D3D12_INPUT_LAYOUT_DESC CShader::CreateInputLayout()
 {
+	const UINT inputElementDescNum = 2;
+	D3D12_INPUT_ELEMENT_DESC* inputElementDescs = new D3D12_INPUT_ELEMENT_DESC[inputElementDescNum];
+
+	//정점은 위치 벡터(POSITION)와 색상(COLOR)을 가진다. 
+	inputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	inputElementDescs[1] = { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+
 	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
+	inputLayoutDesc.pInputElementDescs = inputElementDescs;
+	inputLayoutDesc.NumElements = inputElementDescNum;
 
 	return inputLayoutDesc;
 }
@@ -76,14 +85,12 @@ D3D12_DEPTH_STENCIL_DESC CShader::CreateDepthStencilState()
 
 D3D12_SHADER_BYTECODE CShader::CreateVertexShader(ID3DBlob** shaderBlob)
 {
-	D3D12_SHADER_BYTECODE shaderBytecode{};
-	return shaderBytecode;
+	return CompileShaderFromFile(L"Shaders.hlsl", "VSMain", "vs_5_1", shaderBlob);
 }
 
 D3D12_SHADER_BYTECODE CShader::CreatePixelShader(ID3DBlob** shaderBlob)
 {
-	D3D12_SHADER_BYTECODE shaderBytecode{};
-	return shaderBytecode;
+	return CompileShaderFromFile(L"Shaders.hlsl", "PSMain", "ps_5_1", shaderBlob);
 }
 
 D3D12_SHADER_BYTECODE CShader::CompileShaderFromFile(WCHAR* fileName, LPCSTR shaderName, LPCSTR shaderProfile, ID3DBlob** shaderBlob)
@@ -104,6 +111,7 @@ D3D12_SHADER_BYTECODE CShader::CompileShaderFromFile(WCHAR* fileName, LPCSTR sha
 void CShader::CreateShader(ID3D12Device* device, ID3D12RootSignature* rootSignature)
 {
 	//그래픽스 파이프라인 상태 객체 배열을 생성한다.
+	pipeline_states.push_back(ComPtr<ID3D12PipelineState>());
 	ComPtr<ID3DBlob> vertexShaderBlob{}, pixelShaderBlob{};
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC pipelineStateDesc{};
@@ -120,9 +128,8 @@ void CShader::CreateShader(ID3D12Device* device, ID3D12RootSignature* rootSignat
 	pipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
 	pipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	pipelineStateDesc.SampleDesc.Count = 1;
-	pipelineStateDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 
-	device->CreateGraphicsPipelineState(&pipelineStateDesc, __uuidof(ID3D12PipelineState), (void**)pipeline_states.GetAddressOf());
+	device->CreateGraphicsPipelineState(&pipelineStateDesc, __uuidof(ID3D12PipelineState), (void**)pipeline_states[0].GetAddressOf());
 
 	if (pipelineStateDesc.InputLayout.pInputElementDescs) delete[] pipelineStateDesc.InputLayout.pInputElementDescs;
 }
@@ -135,50 +142,51 @@ void CShader::UpdateShaderVariables(ID3D12GraphicsCommandList*)
 {
 }
 
-void CShader::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList, XMFLOAT4X4* worldMatrix)
+void CShader::ReleaseShaderVariables()
 {
-	XMFLOAT4X4 TWorldMatrix;
-	XMStoreFloat4x4(&TWorldMatrix, XMMatrixTranspose(XMLoadFloat4x4(worldMatrix)));
-	commandList->SetGraphicsRoot32BitConstants(0, 16, &TWorldMatrix, 0);
+
+}
+
+void CShader::ReleaseUploadBuffers()
+{
+	if (!objects.empty()) {
+		for (int i = 0; i < objects.size(); ++i) {
+			if (objects[i]) objects[i]->ReleaseUploadBuffer();
+		}
+	}
+}
+
+void CShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, void* context)
+{
+	CTriangleMesh* pTriangleMesh = new CTriangleMesh(device, commandList);
+
+	for (int i = 0; i < 1; ++i) {
+		objects.push_back(std::make_unique<CGameObject>());
+	}
+	objects[0]->SetMesh(pTriangleMesh);
+}
+
+void CShader::AnimateObjects(float elapsedTime)
+{
+	for (int i = 0; i < objects.size(); ++i) {
+		if (objects[i]) {
+			objects[i]->Animate(elapsedTime);
+		}
+	}
 }
 
 void CShader::OnPrepareRender(ID3D12GraphicsCommandList* commandList)
 {
-	commandList->SetPipelineState(pipeline_states.Get());
+	commandList->SetPipelineState(pipeline_states[0].Get());
 }
 
 void CShader::Render(ID3D12GraphicsCommandList* commandList)
 {
 	OnPrepareRender(commandList);
+
+	for (int i = 0; i < objects.size(); ++i) {
+		if (objects[i]) {
+			objects[i]->Render(commandList);
+		}
+	}
 }
-
-CDiffusedShader::CDiffusedShader()
-{
-}
-
-D3D12_INPUT_LAYOUT_DESC CDiffusedShader::CreateInputLayout()
-{
-	const UINT inputElementDescNum = 2;
-	D3D12_INPUT_ELEMENT_DESC* inputElementDescs = new D3D12_INPUT_ELEMENT_DESC[inputElementDescNum];
-
-	//정점은 위치 벡터(POSITION)와 색상(COLOR)을 가진다. 
-	inputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	inputElementDescs[1] = { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-
-	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
-	inputLayoutDesc.pInputElementDescs = inputElementDescs;
-	inputLayoutDesc.NumElements = inputElementDescNum;
-
-	return inputLayoutDesc;
-}
-
-D3D12_SHADER_BYTECODE CDiffusedShader::CreateVertexShader(ID3DBlob** shaderBlob)
-{
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSDiffused", "vs_5_1", shaderBlob));
-}
-
-D3D12_SHADER_BYTECODE CDiffusedShader::CreatePixelShader(ID3DBlob** shaderBlob)
-{
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSDiffused", "ps_5_1", shaderBlob));
-}
-
