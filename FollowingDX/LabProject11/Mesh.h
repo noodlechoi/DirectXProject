@@ -72,3 +72,9 @@ class CCubeMeshDiffused : public CMesh
 public:
 	CCubeMeshDiffused(ID3D12Device*, ID3D12GraphicsCommandList*, float = 2.0f, float = 2.0f, float = 2.0f);
 };
+
+class CAirPlaneMeshDiffused : public CMesh
+{
+public:
+	CAirPlaneMeshDiffused(ID3D12Device* , ID3D12GraphicsCommandList* , float  = 20.0f, float  = 20.0f, float  = 4.0f, XMFLOAT4 = XMFLOAT4(1.0f, 1.0f, 0.0f, 0.0f));
+};

@@ -134,3 +134,169 @@ CCubeMeshDiffused::CCubeMeshDiffused(ID3D12Device* device, ID3D12GraphicsCommand
 	index_buffer_view.Format = DXGI_FORMAT_R32_UINT;
 	index_buffer_view.SizeInBytes = sizeof(UINT) * index_num;
 }
+
+CAirPlaneMeshDiffused::CAirPlaneMeshDiffused(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, float width, float height, float depth, XMFLOAT4 color)
+	: CMesh(device, commandList)
+{
+	vertex_num = 24 * 3;
+	stride = sizeof(CDiffusedVertex);
+	float fx = width * 0.5f, fy = height * 0.5f, fz = depth * 0.5f;
+	//위의 그림과 같은 비행기 메쉬를 표현하기 위한 정점 데이터이다.
+	CDiffusedVertex vertices[24 * 3];
+	float x1 = fx * 0.2f, y1 = fy * 0.2f, x2 = fx * 0.1f, y3 = fy * 0.3f, y2 = ((y1 - (fy -	y3)) / x1) * x2 + (fy - y3);
+	int i = 0;
+	//비행기 메쉬의 위쪽 면
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(0.0f, +(fy + y3), -fz), Vector4::Add(color, RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(+x1, -y1, -fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(0.0f, 0.0f, -fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(0.0f, +(fy + y3), -fz),
+		Vector4::Add(color, RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(0.0f, 0.0f, -fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(-x1, -y1, -fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(+x2, +y2, -fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(+fx, -y3, -fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(+x1, -y1, -fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(-x2, +y2, -fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(-x1, -y1, -fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(-fx, -y3, -fz), Vector4::Add(color,
+		RandomColor()));
+	//비행기 메쉬의 아래쪽 면
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(0.0f, +(fy + y3), +fz),
+		Vector4::Add(color, RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(0.0f, 0.0f, +fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(+x1, -y1, +fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(0.0f, +(fy + y3), +fz),
+		Vector4::Add(color, RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(-x1, -y1, +fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(0.0f, 0.0f, +fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(+x2, +y2, +fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(+x1, -y1, +fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(+fx, -y3, +fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(-x2, +y2, +fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(-fx, -y3, +fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(-x1, -y1, +fz), Vector4::Add(color,
+		RandomColor()));
+	//비행기 메쉬의 오른쪽 면
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(0.0f, +(fy + y3), -fz),
+		Vector4::Add(color, RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(0.0f, +(fy + y3), +fz),
+		Vector4::Add(color, RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(+x2, +y2, -fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(+x2, +y2, -fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(0.0f, +(fy + y3), +fz),
+		Vector4::Add(color, RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(+x2, +y2, +fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(+x2, +y2, -fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(+x2, +y2, +fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(+fx, -y3, -fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(+fx, -y3, -fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(+x2, +y2, +fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(+fx, -y3, +fz), Vector4::Add(color,
+		RandomColor()));
+	//비행기 메쉬의 뒤쪽/오른쪽 면
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(+x1, -y1, -fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(+fx, -y3, -fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(+fx, -y3, +fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(+x1, -y1, -fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(+fx, -y3, +fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(+x1, -y1, +fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(0.0f, 0.0f, -fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(+x1, -y1, -fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(+x1, -y1, +fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(0.0f, 0.0f, -fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(+x1, -y1, +fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(0.0f, 0.0f, +fz), Vector4::Add(color,
+		RandomColor()));
+	//비행기 메쉬의 왼쪽 면
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(0.0f, +(fy + y3), +fz),
+		Vector4::Add(color, RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(0.0f, +(fy + y3), -fz),
+		Vector4::Add(color, RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(-x2, +y2, -fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(0.0f, +(fy + y3), +fz),
+		Vector4::Add(color, RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(-x2, +y2, -fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(-x2, +y2, +fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(-x2, +y2, +fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(-x2, +y2, -fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(-fx, -y3, -fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(-x2, +y2, +fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(-fx, -y3, -fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(-fx, -y3, +fz), Vector4::Add(color,
+		RandomColor()));
+	//비행기 메쉬의 뒤쪽/왼쪽 면
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(0.0f, 0.0f, -fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(0.0f, 0.0f, +fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(-x1, -y1, +fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(0.0f, 0.0f, -fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(-x1, -y1, +fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(-x1, -y1, -fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(-x1, -y1, -fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(-x1, -y1, +fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(-fx, -y3, +fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(-x1, -y1, -fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(-fx, -y3, +fz), Vector4::Add(color,
+		RandomColor()));
+	vertices[i++] = CDiffusedVertex(XMFLOAT3(-fx, -y3, -fz), Vector4::Add(color,
+		RandomColor()));
+
+	vertex_buffer = ::CreateBufferResource(device, commandList, vertices, stride * vertex_num, D3D12_HEAP_TYPE_DEFAULT,	D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &vertex_upload_buffer);
+	vertex_buffer_view.BufferLocation = vertex_buffer->GetGPUVirtualAddress();
+	vertex_buffer_view.StrideInBytes = stride;
+	vertex_buffer_view.SizeInBytes = stride * vertex_num;
+}

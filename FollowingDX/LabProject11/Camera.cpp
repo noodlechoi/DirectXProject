@@ -30,9 +30,9 @@ void CCamera::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
 	commandList->SetGraphicsRoot32BitConstants(1, 16, &projectionMatrix, 16);
 }
 
-void CCamera::GenerateViewMatrix(XMFLOAT3 position, XMFLOAT3 lookAt, XMFLOAT3 up)
+void CCamera::GenerateViewMatrix(XMFLOAT3 otherPosition, XMFLOAT3 lookAt, XMFLOAT3 otherUp)
 {
-	view_matrix = Matrix4x4::LookAtLH(position, lookAt, up);
+	view_matrix = Matrix4x4::LookAtLH(otherPosition, lookAt, otherUp);
 }
 
 void CCamera::GenerateProjectionMatrix(float nearPlaneDistance, float farPlaneDistance, float aspectRatio, float fovAngle)

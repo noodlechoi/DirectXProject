@@ -240,15 +240,9 @@ void CGameFramework::CreateDepthStencilView()
 void CGameFramework::BuildObjects()
 {
 	command_list->Reset(command_allocator.Get(), NULL);
-	// 카메라 객체 생성
-	camera = std::make_unique<CCamera>();
-	camera->SetViewport(0, 0, client_width, client_height);
-	camera->SetScissorRect(0, 0, client_width, client_height);
-	camera->GenerateProjectionMatrix(1.0f, 500.0f, float(client_width) / float(client_height), 90.0f);
-	camera->GenerateViewMatrix(XMFLOAT3(0.0f, 0.0f, -20.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 1.0f, 0.0f));
-
+	
 	// 씬 객체 생성
-	now_scene = std::make_unique<CScene>();
+	now_scene = std::make_unique<CScene>((float)client_width, (float)client_height);
 	if (now_scene) now_scene->BuildObjects(d3d_device.Get(), command_list.Get());
 
 	// 그래픽 명령 리스트 명령 큐에 추가
@@ -379,7 +373,7 @@ void CGameFramework::FrameAdvance()
 	command_list->ClearDepthStencilView(dsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0F, 0, 0, NULL);
 
 	// 렌더링 코드
-	if (now_scene) now_scene->Render(command_list.Get(), camera.get());
+	if (now_scene) now_scene->Render(command_list.Get());
 
 	// 현재 렌더 타겟에 대한 렌더링이 끝나기를 기다림. GPU가 버퍼를 더 이상 사용하지 않으면 렌더 타겟 -> 프레젠트 상태로 변경
 	resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;

@@ -93,8 +93,5 @@ private:
 
 	// game objects
 	std::unique_ptr<CScene> now_scene{};
-	std::unique_ptr<CCamera> camera{};
-
-
 };
 

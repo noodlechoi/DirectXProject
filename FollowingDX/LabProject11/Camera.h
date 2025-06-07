@@ -28,5 +28,14 @@ protected:
 
 	D3D12_VIEWPORT viewport;
 	D3D12_RECT scissor_rect;
+
+	XMFLOAT3 position{};
+	XMFLOAT3 right{};
+	XMFLOAT3 up{};
+	XMFLOAT3 look{};
+	
+	XMFLOAT3 look_at_world{};
+	XMFLOAT3 offset{};
+	float time_lag{};
 };
 

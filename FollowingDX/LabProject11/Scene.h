@@ -1,12 +1,12 @@
 #pragma once
-#include "Camera.h"
+#include "Player.h"
 #include "Object.h"
 
 // 게임 오브젝트를 관리하는 클래스
 class CScene
 {
 public:
-	CScene();
+	CScene(float, float);
 	virtual ~CScene();
 
 	ID3D12RootSignature* GetGraphicsRootSignature() { return graphics_root_signature.Get(); }
@@ -24,10 +24,11 @@ public:
 
 	// 멤버 변수 set
 	void PrepareRender(ID3D12GraphicsCommandList*);
-	void Render(ID3D12GraphicsCommandList*, CCamera*);
+	void Render(ID3D12GraphicsCommandList*);
 protected:
 	ComPtr<ID3D12RootSignature> graphics_root_signature{};
 
+	std::unique_ptr<CPlayer> player{};
 	std::vector<CObjectShader> shaders{};
 };
 

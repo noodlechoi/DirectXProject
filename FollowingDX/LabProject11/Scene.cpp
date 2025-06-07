@@ -2,7 +2,8 @@
 #include "Shader.h"
 #include "Scene.h"
 
-CScene::CScene()
+CScene::CScene(float width, float height) :
+	player{ std::make_unique<CPlayer>(width, height) }
 {
 	shaders.reserve(10);
 }
@@ -86,12 +87,11 @@ void CScene::PrepareRender(ID3D12GraphicsCommandList* commandList)
 	commandList->SetGraphicsRootSignature(graphics_root_signature.Get());
 }
 
-void CScene::Render(ID3D12GraphicsCommandList* commandList , CCamera* camera)
+void CScene::Render(ID3D12GraphicsCommandList* commandList )
 {
 	PrepareRender(commandList);
 
-	camera->SetViewportsAndScissorRects(commandList);
-	if (camera) camera->UpdateShaderVariables(commandList);
+	player->Render(commandList);
 
 	for (auto& shader : shaders) {
 		shader.Render(commandList);
