@@ -1,6 +1,7 @@
 #pragma once
 #include "Mesh.h"
-#include "Shader.h"
+
+class CShader;
 
 // mesh를 가지고 있는 게임 오브젝트 클래스
 class CGameObject

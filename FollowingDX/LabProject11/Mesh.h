@@ -27,7 +27,7 @@ protected:
 class CMesh
 {
 public:
-	CMesh(ID3D12Device*, ID3D12GraphicsCommandList*);
+	CMesh();
 	virtual ~CMesh() {}
 
 	void AddRef() { ref_num++; }

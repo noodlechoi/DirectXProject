@@ -1,12 +1,10 @@
 #pragma once
+#include "Player.h"
 
 // 게임 객체의 정보를 쉐이더에게 넘겨주기 위한 상수 버퍼 구조체
 //struct CB_GAMEOBJECT_INFO {
 //	XMFLOAT4X4 world_matrix; // 월드 행렬
 //};
-
-class CGameObject;
-class CCamera;
 
 // pipeline 상태 객체를 생성
 class CShader
@@ -63,6 +61,7 @@ class CObjectShader : public CShader
 {
 public:
 	CObjectShader();
+	CObjectShader(float, float);
 	virtual ~CObjectShader() {}
 	CObjectShader(CObjectShader&&);
 
@@ -76,4 +75,5 @@ public:
 	void Render(ID3D12GraphicsCommandList*) override;
 protected:
 	std::deque<std::unique_ptr<CGameObject>> objects{};
+	std::unique_ptr<CPlayer> player{};
 };

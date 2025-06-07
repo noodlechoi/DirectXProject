@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Shader.h"
 #include "Object.h"
 
 CGameObject::CGameObject() : world_matrix{Matrix4x4::Identity()}

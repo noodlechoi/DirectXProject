@@ -1,9 +1,9 @@
 #include "stdafx.h"
 #include "Object.h"
-#include "Camera.h"
+#include "Mesh.h"
 #include "Shader.h"
 
-CShader::CShader()
+CShader::CShader() 
 {
 }
 
@@ -162,6 +162,7 @@ void CShader::OnPrepareRender(ID3D12GraphicsCommandList* commandList)
 void CShader::Render(ID3D12GraphicsCommandList* commandList)
 {
 	OnPrepareRender(commandList);
+
 }
 
 CDiffusedShader::CDiffusedShader()
@@ -198,12 +199,18 @@ CObjectShader::CObjectShader()
 {
 }
 
+CObjectShader::CObjectShader(float width, float height)
+{
+}
+
 CObjectShader::CObjectShader(CObjectShader&& other) : CShader(std::move(other)), objects{ std::move(other.objects) }
 {
 }
 
 void CObjectShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
 {
+	player = std::make_unique<CSpaceShipPlayer>(device, commandList, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
+
 	std::shared_ptr<CMesh> pCubeMesh = std::make_shared<CCubeMeshDiffused>(device, commandList);
 	int xObjects = 6, yObjects = 6, zObjects = 6, i = 0;
 	//x-축, y-축, z-축으로 총 13x13x13 = 2197개의 정육면체를 생성하고 배치. 65 frame
@@ -278,6 +285,8 @@ void CObjectShader::ReleaseUploadBuffers()
 void CObjectShader::Render(ID3D12GraphicsCommandList* commandList)
 {
 	CShader::Render(commandList);
+
+	player->Render(commandList);
 
 	for (auto& object : objects) {
 		if (object) {

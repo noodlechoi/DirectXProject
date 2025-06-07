@@ -1,8 +1,6 @@
 #pragma once
-#include "Player.h"
-#include "Object.h"
+#include "Shader.h"
 
-// 게임 오브젝트를 관리하는 클래스
 class CScene
 {
 public:
@@ -28,7 +26,9 @@ public:
 protected:
 	ComPtr<ID3D12RootSignature> graphics_root_signature{};
 
-	std::unique_ptr<CPlayer> player{};
 	std::vector<CObjectShader> shaders{};
+
+	float cliend_width{};
+	float cliend_height{};
 };
 

@@ -1,9 +1,8 @@
 #include "stdafx.h"
-#include "Shader.h"
 #include "Scene.h"
 
-CScene::CScene(float width, float height) :
-	player{ std::make_unique<CPlayer>(width, height) }
+CScene::CScene(float width, float height)
+	: cliend_width{ width }, cliend_height{ height }
 {
 	shaders.reserve(10);
 }
@@ -63,7 +62,7 @@ void CScene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* comma
 {
 	graphics_root_signature = CreateGraphicsRootSignature(device);
 
-	shaders.emplace_back();
+	shaders.emplace_back(cliend_width, cliend_height);
 	shaders[0].CreateShader(device, graphics_root_signature.Get());
 	shaders[0].BuildObjects(device, commandList);
 }
@@ -91,7 +90,6 @@ void CScene::Render(ID3D12GraphicsCommandList* commandList )
 {
 	PrepareRender(commandList);
 
-	player->Render(commandList);
 
 	for (auto& shader : shaders) {
 		shader.Render(commandList);

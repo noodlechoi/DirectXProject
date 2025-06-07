@@ -26,7 +26,7 @@ CVertex& CVertex::operator=(CVertex&& other)
 	return *this;
 }
 
-CMesh::CMesh(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
+CMesh::CMesh()
 {
 }
 
@@ -50,7 +50,7 @@ void CMesh::Render(ID3D12GraphicsCommandList* commandList)
 }
 
 CTriangleMesh::CTriangleMesh(ID3D12Device* device, ID3D12GraphicsCommandList* commandList) : 
-	CMesh(device, commandList)
+	CMesh()
 {
 	vertex_num = 3;
 	stride = sizeof(CDiffusedVertex);
@@ -71,7 +71,7 @@ CTriangleMesh::CTriangleMesh(ID3D12Device* device, ID3D12GraphicsCommandList* co
 }
 
 CCubeMeshDiffused::CCubeMeshDiffused(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, float width, float height, float depth) :
-	CMesh(device, commandList)
+	CMesh()
 {
 	const size_t vertexSize = 8;
 
@@ -136,7 +136,7 @@ CCubeMeshDiffused::CCubeMeshDiffused(ID3D12Device* device, ID3D12GraphicsCommand
 }
 
 CAirPlaneMeshDiffused::CAirPlaneMeshDiffused(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, float width, float height, float depth, XMFLOAT4 color)
-	: CMesh(device, commandList)
+	: CMesh()
 {
 	vertex_num = 24 * 3;
 	stride = sizeof(CDiffusedVertex);
