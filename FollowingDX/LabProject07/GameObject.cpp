@@ -2,9 +2,8 @@
 #include "Shader.h"
 #include "GameObject.h"
 
-CGameObject::CGameObject()
+CGameObject::CGameObject() : world_matrix{Matrix4x4::Identity()}
 {
-	XMStoreFloat4x4(&world_matrix, XMMatrixIdentity());
 }
 
 CGameObject::~CGameObject()

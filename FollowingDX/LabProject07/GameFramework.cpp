@@ -259,6 +259,13 @@ void CGameFramework::BuildObjects()
 	now_scene = std::make_unique<CScene>();
 	if (now_scene) now_scene->BuildObjects(d3d_device.Get(), command_list.Get());
 
+	// 카메라 객체 생성
+	camera = std::make_unique<CCamera>();
+	camera->SetViewport(0, 0, client_width, client_height);
+	camera->SetScissorRect(0, 0, client_width, client_height);
+	camera->GenerateProjectionMatrix(1.0f, 500.0f, (float)client_width / (float)client_height, 90.0f);
+	camera->GenerateViewMatrix(XMFLOAT3(0.0f, 0.0f, -2.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 1.0f, 0.0f));
+
 	// 그래픽 명령 리스트 명령 큐에 추가
 	command_list->Close();
 	ID3D12CommandList* commandLists[] = { command_list.Get()};
@@ -357,10 +364,6 @@ void CGameFramework::FrameAdvance()
 	// 명령 리셋
 	ThrowIfFailed(command_allocator->Reset());
 	ThrowIfFailed(command_list->Reset(command_allocator.Get(), NULL));
-
-	// 뷰포트 씨저 사각형 설정
-	command_list->RSSetViewports(1, &viewport);
-	command_list->RSSetScissorRects(1, &scissor_rect);
 
 	// 현재 렌더 타겟에 대한 프리젠트가 끝나기를 기다림. 프리젠트가 끝나면 렌더 타겟 상태로 바꿈
 	D3D12_RESOURCE_BARRIER resourceBarrier{};

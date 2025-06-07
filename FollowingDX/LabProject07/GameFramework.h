@@ -1,6 +1,7 @@
 #pragma once
 #include "Timer.h"
 #include "Scene.h"
+#include "Camera.h"
 
 // d3d device를 다루고 Scene을 관리
 class CGameFramework
@@ -95,7 +96,10 @@ private:
 	CTimer timer;
 	_TCHAR frame_rate_str[50];
 
+	// game objects
 	std::unique_ptr<CScene> now_scene{};
+	std::unique_ptr<CCamera> camera{};
+
 
 };
 
