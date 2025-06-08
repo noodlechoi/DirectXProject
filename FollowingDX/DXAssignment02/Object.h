@@ -29,11 +29,14 @@ public:
 
 	void SetPosition(XMFLOAT3 otherPosition) { SetPosition(otherPosition.x, otherPosition.y, otherPosition.z); }
 	void SetPosition(float , float , float );
-	
+	void SetMovingDirection(XMFLOAT3& xmMovingDirection) { XMStoreFloat3(&moving_direction, XMVector3Normalize(XMLoadFloat3(&xmMovingDirection))); }
+	virtual void SetMovingSpeed(float fSpeed) { moving_speed = fSpeed; }
+
 	void Rotate(XMFLOAT3* , float );
 	void Rotate(float, float, float);
 	
 	void Move(float);
+	virtual void Move(XMFLOAT3&, float);
 
 	virtual void Animate(float );
 	virtual void OnPrepareRender();
@@ -44,6 +47,9 @@ protected:
 	XMFLOAT4X4 world_matrix{};
 	std::shared_ptr<CMesh> mesh{};
 	std::shared_ptr<CShader> shader{};
+
+	XMFLOAT3 moving_direction{};
+	float moving_speed{};
 };
 
 class CRotatingObject : public CGameObject
@@ -58,4 +64,17 @@ public:
 private:
 	XMFLOAT3 rotation_axis{ 0.0f, 1.0f, 0.0f };
 	float rotation_speed{ 90.0f };
+};
+
+class CRollerCoaster : public CGameObject {
+public:
+	CRollerCoaster();
+
+	size_t GetPathNum() const { return path.size(); }
+
+	// 업데이트 (경로를 따라 이동)
+	void Animate(float) override;
+private:
+	std::vector<XMFLOAT3> path; // 롤러코스터 경로
+	size_t current_index{ 0 };   // 현재 경로 인덱스
 };

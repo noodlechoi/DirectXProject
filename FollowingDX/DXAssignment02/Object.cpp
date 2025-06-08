@@ -84,10 +84,14 @@ void CGameObject::Move(float elapsedTime)
 {
 }
 
+void CGameObject::Move(XMFLOAT3& direction, float speed)
+{
+	SetPosition(world_matrix._41 + direction.x * speed, world_matrix._42 + direction.y * speed, world_matrix._43 + direction.z * speed);
+}
 
 void CGameObject::Animate(float elapsedTime)
 {
-
+	if (moving_speed != 0.0f) Move(moving_direction, moving_speed * elapsedTime);
 }
 
 void CGameObject::OnPrepareRender()
@@ -109,4 +113,46 @@ void CGameObject::Render(ID3D12GraphicsCommandList* commandList)
 void CRotatingObject::Animate(float elapsedTime)
 {
 	CGameObject::Rotate(&rotation_axis, rotation_speed * elapsedTime);
+}
+
+CRollerCoaster::CRollerCoaster()
+{
+	path = {
+	   { 0.0f, 0.0f, 0.0f },
+		{ 20.0f, 0.0f, 10.0f },
+		{ 30.0f, 10.0f, 40.0f },
+		{ 40.0f, 30.0f, 80.0f },
+		{ 40.0f, 40.0f, 90.0f },
+		{ 30.0f, 0.0f, 100.0f },
+		{ 0.0f, 10.0f, 60.0f },
+		{ -50.0f, -10.0f, 50.0f },
+	};
+}
+
+void CRollerCoaster::Animate(float elapsedTime)
+{
+	float fDistance = moving_speed * elapsedTime;
+
+	XMFLOAT3 xmf3Position = GetPosition();
+
+	// 경로까지 이동
+	XMFLOAT3 xmf3Movement = Vector3::Normalize(Vector3::Subtract(path[current_index], xmf3Position));
+	xmf3Position = Vector3::Add(xmf3Position, xmf3Movement, fDistance);
+	SetPosition(xmf3Position);
+	moving_direction = Vector3::Normalize(Vector3::Add(moving_direction, xmf3Movement));
+	if (xmf3Movement.y > 0) {
+		SetMovingSpeed(5.0f);
+	}
+	else if (xmf3Movement.y < 0) {
+		SetMovingSpeed(10.0f);
+	}
+
+	if (1.0f >= Vector3::Distance(xmf3Position, path[current_index])) {
+		current_index = (current_index + 1) % path.size();
+		if (0 == current_index) {
+			//IsNextScene = true;
+		}
+	}
+
+	CGameObject::Animate(elapsedTime);
 }

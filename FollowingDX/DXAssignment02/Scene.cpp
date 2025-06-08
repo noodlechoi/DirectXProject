@@ -64,9 +64,16 @@ void CScene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* comma
 {
 	graphics_root_signature = CreateGraphicsRootSignature(device);
 
+	shaders.clear();
 	shaders.emplace_back(cliend_width, cliend_height);
 	shaders[0].CreateShader(device, graphics_root_signature.Get());
 	shaders[0].BuildObjects(device, commandList);
+}
+
+void CScene::ProcessInput(HWND& hWnd, float elapsedTime)
+{
+	input_manager->ProcessInput(hWnd, &shaders[0]);
+	shaders[0].Update(elapsedTime);
 }
 
 void CScene::AnimateObjects(float elapsedTime)
@@ -109,13 +116,43 @@ CRollerCoasterScene::CRollerCoasterScene(float width, float height)
 {
 }
 
-void CRollerCoasterScene::ProcessInput(HWND& hWnd, float elapsedTime)
+void CRollerCoasterScene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
 {
-	input_manager->ProcessInput(hWnd, &shaders[0]);
-	shaders[0].Update(elapsedTime);
+	graphics_root_signature = CreateGraphicsRootSignature(device);
+
+	shaders.clear();
+	shaders.emplace_back(cliend_width, cliend_height);
+	shaders[0].CreateShader(device, graphics_root_signature.Get());
+	shaders[0].RollerCoasterBuildObjects(device, commandList);
 }
 
 CScene* CRollerCoasterScene::NextScene()
 {
-	return nullptr;
+	return new CTankScene(cliend_width, cliend_height);
+}
+
+CTankScene::CTankScene(float width, float height)
+	: CScene(new CRollerCoasterInputManager, width, height)
+{
+}
+
+void CTankScene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
+{
+	graphics_root_signature = CreateGraphicsRootSignature(device);
+
+	shaders.clear();
+	shaders.emplace_back(cliend_width, cliend_height);
+	shaders[0].CreateShader(device, graphics_root_signature.Get());
+	shaders[0].TankBuildObjects(device, commandList);
+}
+
+void CTankScene::CheckObjectByBulletCollisions()
+{
+
+}
+
+void CTankScene::AnimateObjects(float elapsedTime)
+{
+	CScene::AnimateObjects(elapsedTime);
+	CheckObjectByBulletCollisions();
 }

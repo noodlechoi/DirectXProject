@@ -17,10 +17,10 @@ public:
 	ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device*);
 	void ReleaseUploadBuffers();
 
-	void BuildObjects(ID3D12Device*, ID3D12GraphicsCommandList*);
+	virtual void BuildObjects(ID3D12Device*, ID3D12GraphicsCommandList*);
 
-	virtual void ProcessInput(HWND&, float) {};
-	void AnimateObjects(float);
+	virtual void ProcessInput(HWND&, float);
+	virtual void AnimateObjects(float);
 
 	// ¸â¹ö º¯¼ö set 
 	void PrepareRender(ID3D12GraphicsCommandList*);
@@ -42,6 +42,15 @@ class CRollerCoasterScene : public CScene {
 public:
 	CRollerCoasterScene(float, float);
 
-	void ProcessInput(HWND&, float) override;
+	void BuildObjects(ID3D12Device*, ID3D12GraphicsCommandList*) override;
 	CScene* NextScene() override;
+};
+
+class CTankScene : public CScene {
+public:
+	CTankScene(float, float);
+
+	void BuildObjects(ID3D12Device*, ID3D12GraphicsCommandList*) override;
+	void CheckObjectByBulletCollisions();
+	void AnimateObjects(float) override;
 };

@@ -183,7 +183,7 @@ void CFirstPersonCamera::Rotate(float pitch, float yaw, float roll)
 
 CThirdPersonCamera::CThirdPersonCamera(CPlayer* otherPlayer) : CCamera(otherPlayer)
 {
-	SetCameraOffset(XMFLOAT3(0.0f, 5.0f, -5.0f));
+	SetCameraOffset(XMFLOAT3(0.0f, 1.0f, -5.0f));
 }
 
 void CThirdPersonCamera::Rotate(float pitch, float yaw, float roll)
