@@ -156,3 +156,112 @@ void CRollerCoaster::Animate(float elapsedTime)
 
 	CGameObject::Animate(elapsedTime);
 }
+CBulletObject::CBulletObject(float effectiveRange) : bullet_effective_range{ effectiveRange }
+{
+}
+
+CBulletObject::~CBulletObject()
+{
+	locked_object = nullptr;
+}
+
+void CBulletObject::Animate(float elapsedTime)
+{
+	elapsed_time_after_fire += elapsedTime;
+
+	float distance = moving_speed * elapsedTime;
+
+	if ((elapsed_time_after_fire > lock_delay_time) && locked_object) {
+		XMVECTOR xmvPosition = XMLoadFloat3(&GetPosition());
+
+		XMVECTOR lockedObjectPosition = XMLoadFloat3(&locked_object->GetPosition());
+		XMVECTOR toLockedObject = XMVector3Normalize(lockedObjectPosition - xmvPosition);
+
+		XMVECTOR movingDirection = XMLoadFloat3(&moving_direction);
+		movingDirection = XMVector3Normalize(XMVectorLerp(movingDirection, toLockedObject, 0.25f));
+		XMStoreFloat3(&moving_direction, movingDirection);
+	}
+
+	XMFLOAT4X4 mtxRotate = Matrix4x4::RotationYawPitchRoll(0.0f, elapsedTime, 0.0f);
+	world_matrix = Matrix4x4::Multiply(mtxRotate, world_matrix);
+	XMFLOAT3 xmf3Movement = Vector3::ScalarProduct(moving_direction, distance, false);
+	XMFLOAT3 xmf3Position = GetPosition();
+	xmf3Position = Vector3::Add(xmf3Position, xmf3Movement);
+	SetPosition(xmf3Position);
+	moving_distance += distance;
+
+	CGameObject::Animate(elapsedTime);
+}
+
+void CBulletObject::SetFirePosition(XMFLOAT3 firePosition)
+{
+	fire_position = firePosition;
+	SetPosition(firePosition);
+}
+
+void CBulletObject::Reset()
+{
+	locked_object = nullptr;
+	elapsed_time_after_fire = 0;
+	moving_distance = 0;
+	rotation_angle = 0.0f;
+}
+
+CEnemyTank::CEnemyTank()
+{
+	SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	SetMovingDirection(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	SetMovingSpeed(5.0f);
+
+
+	std::random_device rd;
+	auto rm = std::mt19937(rd());
+
+	auto uid_pos = std::uniform_int_distribution<int>{ -100, 100 };
+	SetNextDestination({ (float)uid_pos(rm), 0.0f, (float)uid_pos(rm) });
+}
+
+void CEnemyTank::Animate(float elapsedTime)
+{
+	float distance = moving_speed * elapsedTime;
+
+	XMFLOAT3 xmf3Position = GetPosition();
+
+	// 회전 방향 변경
+	XMFLOAT3 normal_direction{ Vector3::Normalize(moving_direction) };
+	float dotProduct{ Vector3::DotProduct(GetLook(), normal_direction) };
+	if (!IsEqual(dotProduct, 1.0f)) {
+		float RotationAngle{ (float)XMConvertToDegrees(acos(dotProduct)) };
+		XMFLOAT4X4 mtxRotate = Matrix4x4::RotationYawPitchRoll(0.0f, RotationAngle, 0.0f);
+		world_matrix = Matrix4x4::Multiply(mtxRotate, world_matrix);
+	}
+
+	// 경로까지 이동
+	XMFLOAT3 xmf3Movement = Vector3::Normalize(Vector3::Subtract(current_distination, xmf3Position));
+	xmf3Position = Vector3::Add(xmf3Position, xmf3Movement, distance);
+	SetPosition(xmf3Position);
+	moving_direction = Vector3::Normalize(Vector3::Add(moving_direction, xmf3Movement));
+	xmf3Position = Vector3::Add(xmf3Position, xmf3Movement);
+
+	if (1.0f >= Vector3::Distance(xmf3Position, current_distination)) {
+		// 목적지 변경
+		current_distination = next_destination;
+
+		std::random_device rd;
+		auto rm = std::mt19937(rd());
+
+		auto uid_pos = std::uniform_int_distribution<int>{ -100, 100 };
+		SetNextDestination({ (float)uid_pos(rm), 0.0f, (float)uid_pos(rm) });
+	}
+
+	CGameObject::Animate(elapsedTime);
+}
+
+void CEnemyTank::FireBullet(CGameObject*)
+{
+}
+
+void CEnemyTank::SetNextDestination(XMFLOAT3 nextDestination)
+{
+	next_destination = nextDestination;
+}

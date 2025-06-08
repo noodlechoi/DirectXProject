@@ -113,3 +113,27 @@ CRollerCoasterPlayer::CRollerCoasterPlayer(ID3D12Device* device, ID3D12GraphicsC
 	std::shared_ptr<CMesh> cubeMesh = std::make_shared<CCubeMeshDiffused>(device, commandList);
 	SetMesh(cubeMesh);
 }
+
+CTankPlayer::CTankPlayer(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, float width, float height) : CPlayer(new CThirdPersonCamera(this), width, height)
+{
+	std::shared_ptr<CMesh> cubeMesh = std::make_shared<CCubeMeshDiffused>(device, commandList);
+	SetMesh(cubeMesh);
+}
+
+void CTankPlayer::Animate(float elapsedTime)
+{
+	CPlayer::Animate(elapsedTime);
+
+	for (CBulletObject& bullet : bullets) {
+		bullet.Animate(elapsedTime);
+	}
+}
+
+void CTankPlayer::Render(ID3D12GraphicsCommandList* commandList)
+{
+	CGameObject::Render(commandList);
+
+	for (CBulletObject& bullet : bullets) {
+		bullet.Render(commandList);
+	}
+}

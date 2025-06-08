@@ -67,6 +67,8 @@ public:
 
 	virtual void BuildObjects(ID3D12Device* , ID3D12GraphicsCommandList* );
 	void RollerCoasterBuildObjects(ID3D12Device* , ID3D12GraphicsCommandList* );
+	void TankBuildObjects(ID3D12Device* , ID3D12GraphicsCommandList* );
+	
 	virtual void AnimateObjects(float );
 	virtual void Update(float);
 

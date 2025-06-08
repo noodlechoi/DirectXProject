@@ -249,7 +249,7 @@ void CRollerCoasterInputManager::ProcessingKeyboardMessage(HWND& hWnd, UINT& nMe
 			break;
 		case 'n':
 		case 'N':
-			IsNextScene = true;
+			//IsNextScene = true;
 			break;
 		case VK_CONTROL:
 			break;

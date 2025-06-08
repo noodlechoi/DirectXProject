@@ -143,8 +143,8 @@ void CTankScene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* c
 	shaders.clear();
 	shaders.emplace_back(cliend_width, cliend_height);
 	shaders[0].CreateShader(device, graphics_root_signature.Get());
-	//shaders[0].TankBuildObjects(device, commandList);
-	shaders[0].BuildObjects(device, commandList);
+	shaders[0].TankBuildObjects(device, commandList);
+	//shaders[0].BuildObjects(device, commandList);
 }
 
 void CTankScene::CheckObjectByBulletCollisions()

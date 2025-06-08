@@ -64,6 +64,11 @@ using Microsoft::WRL::ComPtr;
 
 #define _WITH_SWAPCHAIN_FULLSCREEN_STATE
 
+#define EPSILON					1.0e-6f
+
+inline bool IsZero(float fValue) { return((fabsf(fValue) < EPSILON)); }
+inline bool IsEqual(float fA, float fB) { return(::IsZero(fA - fB)); }
+
 static inline void ThrowIfFailed(HRESULT hr)
 {
 	if (FAILED(hr)) throw std::exception();

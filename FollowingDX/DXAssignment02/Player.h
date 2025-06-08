@@ -38,3 +38,15 @@ class CRollerCoasterPlayer : public CPlayer
 public:
 	CRollerCoasterPlayer(ID3D12Device*, ID3D12GraphicsCommandList*, float, float);
 };
+
+#define BULLETS					50
+
+class CTankPlayer : public CPlayer {
+public:
+	CTankPlayer(ID3D12Device*, ID3D12GraphicsCommandList*, float, float);
+	void Animate(float) override;
+	void Render(ID3D12GraphicsCommandList*)override;
+	//void FireBullet(CGameObject* = nullptr);
+
+	std::deque<CBulletObject> bullets;
+};
