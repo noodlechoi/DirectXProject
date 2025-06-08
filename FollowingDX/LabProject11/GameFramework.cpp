@@ -242,7 +242,7 @@ void CGameFramework::BuildObjects()
 	command_list->Reset(command_allocator.Get(), NULL);
 	
 	// 씬 객체 생성
-	now_scene = std::make_unique<CScene>((float)client_width, (float)client_height);
+	now_scene = std::make_unique<CRollerCoasterScene>((float)client_width, (float)client_height);
 	if (now_scene) now_scene->BuildObjects(d3d_device.Get(), command_list.Get());
 
 	// 그래픽 명령 리스트 명령 큐에 추가
@@ -266,7 +266,7 @@ void CGameFramework::ReleaseObjects()
 // 사용자 입력, 애니메이션, 렌더링 함수
 void CGameFramework::ProcessInput()
 {
-
+	if (now_scene) now_scene->ProcessInput(h_wnd, timer.GetTimeElapsed());
 }
 
 void CGameFramework::AnimateObjects()
@@ -400,18 +400,7 @@ void CGameFramework::FrameAdvance()
 
 void CGameFramework::OnProcessMouseMessage(HWND hWnd, UINT MessageID, WPARAM wParam, LPARAM lParam)
 {
-	switch (MessageID) {
-	case WM_LBUTTONDOWN:
-	case WM_RBUTTONDOWN:
-		break;
-	case WM_LBUTTONUP:
-	case WM_RBUTTONUP:
-		break;
-	case WM_MOUSEMOVE:
-		break;
-	default:
-		break;
-	}
+	if (now_scene) now_scene->OnProcessMouseMessage(hWnd, MessageID, wParam, lParam);
 }
 
 void CGameFramework::OnProcessKeyboardMessage(HWND hWnd, UINT MessageID, WPARAM wParam, LPARAM lParam)
@@ -430,6 +419,7 @@ void CGameFramework::OnProcessKeyboardMessage(HWND hWnd, UINT MessageID, WPARAM 
 			 ChangeSwapChainState();
 			 break;
 		 default:
+			 if (now_scene) now_scene->OnProcessKeyboardMessage(hWnd, MessageID, wParam, lParam);
 			 break;
 		 }
 		 break;

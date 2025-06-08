@@ -7,7 +7,7 @@ CCamera::CCamera(CPlayer* otherPlayer)
 	projection_matrix{ Matrix4x4::Identity() },
 	viewport{ 0.0f, 0.0f, float(FRAME_BUFFER_WIDTH), float(FRAME_BUFFER_HEIGHT), 0.0f, 1.0f },
 	scissor_rect{ 0, 0, LONG(FRAME_BUFFER_WIDTH), LONG(FRAME_BUFFER_HEIGHT) },
-	player{ otherPlayer }
+	player{ otherPlayer }	
 {
 }
 
@@ -37,7 +37,7 @@ void CCamera::GenerateViewMatrix(XMFLOAT3 otherPosition, XMFLOAT3 lookAt, XMFLOA
 	position = otherPosition;
 	look_at_world = lookAt;
 	up = otherUp;
-
+	
 	GenerateViewMatrix();
 }
 
@@ -166,8 +166,7 @@ void CFirstPersonCamera::Update(XMFLOAT3& lookAt, float elapsedTime)
 
 CThirdPersonCamera::CThirdPersonCamera(CPlayer* otherPlayer) : CCamera(otherPlayer)
 {
-	up = XMFLOAT3(0.0f, 1.0f, 0.0f);
-	SetCameraOffset(XMFLOAT3(0.0f, 0.0f, -20.0f));
+	SetCameraOffset(XMFLOAT3(0.0f, 5.0f, -5.0f));
 }
 
 void CThirdPersonCamera::Rotate(float pitch, float yaw, float roll)
@@ -187,6 +186,7 @@ void CThirdPersonCamera::Rotate(float pitch, float yaw, float roll)
 		XMStoreFloat3(&up, XMVector3TransformNormal(XMLoadFloat3(&up), rotate));
 		XMStoreFloat3(&right, XMVector3TransformNormal(XMLoadFloat3(&right), rotate));
 	}
+
 }
 
 void CThirdPersonCamera::Update(XMFLOAT3& lookAt, float elapsedTime)

@@ -66,12 +66,16 @@ public:
 	CObjectShader(CObjectShader&&);
 
 	virtual void BuildObjects(ID3D12Device* , ID3D12GraphicsCommandList* );
-	virtual void AnimateObjects(float fTimeElapsed);
+	virtual void AnimateObjects(float );
+	virtual void Update(float);
 
 	D3D12_INPUT_LAYOUT_DESC CreateInputLayout() override;
 	D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ) override;
 	D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ) override;
 	void ReleaseUploadBuffers() override;
+
+	void PlayerMove(DWORD, float);
+	void PlayerRotate(float, float, float);
 	void Render(ID3D12GraphicsCommandList*) override;
 protected:
 	std::deque<std::unique_ptr<CGameObject>> objects{};

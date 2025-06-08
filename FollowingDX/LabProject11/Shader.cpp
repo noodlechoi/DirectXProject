@@ -211,30 +211,6 @@ void CObjectShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList
 {
 	player = std::make_shared<CSpaceShipPlayer>(device, commandList, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 
-	std::shared_ptr<CMesh> pCubeMesh = std::make_shared<CCubeMeshDiffused>(device, commandList);
-	int xObjects = 6, yObjects = 6, zObjects = 6, i = 0;
-	//x-축, y-축, z-축으로 총 13x13x13 = 2197개의 정육면체를 생성하고 배치. 65 frame
-	float fxPitch = 12.0f * 2.5f;
-	float fyPitch = 12.0f * 2.5f;
-	float fzPitch = 12.0f * 2.5f;
-	CRotatingObject* pRotatingObject = NULL;
-	for (int x = -xObjects; x <= xObjects; x++)
-	{
-		for (int y = -yObjects; y <= yObjects; y++)
-		{
-			for (int z = -zObjects; z <= zObjects; z++)
-			{
-				objects.push_back(std::unique_ptr<CGameObject>());
-				pRotatingObject = new CRotatingObject();
-				pRotatingObject->SetMesh(pCubeMesh);
-				//각 정육면체 객체의 위치를 설정한다.
-				pRotatingObject->SetPosition(fxPitch * x, fyPitch * y, fzPitch * z);
-				pRotatingObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
-				pRotatingObject->SetRotationSpeed(10.0f * (i % 10) + 3.0f);
-				objects[i++].reset(pRotatingObject);
-			}
-		}
-	}
 	CreateShaderVariables(device, commandList);
 }
 
@@ -245,6 +221,11 @@ void CObjectShader::AnimateObjects(float fTimeElapsed)
 			object->Animate(fTimeElapsed);
 		}
 	}
+}
+
+void CObjectShader::Update(float elapsedTime)
+{
+	player->Update(elapsedTime);
 }
 
 D3D12_INPUT_LAYOUT_DESC CObjectShader::CreateInputLayout()
@@ -280,6 +261,16 @@ void CObjectShader::ReleaseUploadBuffers()
 			object->ReleaseUploadBuffers();
 		}
 	}
+}
+
+void CObjectShader::PlayerMove(DWORD direction, float distance)
+{
+	player->Move(direction, distance);
+}
+
+void CObjectShader::PlayerRotate(float pitch, float yaw, float roll)
+{
+	player->Rotate(pitch, yaw, roll);
 }
 
 void CObjectShader::Render(ID3D12GraphicsCommandList* commandList)

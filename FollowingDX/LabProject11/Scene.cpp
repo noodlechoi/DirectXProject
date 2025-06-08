@@ -1,9 +1,11 @@
 #include "stdafx.h"
 #include "Scene.h"
 
-CScene::CScene(float width, float height)
+CScene::CScene(CRollerCoasterInputManager* inputManager, float width, float height)
 	: cliend_width{ width }, cliend_height{ height }
 {
+	input_manager.reset(inputManager);
+
 	shaders.reserve(10);
 }
 
@@ -67,12 +69,6 @@ void CScene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* comma
 	shaders[0].BuildObjects(device, commandList);
 }
 
-
-bool CScene::ProcessInput()
-{
-	return false;
-}
-
 void CScene::AnimateObjects(float elapsedTime)
 {
 	for (auto& shader : shaders) {
@@ -96,12 +92,30 @@ void CScene::Render(ID3D12GraphicsCommandList* commandList )
 	}
 }
 
-bool CScene::OnProcessMouseMessage(HWND, UINT, WPARAM, LPARAM)
+bool CScene::OnProcessMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
-	return false;
+	input_manager->ProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
+	return true;
 }
 
-bool CScene::OnProcessKeyboardMessage(HWND, UINT, WPARAM, LPARAM)
+bool CScene::OnProcessKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
-	return false;
+	input_manager->ProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
+	return true;
+}
+
+CRollerCoasterScene::CRollerCoasterScene(float width, float height)
+	: CScene(new CRollerCoasterInputManager, width, height)
+{
+}
+
+void CRollerCoasterScene::ProcessInput(HWND& hWnd, float elapsedTime)
+{
+	input_manager->ProcessInput(hWnd, &shaders[0]);
+	shaders[0].Update(elapsedTime);
+}
+
+CScene* CRollerCoasterScene::NextScene()
+{
+	return nullptr;
 }
