@@ -209,8 +209,9 @@ CObjectShader::CObjectShader(CObjectShader&& other) : CShader(std::move(other)),
 
 void CObjectShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
 {
-	player = std::make_shared<CSpaceShipPlayer>(device, commandList, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
+	player = std::make_shared<CRollerCoasterPlayer>(device, commandList, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 
+	objects.clear();
 	std::shared_ptr<CMesh> pCubeMesh = std::make_shared<CCubeMeshDiffused>(device, commandList);
 	int xObjects = 6, yObjects = 6, zObjects = 6, i = 0;
 	float fxPitch = 12.0f * 2.5f;
@@ -234,6 +235,10 @@ void CObjectShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList
 		}
 	}
 	CreateShaderVariables(device, commandList);
+}
+
+void CObjectShader::RollerCoasterBuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
+{
 }
 
 void CObjectShader::AnimateObjects(float fTimeElapsed)

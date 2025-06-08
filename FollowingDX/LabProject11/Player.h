@@ -33,8 +33,8 @@ public:
 
 };
 
-class CSpaceShipPlayer : public CPlayer
+class CRollerCoasterPlayer : public CPlayer
 {
 public:
-	CSpaceShipPlayer(ID3D12Device*, ID3D12GraphicsCommandList*, float, float);
+	CRollerCoasterPlayer(ID3D12Device*, ID3D12GraphicsCommandList*, float, float);
 };

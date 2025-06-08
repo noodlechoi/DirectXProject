@@ -108,7 +108,7 @@ void CPlayer::Render(ID3D12GraphicsCommandList* commandList)
 	CGameObject::Render(commandList);
 }
 
-CSpaceShipPlayer::CSpaceShipPlayer(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, float width, float height) : CPlayer(new CThirdPersonCamera(this), width, height)
+CRollerCoasterPlayer::CRollerCoasterPlayer(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, float width, float height) : CPlayer(new CThirdPersonCamera(this), width, height)
 {
 	std::shared_ptr<CMesh> cubeMesh = std::make_shared<CCubeMeshDiffused>(device, commandList);
 	SetMesh(cubeMesh);
