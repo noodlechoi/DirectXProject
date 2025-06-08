@@ -14,7 +14,9 @@ public:
 
 	void Rotate(float , float , float );
 	virtual void Update(float = 0.016f);
+	virtual void OnUpdateTransform();
 
+	virtual void Animate(float);
 	virtual void Render(ID3D12GraphicsCommandList*);
 public:
 	std::unique_ptr<CCamera> camera{};

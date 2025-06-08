@@ -120,9 +120,8 @@ void CCamera::SetCameraOffset(XMFLOAT3& cameraOffset)
 
 void CCamera::Move(const XMFLOAT3& shift)
 {
-	position.x += shift.x;
-	position.y += shift.y;
-	position.z += shift.z;
+	XMStoreFloat3(&position, XMVectorAdd(XMLoadFloat3(&position), XMLoadFloat3(&shift)));
+
 }
 
 void CCamera::Rotate(float pitch, float yaw, float roll)

@@ -1,4 +1,4 @@
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 #include "Object.h"
 #include "Mesh.h"
 #include "Shader.h"
@@ -110,7 +110,7 @@ D3D12_SHADER_BYTECODE CShader::CompileShaderFromFile(WCHAR* fileName, LPCSTR sha
 
 void CShader::CreateShader(ID3D12Device* device, ID3D12RootSignature* rootSignature)
 {
-	//±×·¡ÇÈ½º ÆÄÀÌÇÁ¶óÀÎ »óÅÂ °´Ã¼ ¹è¿­À» »ı¼ºÇÑ´Ù.
+	//ê·¸ë˜í”½ìŠ¤ íŒŒì´í”„ë¼ì¸ ìƒíƒœ ê°ì²´ ë°°ì—´ì„ ìƒì„±í•œë‹¤.
 	ComPtr<ID3DBlob> vertexShaderBlob{}, pixelShaderBlob{};
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC pipelineStateDesc{};
@@ -174,7 +174,7 @@ D3D12_INPUT_LAYOUT_DESC CDiffusedShader::CreateInputLayout()
 	const UINT inputElementDescNum = 2;
 	D3D12_INPUT_ELEMENT_DESC* inputElementDescs = new D3D12_INPUT_ELEMENT_DESC[inputElementDescNum];
 
-	//Á¤Á¡Àº À§Ä¡ º¤ÅÍ(POSITION)¿Í »ö»ó(COLOR)À» °¡Áø´Ù. 
+	//ì •ì ì€ ìœ„ì¹˜ ë²¡í„°(POSITION)ì™€ ìƒ‰ìƒ(COLOR)ì„ ê°€ì§„ë‹¤. 
 	inputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 	inputElementDescs[1] = { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 
@@ -211,15 +211,37 @@ void CObjectShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList
 {
 	player = std::make_shared<CSpaceShipPlayer>(device, commandList, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 
+	std::shared_ptr<CMesh> pCubeMesh = std::make_shared<CCubeMeshDiffused>(device, commandList);
+	int xObjects = 6, yObjects = 6, zObjects = 6, i = 0;
+	float fxPitch = 12.0f * 2.5f;
+	float fyPitch = 12.0f * 2.5f;
+	float fzPitch = 12.0f * 2.5f;
+	CRotatingObject* pRotatingObject = NULL;
+	for (int x = -xObjects; x <= xObjects; x++)
+	{
+		for (int y = -yObjects; y <= yObjects; y++)
+		{
+			for (int z = -zObjects; z <= zObjects; z++)
+			{
+				objects.push_back(std::unique_ptr<CGameObject>());
+				pRotatingObject = new CRotatingObject();
+				pRotatingObject->SetMesh(pCubeMesh);
+				pRotatingObject->SetPosition(fxPitch * x, fyPitch * y, fzPitch * z);
+				pRotatingObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
+				pRotatingObject->SetRotationSpeed(10.0f * (i % 10) + 3.0f);
+				objects[i++].reset(pRotatingObject);
+			}
+		}
+	}
 	CreateShaderVariables(device, commandList);
 }
 
 void CObjectShader::AnimateObjects(float fTimeElapsed)
 {
+	if (player) player->Animate(fTimeElapsed);
+
 	for (auto& object : objects) {
-		if (object)	{
-			object->Animate(fTimeElapsed);
-		}
+		object->Animate(fTimeElapsed);
 	}
 }
 
@@ -233,7 +255,7 @@ D3D12_INPUT_LAYOUT_DESC CObjectShader::CreateInputLayout()
 	const UINT inputElementDescNum = 2;
 	D3D12_INPUT_ELEMENT_DESC* inputElementDescs = new D3D12_INPUT_ELEMENT_DESC[inputElementDescNum];
 
-	//Á¤Á¡Àº À§Ä¡ º¤ÅÍ(POSITION)¿Í »ö»ó(COLOR)À» °¡Áø´Ù. 
+	//ì •ì ì€ ìœ„ì¹˜ ë²¡í„°(POSITION)ì™€ ìƒ‰ìƒ(COLOR)ì„ ê°€ì§„ë‹¤. 
 	inputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 	inputElementDescs[1] = { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 

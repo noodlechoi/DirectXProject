@@ -87,6 +87,19 @@ void CPlayer::Update(float timeElapsed)
 	XMStoreFloat3(&velocity, XMVectorAdd(xmvVelocity, XMVectorScale(xmvDeceleration, deceleration)));
 }
 
+void CPlayer::OnUpdateTransform()
+{
+	world_matrix._11 = right.x; world_matrix._12 = right.y; world_matrix._13 = right.z;
+	world_matrix._21 = up.x; world_matrix._22 = up.y; world_matrix._23 = up.z;
+	world_matrix._31 = look.x; world_matrix._32 = look.y; world_matrix._33 = look.z;
+	world_matrix._41 = position.x; world_matrix._42 = position.y; world_matrix._43 = position.z;
+}
+
+void CPlayer::Animate(float elapsedTime)
+{
+	OnUpdateTransform();
+}
+
 void CPlayer::Render(ID3D12GraphicsCommandList* commandList)
 {
 	camera->SetViewportsAndScissorRects(commandList);

@@ -265,6 +265,7 @@ void CRollerCoasterInputManager::ProcessingKeyboardMessage(HWND& hWnd, UINT& nMe
 		case VK_CONTROL:
 			break;
 		default:
+
 			break;
 		}
 		break;

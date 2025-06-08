@@ -419,7 +419,7 @@ void CGameFramework::OnProcessKeyboardMessage(HWND hWnd, UINT MessageID, WPARAM 
 			 ChangeSwapChainState();
 			 break;
 		 default:
-			 if (now_scene) now_scene->OnProcessKeyboardMessage(hWnd, MessageID, wParam, lParam);
+			 //if (now_scene) now_scene->OnProcessKeyboardMessage(hWnd, MessageID, wParam, lParam);
 			 break;
 		 }
 		 break;

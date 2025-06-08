@@ -84,6 +84,7 @@ void CGameObject::Move(float elapsedTime)
 {
 }
 
+
 void CGameObject::Animate(float elapsedTime)
 {
 
