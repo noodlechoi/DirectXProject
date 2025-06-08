@@ -14,7 +14,7 @@ public:
 	void Rotate(float , float , float );
 
 	virtual void Render(ID3D12GraphicsCommandList*);
-protected:
+public:
 	std::unique_ptr<CCamera> camera{};
 
 	XMFLOAT3 position{};

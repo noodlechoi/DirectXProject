@@ -209,7 +209,7 @@ CObjectShader::CObjectShader(CObjectShader&& other) : CShader(std::move(other)),
 
 void CObjectShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
 {
-	player = std::make_unique<CSpaceShipPlayer>(device, commandList, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
+	player = std::make_shared<CSpaceShipPlayer>(device, commandList, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 
 	std::shared_ptr<CMesh> pCubeMesh = std::make_shared<CCubeMeshDiffused>(device, commandList);
 	int xObjects = 6, yObjects = 6, zObjects = 6, i = 0;

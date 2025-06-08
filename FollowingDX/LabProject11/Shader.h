@@ -75,5 +75,5 @@ public:
 	void Render(ID3D12GraphicsCommandList*) override;
 protected:
 	std::deque<std::unique_ptr<CGameObject>> objects{};
-	std::unique_ptr<CPlayer> player{};
+	std::shared_ptr<CPlayer> player{};
 };

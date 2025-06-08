@@ -2,6 +2,8 @@
 
 #define ASPECT_RATIO (float(FRAME_BUFFER_WIDTH) / float(FRAME_BUFFER_HEIGHT))
 
+class CPlayer;
+
 //// 카메라 상수 버퍼를 위한 구조체
 //struct VS_CB_CAMERA_INFO {
 //	XMFLOAT4X4 view_matrix;
@@ -11,7 +13,7 @@
 class CCamera
 {
 public:
-	CCamera();
+	CCamera(CPlayer*);
 
 	virtual void CreateShaderVariables(ID3D12Device*, ID3D12GraphicsCommandList*);
 	virtual void ReleaseShaderVariables();
@@ -24,6 +26,10 @@ public:
 	void SetViewport(int , int , int , int , float = 0.0f, float = 1.0f);
 	void SetScissorRect(LONG , LONG , LONG , LONG );
 	virtual void SetViewportsAndScissorRects(ID3D12GraphicsCommandList* );
+
+	void SetLookAt(XMFLOAT3&, XMFLOAT3&);
+	void SetLookAt(XMFLOAT3, XMFLOAT3, XMFLOAT3);
+	void SetCameraOffset(XMFLOAT3&);
 
 	virtual void Move(const XMFLOAT3&);
 	virtual void Rotate(float, float, float);
@@ -43,16 +49,23 @@ protected:
 	XMFLOAT3 look_at_world{};
 	XMFLOAT3 offset{};
 	float time_lag{};
+
+	CPlayer* player;
 };
 
 class CFirstPersonCamera : public CCamera
 {
 public:
-	CFirstPersonCamera();
+	CFirstPersonCamera(CPlayer*);
+
+	void Update(XMFLOAT3&, float) override;
 };
 
 class CThirdPersonCamera : public CCamera
 {
 public:
-	CThirdPersonCamera();
+	CThirdPersonCamera(CPlayer*);
+
+	void Rotate(float, float, float) override;
+	void Update(XMFLOAT3&, float) override;
 };

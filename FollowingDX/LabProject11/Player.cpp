@@ -7,7 +7,6 @@ CPlayer::CPlayer(CCamera* otherCamera, float width, float height)
 	camera->SetViewport(0, 0, width, height);
 	camera->SetScissorRect(0, 0, width, height);
 	camera->GenerateProjectionMatrix(1.0f, 500.0f, float(width) / float(height), 90.0f);
-	camera->GenerateViewMatrix(XMFLOAT3(0.0f, 0.0f, -20.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 1.0f, 0.0f));
 }
 
 void CPlayer::CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
@@ -40,7 +39,7 @@ void CPlayer::Render(ID3D12GraphicsCommandList* commandList)
 	CGameObject::Render(commandList);
 }
 
-CSpaceShipPlayer::CSpaceShipPlayer(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, float width, float height) : CPlayer(new CThirdPersonCamera, width, height)
+CSpaceShipPlayer::CSpaceShipPlayer(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, float width, float height) : CPlayer(new CThirdPersonCamera(this), width, height)
 {
 	std::shared_ptr<CMesh> cubeMesh = std::make_shared<CAirPlaneMeshDiffused>(device, commandList);
 	SetMesh(cubeMesh);
