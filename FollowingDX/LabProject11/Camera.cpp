@@ -121,7 +121,6 @@ void CCamera::SetCameraOffset(XMFLOAT3& cameraOffset)
 void CCamera::Move(const XMFLOAT3& shift)
 {
 	XMStoreFloat3(&position, XMVectorAdd(XMLoadFloat3(&position), XMLoadFloat3(&shift)));
-
 }
 
 void CCamera::Rotate(float pitch, float yaw, float roll)
@@ -130,6 +129,7 @@ void CCamera::Rotate(float pitch, float yaw, float roll)
 
 void CCamera::Update(XMFLOAT3&, float)
 {
+
 }
 
 CFirstPersonCamera::CFirstPersonCamera(CPlayer* otherPlayer) : CCamera(otherPlayer)
@@ -211,6 +211,8 @@ void CThirdPersonCamera::Update(XMFLOAT3& lookAt, float elapsedTime)
 	if (distance > 0)
 	{
 		XMStoreFloat3(&position, XMVectorAdd(xmvPosition, XMVectorScale(xmvDirection, distance)));
-		SetLookAt(player->position, player->up);
+		//SetLookAt(player->position, player->up);
 	}
+
+	look_at_world = lookAt;
 }
