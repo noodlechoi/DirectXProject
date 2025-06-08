@@ -6,7 +6,7 @@ class CScene
 {
 public:
 	CScene() {}
-	CScene(CRollerCoasterInputManager*, float, float);
+	CScene(CInputManager*, float, float);
 	virtual ~CScene();
 
 	ID3D12RootSignature* GetGraphicsRootSignature() { return graphics_root_signature.Get(); }
@@ -31,7 +31,7 @@ protected:
 	ComPtr<ID3D12RootSignature> graphics_root_signature{};
 
 	std::vector<CObjectShader> shaders{};
-	std::unique_ptr<CRollerCoasterInputManager> input_manager;
+	std::unique_ptr<CInputManager> input_manager;
 
 	float cliend_width{};
 	float cliend_height{};

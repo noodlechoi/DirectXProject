@@ -4,6 +4,8 @@
 #include "Camera.h"
 #include "InputManager.h"
 
+extern bool IsNextScene;
+
 void CInputManager::ProcessingMouseMessage(HWND& hWnd, UINT& nMessageID, WPARAM& wParam, LPARAM& lParam)
 {
 }
@@ -247,7 +249,7 @@ void CRollerCoasterInputManager::ProcessingKeyboardMessage(HWND& hWnd, UINT& nMe
 			break;
 		case 'n':
 		case 'N':
-			//IsNextshader = true;
+			IsNextScene = true;
 			break;
 		case VK_CONTROL:
 			break;

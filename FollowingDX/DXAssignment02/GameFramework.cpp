@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "GameFramework.h"
 
+bool IsNextScene{};
+
 CGameFramework::CGameFramework()
 {
 	_tcscpy_s(frame_rate_str, _T("LapProject ("));
@@ -272,6 +274,11 @@ void CGameFramework::ProcessInput()
 void CGameFramework::AnimateObjects()
 {
 	if (now_scene) now_scene->AnimateObjects(timer.GetTimeElapsed());
+	if (IsNextScene) {
+		now_scene.reset(now_scene->NextScene());
+		now_scene->BuildObjects(d3d_device.Get(), command_list.Get());
+		IsNextScene = false;
+	}
 }
 
 void CGameFramework::waitForGpuComplete()
@@ -419,10 +426,12 @@ void CGameFramework::OnProcessKeyboardMessage(HWND hWnd, UINT MessageID, WPARAM 
 			 ChangeSwapChainState();
 			 break;
 		 default:
-			 //if (now_scene) now_scene->OnProcessKeyboardMessage(hWnd, MessageID, wParam, lParam);
 			 break;
 		 }
 		 break;
+	case WM_KEYDOWN:
+		if (now_scene) now_scene->OnProcessKeyboardMessage(hWnd, MessageID, wParam, lParam);
+		break;
 	default:
 		 break;
 	}

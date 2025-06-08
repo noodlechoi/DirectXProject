@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "Scene.h"
 
-CScene::CScene(CRollerCoasterInputManager* inputManager, float width, float height)
+CScene::CScene(CInputManager* inputManager, float width, float height)
 	: cliend_width{ width }, cliend_height{ height }
 {
 	input_manager.reset(inputManager);
@@ -132,7 +132,7 @@ CScene* CRollerCoasterScene::NextScene()
 }
 
 CTankScene::CTankScene(float width, float height)
-	: CScene(new CRollerCoasterInputManager, width, height)
+	: CScene(new CTankInputManager, width, height)
 {
 }
 
@@ -143,7 +143,8 @@ void CTankScene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* c
 	shaders.clear();
 	shaders.emplace_back(cliend_width, cliend_height);
 	shaders[0].CreateShader(device, graphics_root_signature.Get());
-	shaders[0].TankBuildObjects(device, commandList);
+	//shaders[0].TankBuildObjects(device, commandList);
+	shaders[0].BuildObjects(device, commandList);
 }
 
 void CTankScene::CheckObjectByBulletCollisions()
