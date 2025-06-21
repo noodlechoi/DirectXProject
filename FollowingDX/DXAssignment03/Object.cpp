@@ -1,5 +1,4 @@
 #include "stdafx.h"
-#include "Shader.h"
 #include "Object.h"
 
 CGameObject::CGameObject() : world_matrix{Matrix4x4::Identity()}
@@ -14,8 +13,9 @@ CGameObject::~CGameObject()
 void CGameObject::ReleaseUploadBuffers()
 {
 	// 정점 버퍼를 위한 업로드 버퍼를 소멸시킨다.
-	if (mesh) {
-		mesh->ReleaseUploadBuffers();
+	if (meshes.data()) {
+		for(auto& mesh : meshes)
+			mesh->ReleaseUploadBuffers();
 	}
 }
 
@@ -36,14 +36,15 @@ void CGameObject::ReleaseShaderVariables()
 
 void CGameObject::SetMesh(std::shared_ptr<CMesh>& Mesh)
 {
-	if (mesh) mesh->Release();
-	mesh = Mesh;
-	if (mesh) mesh->AddRef();
-}
-
-void CGameObject::SetShader(std::shared_ptr<CShader>& otherShader)
-{
-	shader = otherShader;
+	if (meshes.data()) {
+		for (auto& mesh : meshes)
+			mesh->Release();
+	}
+	meshes.push_back(Mesh);
+	if (meshes.data()) {
+		for (auto& mesh : meshes)
+			mesh->AddRef();
+	}
 }
 
 XMFLOAT3 CGameObject::GetLook() const
@@ -105,9 +106,10 @@ void CGameObject::Render(ID3D12GraphicsCommandList* commandList)
 
 	UpdateShaderVariables(commandList);
 
-	if (shader)	shader->Render(commandList);
-
-	if (mesh) mesh->Render(commandList);
+	if (meshes.data()) {
+		for (auto& mesh : meshes)
+			mesh->Render(commandList);
+	}
 }
 
 void CRotatingObject::Animate(float elapsedTime)
@@ -264,4 +266,25 @@ void CEnemyTank::FireBullet(CGameObject*)
 void CEnemyTank::SetNextDestination(XMFLOAT3 nextDestination)
 {
 	next_destination = nextDestination;
+}
+
+CHeightMapTerrain::CHeightMapTerrain(ID3D12Device*device, ID3D12GraphicsCommandList* commandList, LPCTSTR fileName, int otherWidth, int otherLength, int blockWidth, int blockLength, XMFLOAT3 otherScale, XMFLOAT4 color)
+	: width{otherWidth}, length{otherLength}, scale{otherScale}
+{
+	int xQuadsPerBlock{ blockWidth - 1 };
+	int zQuadsPerBlock{ blockLength - 1 };
+
+	height_map_image = std::make_unique<CHeightMapImage>(fileName, width, length, scale);
+
+	long xBlocks = (width - 1) / xQuadsPerBlock;
+	long zBlocks = (length - 1) / zQuadsPerBlock;
+
+	for (int z = 0, zStart = 0; z < zBlocks; ++z) {
+		for (int x = 0, xStart = 0; x < xBlocks; ++x) {
+			xStart = x * (blockWidth - 1);
+			zStart = z * (blockLength - 1);
+			std::shared_ptr<CMesh> heightMapMesh = std::make_shared<CHeightMapGridMesh>(device, commandList, xStart, zStart, blockWidth, blockLength, scale, color, height_map_image.get());
+			SetMesh(heightMapMesh);
+		}
+	}
 }

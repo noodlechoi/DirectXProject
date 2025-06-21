@@ -78,3 +78,19 @@ class CAirPlaneMeshDiffused : public CMesh
 public:
 	CAirPlaneMeshDiffused(ID3D12Device* , ID3D12GraphicsCommandList* , float  = 20.0f, float  = 20.0f, float  = 4.0f, XMFLOAT4 = XMFLOAT4(1.0f, 1.0f, 0.0f, 0.0f));
 };
+
+class CHeightMapGridMesh : public CMesh {
+public:
+	CHeightMapGridMesh(ID3D12Device*, ID3D12GraphicsCommandList*, int, int, int, int, XMFLOAT3 = XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT4 = XMFLOAT4(1.0f, 1.0f, 0.0f, 0.0f), void* = nullptr);
+
+	XMFLOAT3 GetScale() { return scale; }
+	int GetWidth() { return width; }
+	int GetLength() { return length; }
+
+	// 격자 좌표 정점 높이 반환
+	virtual float OnGetHeight(int, int, void*);
+	virtual XMFLOAT4 OnGetColor(int, int, void*);
+protected:
+	XMFLOAT3 scale;
+	int width, length;
+};

@@ -84,3 +84,16 @@ protected:
 	std::deque<std::unique_ptr<CGameObject>> objects{};
 	std::shared_ptr<CPlayer> player{};
 };
+
+class CTerrainShader : public CObjectShader {
+public:
+	CTerrainShader();
+	virtual ~CTerrainShader() {};
+	D3D12_INPUT_LAYOUT_DESC CreateInputLayout() override;
+	void BuildObjects(ID3D12Device*, ID3D12GraphicsCommandList*) override;
+	void Render(ID3D12GraphicsCommandList*) override;
+
+	CHeightMapTerrain* GetTerrain() { return terrain.get(); }
+protected:
+	std::shared_ptr<CHeightMapTerrain> terrain{};
+};

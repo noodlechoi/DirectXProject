@@ -54,3 +54,12 @@ private:
 	bool isFire{};
 	//CObject* lock_object{};
 };
+class CTerrainInputManager : public CInputManager {
+public:
+	void ProcessInput(HWND&, CObjectShader*) override;
+	void ProcessingMouseMessage(HWND&, UINT&, WPARAM&, LPARAM&) override;
+	void ProcessingKeyboardMessage(HWND&, UINT&, WPARAM&, LPARAM&) override;
+	virtual LRESULT ProcessingWindowMessage(HWND&, UINT&, WPARAM&, LPARAM&) override;
+private:
+	POINT old_cursor_pos;
+};

@@ -1,7 +1,6 @@
 #pragma once
 #include "Mesh.h"
-
-class CShader;
+#include "HeightMapImage.h"
 
 // mesh를 가지고 있는 게임 오브젝트 클래스
 class CGameObject
@@ -20,7 +19,6 @@ public:
 	virtual void ReleaseShaderVariables();
 
 	virtual void SetMesh(std::shared_ptr<CMesh>& );
-	virtual void SetShader(std::shared_ptr<CShader>&);
 	
 	XMFLOAT3 GetPosition() const { return XMFLOAT3(world_matrix._41, world_matrix._42, world_matrix._43); }
 	XMFLOAT3 GetLook() const;
@@ -45,8 +43,7 @@ private:
 	size_t ref_num{};
 protected:
 	XMFLOAT4X4 world_matrix{};
-	std::shared_ptr<CMesh> mesh{};
-	std::shared_ptr<CShader> shader{};
+	std::vector<std::shared_ptr<CMesh>> meshes{};
 
 	XMFLOAT3 moving_direction{};
 	float moving_speed{};
@@ -63,7 +60,7 @@ public:
 	void Animate(float) override;
 private:
 	XMFLOAT3 rotation_axis{ 0.0f, 1.0f, 0.0f };
-	float rotation_speed{ 90.0f };
+	float rotation_speed{ 15.0f };
 };
 
 class CRollerCoaster : public CGameObject {
@@ -112,4 +109,25 @@ public:
 private:
 	XMFLOAT3 current_distination{};
 	XMFLOAT3 next_destination{};
+};
+
+class CHeightMapTerrain : public CGameObject {
+public:
+	CHeightMapTerrain(ID3D12Device*, ID3D12GraphicsCommandList*, LPCTSTR, int, int, int, int, XMFLOAT3, XMFLOAT4);
+
+	float GetHeight(float x, float z) { return(height_map_image->GetHeight(x / scale.x, z / scale.z) * scale.y); };
+	XMFLOAT3 GetNormal(float x, float z) { return(height_map_image->GetHeightMapNormal(int(x / scale.x),int( z / scale.z))); };
+
+	int GetHeightMapWidth() { return height_map_image->GetWidth(); }
+	int GetHeightMapLength() { return height_map_image->GetLength(); }
+	XMFLOAT3 GetScale() { return scale; }
+
+	float GetWidth() { return width * scale.x; }
+	float GetLength() { return length* scale.z; }
+private:
+	std::unique_ptr<CHeightMapImage> height_map_image;
+
+	int width, length;
+
+	XMFLOAT3 scale;
 };

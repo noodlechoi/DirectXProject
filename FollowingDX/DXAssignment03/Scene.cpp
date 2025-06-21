@@ -6,7 +6,6 @@ CScene::CScene(CInputManager* inputManager, float width, float height)
 {
 	input_manager.reset(inputManager);
 
-	shaders.reserve(10);
 }
 
 CScene::~CScene()
@@ -55,8 +54,8 @@ ID3D12RootSignature* CScene::CreateGraphicsRootSignature(ID3D12Device* device)
 
 void CScene::ReleaseUploadBuffers()
 {
-	for (auto& shader : shaders) {
-		shader.ReleaseUploadBuffers();
+	if(shader){
+		shader->ReleaseUploadBuffers();
 	}
 }
 
@@ -64,22 +63,21 @@ void CScene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* comma
 {
 	graphics_root_signature = CreateGraphicsRootSignature(device);
 
-	shaders.clear();
-	shaders.emplace_back(cliend_width, cliend_height);
-	shaders[0].CreateShader(device, graphics_root_signature.Get());
-	shaders[0].BuildObjects(device, commandList);
+	shader = std::make_unique<CObjectShader>(cliend_width, cliend_height);
+	shader->CreateShader(device, graphics_root_signature.Get());
+	shader->BuildObjects(device, commandList);
 }
 
 void CScene::ProcessInput(HWND& hWnd, float elapsedTime)
 {
-	input_manager->ProcessInput(hWnd, &shaders[0]);
-	shaders[0].Update(elapsedTime);
+	input_manager->ProcessInput(hWnd, shader.get());
+	shader->Update(elapsedTime);
 }
 
 void CScene::AnimateObjects(float elapsedTime)
 {
-	for (auto& shader : shaders) {
-		shader.AnimateObjects(elapsedTime);
+	if (shader) {
+		shader->AnimateObjects(elapsedTime);
 	}
 }
 
@@ -93,9 +91,8 @@ void CScene::Render(ID3D12GraphicsCommandList* commandList )
 {
 	PrepareRender(commandList);
 
-
-	for (auto& shader : shaders) {
-		shader.Render(commandList);
+	if(shader) {
+		shader->Render(commandList);
 	}
 }
 
@@ -120,10 +117,9 @@ void CRollerCoasterScene::BuildObjects(ID3D12Device* device, ID3D12GraphicsComma
 {
 	graphics_root_signature = CreateGraphicsRootSignature(device);
 
-	shaders.clear();
-	shaders.emplace_back(cliend_width, cliend_height);
-	shaders[0].CreateShader(device, graphics_root_signature.Get());
-	shaders[0].RollerCoasterBuildObjects(device, commandList);
+	shader = std::make_unique<CObjectShader>(cliend_width, cliend_height);
+	shader->CreateShader(device, graphics_root_signature.Get());
+	shader->RollerCoasterBuildObjects(device, commandList);
 }
 
 CScene* CRollerCoasterScene::NextScene()
@@ -140,11 +136,10 @@ void CTankScene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* c
 {
 	graphics_root_signature = CreateGraphicsRootSignature(device);
 
-	shaders.clear();
-	shaders.emplace_back(cliend_width, cliend_height);
-	shaders[0].CreateShader(device, graphics_root_signature.Get());
-	shaders[0].TankBuildObjects(device, commandList);
-	//shaders[0].BuildObjects(device, commandList);
+	shader = std::make_unique<CObjectShader>(cliend_width, cliend_height);
+	shader->CreateShader(device, graphics_root_signature.Get());
+	shader->TankBuildObjects(device, commandList);
+	//shader[0].BuildObjects(device, commandList);
 }
 
 void CTankScene::CheckObjectByBulletCollisions()
@@ -156,4 +151,18 @@ void CTankScene::AnimateObjects(float elapsedTime)
 {
 	CScene::AnimateObjects(elapsedTime);
 	CheckObjectByBulletCollisions();
+}
+
+CTerrainScene::CTerrainScene(float width, float height)
+	: CScene(new CTerrainInputManager, width, height)
+{
+}
+
+void CTerrainScene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
+{
+	graphics_root_signature = CreateGraphicsRootSignature(device);
+
+	shader = std::make_unique<CTerrainShader>();
+	shader->CreateShader(device, graphics_root_signature.Get());
+	shader->BuildObjects(device, commandList);
 }

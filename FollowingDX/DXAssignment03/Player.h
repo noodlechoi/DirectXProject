@@ -50,3 +50,8 @@ public:
 
 	std::deque<CBulletObject> bullets;
 };
+
+class CTerrainPlayer : public CPlayer {
+public:
+	CTerrainPlayer(ID3D12Device*, ID3D12GraphicsCommandList*, float, float, void*);
+};

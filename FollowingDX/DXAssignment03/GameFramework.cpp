@@ -244,7 +244,7 @@ void CGameFramework::BuildObjects()
 	command_list->Reset(command_allocator.Get(), NULL);
 	
 	// 씬 객체 생성
-	now_scene = std::make_unique<CRollerCoasterScene>((float)client_width, (float)client_height);
+	now_scene = std::make_unique<CTerrainScene>((float)client_width, (float)client_height);
 	if (now_scene) now_scene->BuildObjects(d3d_device.Get(), command_list.Get());
 
 	// 그래픽 명령 리스트 명령 큐에 추가

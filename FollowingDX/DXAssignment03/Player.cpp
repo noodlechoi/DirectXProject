@@ -137,3 +137,14 @@ void CTankPlayer::Render(ID3D12GraphicsCommandList* commandList)
 		bullet.Render(commandList);
 	}
 }
+
+CTerrainPlayer::CTerrainPlayer(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, float width, float height, void* context)
+	: CPlayer(new CThirdPersonCamera(this), width, height)
+{
+	std::shared_ptr<CMesh> cubeMesh = std::make_shared<CCubeMeshDiffused>(device, commandList);
+	SetMesh(cubeMesh);
+	CHeightMapTerrain* terrain = (CHeightMapTerrain*)context;
+	float mapHeight = terrain->GetHeight(terrain->GetWidth() * 0.5f,terrain->GetLength() * 0.5f);
+	SetPosition(terrain->GetWidth() * 0.5f, 2000, terrain->GetLength() * 0.5f);
+	CreateShaderVariables(device, commandList);
+}

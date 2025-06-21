@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "HeightMapImage.h"
 #include "Mesh.h"
 
 CVertex::CVertex(const CVertex& rhs) : position{ rhs.position }
@@ -299,4 +300,98 @@ CAirPlaneMeshDiffused::CAirPlaneMeshDiffused(ID3D12Device* device, ID3D12Graphic
 	vertex_buffer_view.BufferLocation = vertex_buffer->GetGPUVirtualAddress();
 	vertex_buffer_view.StrideInBytes = stride;
 	vertex_buffer_view.SizeInBytes = stride * vertex_num;
+}
+
+CHeightMapGridMesh::CHeightMapGridMesh(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, int xStart, int zStart, int otherWidth, int otherLength, XMFLOAT3 otherScale, XMFLOAT4 color, void* context)
+	: CMesh(), width{otherWidth}, length{otherLength}, scale{otherScale}
+{
+	vertex_num = width * length;
+	stride = sizeof(CDiffusedVertex);
+
+	primitive_topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
+
+	CDiffusedVertex* vertice = new CDiffusedVertex[vertex_num];
+	float fHeight = 0.0f, fMinHeight = +FLT_MAX, fMaxHeight = -FLT_MAX;
+	for (int i = 0, z = zStart; z < (zStart + length); z++)
+	{
+		for (int x = xStart; x < (xStart + width); x++, i++)
+		{
+			//정점의 높이와 색상을 높이 맵으로부터 구한다.
+			XMFLOAT3 xmf3Position = XMFLOAT3((x * scale.x), OnGetHeight(x, z, context),
+				(z * scale.z));
+			XMFLOAT4 xmf3Color = Vector4::Add(OnGetColor(x, z, context), color);
+			vertice[i] = CDiffusedVertex(xmf3Position, xmf3Color);
+			if (fHeight < fMinHeight) fMinHeight = fHeight;
+			if (fHeight > fMaxHeight) fMaxHeight = fHeight;
+		}
+	}
+
+	vertex_buffer = CreateBufferResource(device, commandList, vertice, stride * vertex_num, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, vertex_upload_buffer.GetAddressOf());
+	vertex_buffer_view.BufferLocation = vertex_buffer->GetGPUVirtualAddress();
+	vertex_buffer_view.StrideInBytes = stride;
+	vertex_buffer_view.SizeInBytes = stride * vertex_num;
+
+	delete[] vertice;
+
+	index_num = ((width * 2) * (length - 1)) + ((length - 1) - 1);
+	UINT* indices = new UINT[index_num];
+
+	for (int j = 0, z = 0; z < length - 1; z++)
+	{
+		if ((z % 2) == 0)
+		{
+			for (int x = 0; x < width; x++)
+			{
+				if ((x == 0) && (z > 0)) indices[j++] = (UINT)(x + (z * width));
+				//아래(x, z), 위(x, z+1)의 순서로 인덱스를 추가한다.
+				indices[j++] = (UINT)(x + (z * width));
+				indices[j++] = (UINT)((x + (z * width)) + width);
+			}
+		}
+		else
+		{
+			//짝수 번째 줄이므로(z = 1, 3, 5, ...) 인덱스의 나열 순서는 오른쪽에서 왼쪽 방향이다.
+			for (int x = width - 1; x >= 0; x--)
+			{
+				//줄이 바뀔 때마다(x == (width-1)) 첫 번째 인덱스를 추가한다.
+				if (x == (width - 1)) indices[j++] = (UINT)(x + (z * width));
+				//아래(x, z), 위(x, z+1)의 순서로 인덱스를 추가한다.
+				indices[j++] = (UINT)(x + (z * width));
+				indices[j++] = (UINT)((x + (z * width)) + width);
+			}
+		}
+	}
+	index_buffer = ::CreateBufferResource(device, commandList, indices,	sizeof(UINT) * index_num, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, index_upload_buffer.GetAddressOf());
+	index_buffer_view.BufferLocation = index_buffer->GetGPUVirtualAddress();
+	index_buffer_view.Format = DXGI_FORMAT_R32_UINT;
+	index_buffer_view.SizeInBytes = sizeof(UINT) * index_num;
+	delete[] indices;
+}
+
+float CHeightMapGridMesh::OnGetHeight(int x, int z, void* context)
+{
+	CHeightMapImage* heightMapImage = (CHeightMapImage*)context;
+	BYTE* heightMapPixels = heightMapImage->GetHeightMapPixels();
+	return (heightMapPixels[x + (z * heightMapImage->GetWidth())] * heightMapImage->GetScale().y);
+}
+
+XMFLOAT4 CHeightMapGridMesh::OnGetColor(int x, int z, void* context)
+{
+	// 조명 방향 벡터
+	XMFLOAT3 lightDirection{ -1.0f, 1.0f, 1.0f };
+	lightDirection = Vector3::Normalize(lightDirection);
+	CHeightMapImage* heightMapImage = (CHeightMapImage*)context;
+	// 조명의 색상(세기, 밝기)
+	XMFLOAT4 incidentLightColor{ 0.9f, 0.8f, 0.4f, 1.0f };
+	// 조명 색상이 반사되는 비율
+	float mapScale = Vector3::DotProduct(heightMapImage->GetHeightMapNormal(x, z), lightDirection);
+	mapScale += Vector3::DotProduct(heightMapImage->GetHeightMapNormal(x + 1, z), lightDirection);
+	mapScale += Vector3::DotProduct(heightMapImage->GetHeightMapNormal(x + 1, z + 1), lightDirection);
+	mapScale += Vector3::DotProduct(heightMapImage->GetHeightMapNormal(x, z + 1), lightDirection);
+	mapScale = (mapScale / 4.0f) + 0.05f;
+	if (mapScale > 1.0f) mapScale = 1.0f;
+	if(mapScale < 0.25f) mapScale = 0.25f;
+
+	XMFLOAT4 color = Vector4::Multiply(mapScale, incidentLightColor);
+	return color;
 }
