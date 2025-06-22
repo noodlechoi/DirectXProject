@@ -374,7 +374,6 @@ void CTerrainShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandLis
 
 	player.reset();
 	player = std::make_shared<CTerrainPlayer>(device, commandList, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, terrain.get());
-	player->SetPosition(0.0f, 100.0f, 0.0f);
 
 	CreateShaderVariables(device, commandList);
 }
