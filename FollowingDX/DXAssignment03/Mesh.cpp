@@ -393,3 +393,82 @@ XMFLOAT4 CHeightMapGridMesh::OnGetColor(int x, int z, void* context)
 	XMFLOAT4 color = Vector4::Multiply(mapScale, incidentLightColor);
 	return color;
 }
+
+CTankMesh::CTankMesh(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
+	: CMesh()
+{
+	// 각 파트 크기 설정
+	XMFLOAT3 bodySize = { 4.0f, 1.0f, 6.0f };
+	XMFLOAT3 turretSize = { 2.0f, 1.0f, 2.0f };
+	XMFLOAT3 cannonSize = { 0.3f, 0.3f, 3.0f };
+
+	std::vector<CDiffusedVertex> vertices;
+	std::vector<UINT> indices;
+
+	// 위치 기준값
+	XMFLOAT3 bodyCenter = { 0.0f, 0.5f, 0.0f };
+	XMFLOAT3 turretCenter = { 0.0f, bodyCenter.y + 0.5f + 0.5f, 0.0f };
+	XMFLOAT3 cannonCenter = { 0.0f, turretCenter.y, turretSize.z * 0.5f + cannonSize.z * 0.5f };
+
+	auto addCube = [&](const XMFLOAT3& center, const XMFLOAT3& size) {
+		float x = size.x * 0.5f;
+		float y = size.y * 0.5f;
+		float z = size.z * 0.5f;
+
+		XMFLOAT4 color = RandomColor();
+		UINT baseIndex = static_cast<UINT>(vertices.size());
+
+		vertices.push_back(CDiffusedVertex({ center.x - x, center.y + y, center.z - z }, color)); // 0
+		vertices.push_back(CDiffusedVertex({ center.x + x, center.y + y, center.z - z }, color)); // 1
+		vertices.push_back(CDiffusedVertex({ center.x + x, center.y + y, center.z + z }, color)); // 2
+		vertices.push_back(CDiffusedVertex({ center.x - x, center.y + y, center.z + z }, color)); // 3
+		vertices.push_back(CDiffusedVertex({ center.x - x, center.y - y, center.z - z }, color)); // 4
+		vertices.push_back(CDiffusedVertex({ center.x + x, center.y - y, center.z - z }, color)); // 5
+		vertices.push_back(CDiffusedVertex({ center.x + x, center.y - y, center.z + z }, color)); // 6
+		vertices.push_back(CDiffusedVertex({ center.x - x, center.y - y, center.z + z }, color)); // 7
+
+		UINT idx[] = {
+			// 앞
+			3,1,0, 2,1,3,
+			// 위
+			0,5,4, 1,5,0,
+			// 뒤
+			3,4,7, 0,4,3,
+			// 아래
+			1,6,5, 2,6,1,
+			// 좌
+			2,7,6, 3,7,2,
+			// 우
+			6,4,5, 7,4,6
+		};
+
+		for (UINT i = 0; i < 36; ++i)
+			indices.push_back(baseIndex + idx[i]);
+		};
+
+	// 바디 생성
+	addCube(bodyCenter, bodySize);
+	// 포탑 생성
+	addCube(turretCenter, turretSize);
+	// 캐논 생성
+	addCube(cannonCenter, cannonSize);
+
+	// 버퍼 설정
+	vertex_num = static_cast<UINT>(vertices.size());
+	index_num = static_cast<UINT>(indices.size());
+	stride = sizeof(CDiffusedVertex);
+
+	vertex_buffer = CreateBufferResource(device, commandList, vertices.data(), stride * vertex_num,
+		D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, vertex_upload_buffer.GetAddressOf());
+
+	vertex_buffer_view.BufferLocation = vertex_buffer->GetGPUVirtualAddress();
+	vertex_buffer_view.StrideInBytes = stride;
+	vertex_buffer_view.SizeInBytes = stride * vertex_num;
+
+	index_buffer = CreateBufferResource(device, commandList, indices.data(), sizeof(UINT) * index_num,
+		D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, index_upload_buffer.GetAddressOf());
+
+	index_buffer_view.BufferLocation = index_buffer->GetGPUVirtualAddress();
+	index_buffer_view.Format = DXGI_FORMAT_R32_UINT;
+	index_buffer_view.SizeInBytes = sizeof(UINT) * index_num;
+}

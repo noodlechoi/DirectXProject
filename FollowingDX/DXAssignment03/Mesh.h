@@ -79,6 +79,11 @@ public:
 	CAirPlaneMeshDiffused(ID3D12Device* , ID3D12GraphicsCommandList* , float  = 20.0f, float  = 20.0f, float  = 4.0f, XMFLOAT4 = XMFLOAT4(1.0f, 1.0f, 0.0f, 0.0f));
 };
 
+class CTankMesh : public CMesh {
+public:
+	CTankMesh(ID3D12Device*, ID3D12GraphicsCommandList*);
+};
+
 class CHeightMapGridMesh : public CMesh {
 public:
 	CHeightMapGridMesh(ID3D12Device*, ID3D12GraphicsCommandList*, int, int, int, int, XMFLOAT3 = XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT4 = XMFLOAT4(1.0f, 1.0f, 0.0f, 0.0f), void* = nullptr);

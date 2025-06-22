@@ -441,10 +441,8 @@ void CTerrainInputManager::ProcessInput(HWND& hwnd, CObjectShader* shader)
 		SetCursorPos(old_cursor_pos.x, old_cursor_pos.y);
 		if (cxMouseDelta || cyMouseDelta)
 		{
-			if (pKeyBuffer[VK_RBUTTON] & 0xF0)
-				shader->PlayerRotate(cyMouseDelta, 0.0f, -cxMouseDelta);
-			else
-				shader->PlayerRotate(cyMouseDelta, cxMouseDelta, 0.0f);
+			if (pKeyBuffer[VK_LBUTTON] & 0xF0)
+				shader->PlayerRotate(0.0f, cxMouseDelta, 0.0f);
 		}
 	}
 }
@@ -484,12 +482,6 @@ void CTerrainInputManager::ProcessingKeyboardMessage(HWND& hWnd, UINT& nMessageI
 		case 'n':
 		case 'N':
 			//IsNextScene = true;
-			break;
-		case 'w':
-		case 'a':
-		case 's':
-		case 'd':
-
 			break;
 		case VK_CONTROL:
 			break;
