@@ -428,7 +428,7 @@ void CTerrainInputManager::ProcessInput(HWND& hwnd, CObjectShader* shader)
 		if (pKeyBuffer[VK_PRIOR] & 0xF0) dwDirection |= DIR_UP;
 		if (pKeyBuffer[VK_NEXT] & 0xF0) dwDirection |= DIR_DOWN;
 
-		if (dwDirection) shader->PlayerMove(dwDirection, 0.15f);
+		if (dwDirection) shader->PlayerMove(dwDirection, 0.05f);
 	}
 
 	if (GetCapture() == hwnd)
@@ -484,6 +484,12 @@ void CTerrainInputManager::ProcessingKeyboardMessage(HWND& hWnd, UINT& nMessageI
 		case 'n':
 		case 'N':
 			//IsNextScene = true;
+			break;
+		case 'w':
+		case 'a':
+		case 's':
+		case 'd':
+
 			break;
 		case VK_CONTROL:
 			break;

@@ -106,10 +106,8 @@ void CGameObject::Render(ID3D12GraphicsCommandList* commandList)
 
 	UpdateShaderVariables(commandList);
 
-	if (meshes.data()) {
-		for (auto& mesh : meshes)
-			mesh->Render(commandList);
-	}
+	for (auto& mesh : meshes)
+		mesh->Render(commandList);
 }
 
 void CRotatingObject::Animate(float elapsedTime)
@@ -279,11 +277,12 @@ CHeightMapTerrain::CHeightMapTerrain(ID3D12Device*device, ID3D12GraphicsCommandL
 	long xBlocks = (width - 1) / xQuadsPerBlock;
 	long zBlocks = (length - 1) / zQuadsPerBlock;
 
+	std::shared_ptr<CMesh> heightMapMesh;
 	for (int z = 0, zStart = 0; z < zBlocks; ++z) {
 		for (int x = 0, xStart = 0; x < xBlocks; ++x) {
 			xStart = x * (blockWidth - 1);
 			zStart = z * (blockLength - 1);
-			std::shared_ptr<CMesh> heightMapMesh = std::make_shared<CHeightMapGridMesh>(device, commandList, xStart, zStart, blockWidth, blockLength, scale, color, height_map_image.get());
+			heightMapMesh = std::make_shared<CHeightMapGridMesh>(device, commandList, xStart, zStart, blockWidth, blockLength, scale, color, height_map_image.get());
 			SetMesh(heightMapMesh);
 		}
 	}

@@ -27,7 +27,7 @@ D3D12_RASTERIZER_DESC CShader::CreateRasterizerState()
 {
 	D3D12_RASTERIZER_DESC rasterizerDesc{};
 	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
-	rasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
+	rasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
 	rasterizerDesc.FrontCounterClockwise = FALSE;
 	rasterizerDesc.DepthBias = 0;
 	rasterizerDesc.DepthBiasClamp = 0.0f;
@@ -374,52 +374,8 @@ void CTerrainShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandLis
 
 	player.reset();
 	player = std::make_shared<CTerrainPlayer>(device, commandList, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, terrain.get());
+	player->SetPosition(0.0f, 100.0f, 0.0f);
 
-	float fTerrainWidth = terrain->GetWidth(), fTerrainLength = terrain->GetLength();
-	float fxPitch = 12.0f * 3.5f;
-	float fyPitch = 12.0f * 3.5f;
-	float fzPitch = 12.0f * 3.5f;
-
-	//직육면체를 지형 표면에 그리고 지형보다 높은 위치에 일정한 간격으로 배치한다.
-	int xObjects = int(fTerrainWidth / fxPitch), yObjects = 2, zObjects = int(fTerrainLength / fzPitch);
-	objects.clear();
-	//std::shared_ptr<CMesh> pCubeMesh = std::make_shared<CCubeMeshDiffused>(device, commandList);
-
-	//XMFLOAT3 xmf3RotateAxis, xmf3SurfaceNormal;
-	//CRotatingObject* pRotatingObject = NULL;
-	//for (int i = 0, x = 0; x < xObjects; x++)
-	//{
-	//	for (int z = 0; z < zObjects; z++)
-	//	{
-	//		for (int y = 0; y < yObjects; y++)
-	//		{
-	//			objects.push_back(std::unique_ptr<CRotatingObject>());
-	//			pRotatingObject = new CRotatingObject();
-	//			pRotatingObject->SetMesh(pCubeMesh);
-	//			float xPosition = x * fxPitch;
-	//			float zPosition = z * fzPitch;
-	//			float fHeight = terrain->GetHeight(xPosition, zPosition);
-	//			pRotatingObject->SetPosition(xPosition, fHeight + (y * 10.0f * fyPitch) +
-	//				6.0f, zPosition);
-	//			if (y == 0)
-	//			{
-	//				/*지형의 표면에 위치하는 직육면체는 지형의 기울기에 따라 방향이 다르게 배치한다. 직육면체가 위치할 지형의 법선
-	//			   벡터 방향과 직육면체의 y-축이 일치하도록 한다.*/
-	//				xmf3SurfaceNormal = terrain->GetNormal(xPosition, zPosition);
-	//				xmf3RotateAxis = Vector3::CrossProduct(XMFLOAT3(0.0f, 1.0f, 0.0f),
-	//					xmf3SurfaceNormal);
-	//				if (Vector3::IsZero(xmf3RotateAxis)) xmf3RotateAxis = XMFLOAT3(0.0f, 1.0f,
-	//					0.0f);
-	//				float fAngle = acos(Vector3::DotProduct(XMFLOAT3(0.0f, 1.0f, 0.0f),
-	//					xmf3SurfaceNormal));
-	//				pRotatingObject->Rotate(&xmf3RotateAxis, XMConvertToDegrees(fAngle));
-	//			}
-	//			pRotatingObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
-	//			pRotatingObject->SetRotationSpeed(36.0f * (i % 10) + 36.0f);
-	//			objects[i].reset(pRotatingObject);
-	//		}
-	//	}
-	//}
 	CreateShaderVariables(device, commandList);
 }
 

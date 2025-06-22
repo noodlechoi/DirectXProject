@@ -15,12 +15,13 @@ CHeightMapImage::CHeightMapImage(LPCTSTR fileName, int otherWidth, int otherLeng
 	// 좌표축 상하대칭 저장
 	for (int y = 0; y < length; ++y) {
 		for (int x = 0; x < width; ++x) {
-			height_map_pixels[x + ((length - 1 - y) * width)] = heightMapPixels[x + y * width];
+			height_map_pixels[x + ((length - 1 - y) * width)] = heightMapPixels[x + (y * width)];
 		}
 	}
 
 	if (heightMapPixels) delete[] heightMapPixels;
 }
+
 
 float CHeightMapImage::GetHeight(float x, float z)
 {
@@ -39,7 +40,7 @@ float CHeightMapImage::GetHeight(float x, float z)
 	float topRight{ (float)height_map_pixels[(intX + 1)+((intZ + 1) * width)] };
 #ifdef  _WITH_APPROXIMATE_OPPOSITE_CORNER
 	// z 좌표가 홀수인 경우 인덱스가 오른쪽에서 왼쪽으로 나열
-	bool rightToLeft{ (z % 2 != 0) };
+	bool rightToLeft{ (fmod(z, 2.0f) != 0) };
 	// 같은 평면 상에서 보간이 되도록
 	if (rightToLeft) {
 		// 왼쪽 위 삼각형
@@ -48,10 +49,10 @@ float CHeightMapImage::GetHeight(float x, float z)
 		else // 오른쪽 아래 삼각형
 			topLeft = topRight + (bottomLeft - bottomRight);
 	} else {
-		if (zPercent < 1.0f - xPercent)
+		if (zPercent < (1.0f - xPercent))
 			topRight = topLeft + (bottomRight - bottomLeft);
 		else
-			BottomLeft = topLeft + (bottomRight - topRight);
+			bottomLeft = topLeft + (bottomRight - topRight);
 	}
 #endif //  _WITH_APPROXIMATE_OPPOSITE_CORNER
 	// 네 점 보간
@@ -78,7 +79,7 @@ XMFLOAT3 CHeightMapImage::GetHeightMapNormal(int x, int z)
 	float y3{ (float)height_map_pixels[heightMapIndex + yHeightMapAdd] * scale.y };
 	// Edge1, Edge2 => y1을 기준으로 삼각형 사이 벡터
 	XMFLOAT3 edge1{ XMFLOAT3(0.0f, y3 - y1, scale.z) };
-	XMFLOAT3 edge2{ XMFLOAT3(scale.x, y2 - y1, 0) };
+	XMFLOAT3 edge2{ XMFLOAT3(scale.x, y2 - y1, 0.0f) };
 	// 법선 벡터
 	XMFLOAT3 normal{ Vector3::CrossProduct(edge1, edge2, true) };
 

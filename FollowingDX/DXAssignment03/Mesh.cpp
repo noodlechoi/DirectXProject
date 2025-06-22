@@ -39,6 +39,7 @@ void CMesh::ReleaseUploadBuffers()
 void CMesh::Render(ID3D12GraphicsCommandList* commandList)
 {
 	// 정점 버퍼 뷰 설정
+	commandList->IASetPrimitiveTopology(primitive_topology);
 	commandList->IASetVertexBuffers(slot_num, 1, &vertex_buffer_view);
 	if (index_buffer) {
 		commandList->IASetIndexBuffer(&index_buffer_view);
@@ -311,18 +312,14 @@ CHeightMapGridMesh::CHeightMapGridMesh(ID3D12Device* device, ID3D12GraphicsComma
 	primitive_topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
 
 	CDiffusedVertex* vertice = new CDiffusedVertex[vertex_num];
-	float fHeight = 0.0f, fMinHeight = +FLT_MAX, fMaxHeight = -FLT_MAX;
 	for (int i = 0, z = zStart; z < (zStart + length); z++)
 	{
 		for (int x = xStart; x < (xStart + width); x++, i++)
 		{
 			//정점의 높이와 색상을 높이 맵으로부터 구한다.
-			XMFLOAT3 xmf3Position = XMFLOAT3((x * scale.x), OnGetHeight(x, z, context),
-				(z * scale.z));
+			XMFLOAT3 xmf3Position{ (x * scale.x), OnGetHeight(x, z, context),(z * scale.z) };
 			XMFLOAT4 xmf3Color = Vector4::Add(OnGetColor(x, z, context), color);
 			vertice[i] = CDiffusedVertex(xmf3Position, xmf3Color);
-			if (fHeight < fMinHeight) fMinHeight = fHeight;
-			if (fHeight > fMaxHeight) fMaxHeight = fHeight;
 		}
 	}
 
@@ -332,6 +329,7 @@ CHeightMapGridMesh::CHeightMapGridMesh(ID3D12Device* device, ID3D12GraphicsComma
 	vertex_buffer_view.SizeInBytes = stride * vertex_num;
 
 	delete[] vertice;
+
 
 	index_num = ((width * 2) * (length - 1)) + ((length - 1) - 1);
 	UINT* indices = new UINT[index_num];

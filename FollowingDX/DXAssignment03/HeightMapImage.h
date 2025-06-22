@@ -1,4 +1,6 @@
 #pragma once
+#define _WITH_APPROXIMATE_OPPOSITE_CORNER
+
 class CHeightMapImage
 {
 public:

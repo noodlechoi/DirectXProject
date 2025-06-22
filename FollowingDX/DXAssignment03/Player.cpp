@@ -145,6 +145,7 @@ CTerrainPlayer::CTerrainPlayer(ID3D12Device* device, ID3D12GraphicsCommandList* 
 	SetMesh(cubeMesh);
 	CHeightMapTerrain* terrain = (CHeightMapTerrain*)context;
 	float mapHeight = terrain->GetHeight(terrain->GetWidth() * 0.5f,terrain->GetLength() * 0.5f);
-	SetPosition(terrain->GetWidth() * 0.5f, 2000, terrain->GetLength() * 0.5f);
+	SetPosition(XMFLOAT3(terrain->GetWidth() * 0.5f, mapHeight + 2000, terrain->GetLength() * 0.5f));
+	//SetPosition(0.0f, 100.0f, 0.0f);
 	CreateShaderVariables(device, commandList);
 }
