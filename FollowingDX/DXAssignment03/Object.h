@@ -39,6 +39,9 @@ public:
 	virtual void Animate(float );
 	virtual void OnPrepareRender();
 	virtual void Render(ID3D12GraphicsCommandList* );
+
+	BoundingOrientedBox	OOBB{ BoundingOrientedBox() };
+
 private:
 	size_t ref_num{};
 protected:

@@ -143,7 +143,7 @@ void CCamera::Update(XMFLOAT3& lookAt, float elapsedTime)
 	float length = XMVectorGetX(XMVector3Length(xmvDirection));
 	xmvDirection = XMVector3Normalize(xmvDirection);
 
-	float timeLagScale = elapsedTime * 4.0f;
+	float timeLagScale = elapsedTime * 10.0f;
 	float distance = length * timeLagScale;
 	if (distance > length) distance = length;
 	if (length < 0.01f) distance = length;

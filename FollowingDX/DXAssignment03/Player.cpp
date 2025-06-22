@@ -152,7 +152,22 @@ CTerrainPlayer::CTerrainPlayer(ID3D12Device* device, ID3D12GraphicsCommandList* 
 void CTerrainPlayer::Update(float elapsedTime)
 {
 	CPlayer::Update(elapsedTime);
+
 	// 중력 적용
 	gravity.Apply(position, velocity, elapsedTime);
 	gravity.ResolveCollision(position, velocity, terrain->GetHeight(position.x, position.z));
+
+	// up == height
+	XMVECTOR xmvUp = XMVector3Normalize(XMLoadFloat3(&terrain->GetNormal(position.x, position.z)));
+	XMVECTOR xmvPrevLook = XMVector3Normalize(XMLoadFloat3(&look));
+	// look = 지형 normal과 직교하도록 => 경사로 올라갈 때 적용되도록
+	XMVECTOR xmvLook = XMVector3Normalize(XMVector3Cross(xmvUp, XMVector3Cross(xmvPrevLook, xmvUp)));
+	XMVECTOR xmvRight = XMVector3Normalize(XMVector3Cross(xmvUp, xmvLook));
+
+	XMStoreFloat3(&up, xmvUp);
+	XMStoreFloat3(&look, xmvLook);
+	XMStoreFloat3(&right, xmvRight);
+
+	// 카메라 갱신
+	camera->SetLookAt(position, up);
 }
