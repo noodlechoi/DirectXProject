@@ -143,8 +143,16 @@ CTerrainPlayer::CTerrainPlayer(ID3D12Device* device, ID3D12GraphicsCommandList* 
 {
 	std::shared_ptr<CMesh> cubeMesh = std::make_shared<CCubeMeshDiffused>(device, commandList);
 	SetMesh(cubeMesh);
-	CHeightMapTerrain* terrain = (CHeightMapTerrain*)context;
+	terrain = (CHeightMapTerrain*)context;
 	float mapHeight = terrain->GetHeight(terrain->GetWidth() * 0.5f,terrain->GetLength() * 0.5f);
 	position = (XMFLOAT3(terrain->GetWidth() * 0.5f, mapHeight + 50, terrain->GetLength() * 0.5f));
 	CreateShaderVariables(device, commandList);
+}
+
+void CTerrainPlayer::Update(float elapsedTime)
+{
+	CPlayer::Update(elapsedTime);
+	// 중력 적용
+	gravity.Apply(position, velocity, elapsedTime);
+	gravity.ResolveCollision(position, velocity, terrain->GetHeight(position.x, position.z));
 }

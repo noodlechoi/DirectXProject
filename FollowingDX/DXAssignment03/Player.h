@@ -1,6 +1,7 @@
 #pragma once
 #include "Object.h"
 #include "Camera.h"
+#include "Gravity.h"
 
 class CPlayer : public CGameObject
 {
@@ -27,7 +28,7 @@ public:
 	XMFLOAT3 look{ XMFLOAT3(0.0f, 0.0f, 1.0f) };
 
 	XMFLOAT3 velocity{};
-	XMFLOAT3 gravity{};
+	CGravity gravity{};
 
 	float friction{ 125.0f };
 
@@ -54,4 +55,7 @@ public:
 class CTerrainPlayer : public CPlayer {
 public:
 	CTerrainPlayer(ID3D12Device*, ID3D12GraphicsCommandList*, float, float, void*);
+	void Update(float = 0.016f) override;
+private:
+	CHeightMapTerrain* terrain;
 };

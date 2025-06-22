@@ -132,6 +132,7 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="DXAssignment03.h" />
     <ClInclude Include="GameFramework.h" />
+    <ClInclude Include="Gravity.h" />
     <ClInclude Include="HeightMapImage.h" />
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="Mesh.h" />
@@ -155,6 +156,7 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="DXAssignment03.cpp" />
     <ClCompile Include="GameFramework.cpp" />
+    <ClCompile Include="Gravity.cpp" />
     <ClCompile Include="HeightMapImage.cpp" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="Mesh.cpp" />
