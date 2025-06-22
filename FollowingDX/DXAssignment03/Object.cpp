@@ -213,7 +213,6 @@ CEnemyTank::CEnemyTank()
 	SetMovingDirection(XMFLOAT3(0.0f, 0.0f, 0.0f));
 	SetMovingSpeed(5.0f);
 
-
 	std::random_device rd;
 	auto rm = std::mt19937(rd());
 
@@ -243,7 +242,7 @@ void CEnemyTank::Animate(float elapsedTime)
 	moving_direction = Vector3::Normalize(Vector3::Add(moving_direction, xmf3Movement));
 	xmf3Position = Vector3::Add(xmf3Position, xmf3Movement);
 
-	if (1.0f >= Vector3::Distance(xmf3Position, current_distination)) {
+	if (1.0f >= (xmf3Position.x -  current_distination.x) && 1 >= (xmf3Position.y - current_distination.y)) {
 		// 목적지 변경
 		current_distination = next_destination;
 
@@ -253,6 +252,22 @@ void CEnemyTank::Animate(float elapsedTime)
 		auto uid_pos = std::uniform_int_distribution<int>{ -100, 100 };
 		SetNextDestination({ (float)uid_pos(rm), 0.0f, (float)uid_pos(rm) });
 	}
+
+	//// 중력 적용
+	//gravity.Apply(GetPosition(), velocity, elapsedTime);
+	//gravity.ResolveCollision(GetPosition(), velocity, terrain->GetHeight(position.x, position.z));
+
+	//// up == height
+	//XMVECTOR xmvUp = XMVector3Normalize(XMLoadFloat3(&terrain->GetNormal(position.x, position.z)));
+	//XMVECTOR xmvPrevLook = XMVector3Normalize(XMLoadFloat3(&look));
+	//// look = 지형 normal과 직교하도록 => 경사로 올라갈 때 적용되도록
+	//XMVECTOR xmvLook = XMVector3Normalize(XMVector3Cross(xmvUp, XMVector3Cross(xmvPrevLook, xmvUp)));
+	//XMVECTOR xmvRight = XMVector3Normalize(XMVector3Cross(xmvUp, xmvLook));
+
+	//XMStoreFloat3(&up, xmvUp);
+	//XMStoreFloat3(&look, xmvLook);
+	//XMStoreFloat3(&right, xmvRight);
+
 
 	CGameObject::Animate(elapsedTime);
 }

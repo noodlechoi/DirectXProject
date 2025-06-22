@@ -37,6 +37,7 @@
 #include <random>
 #include <vector>
 #include <fstream>
+#include <list>
 
 using namespace DirectX;
 using namespace DirectX::PackedVector;

@@ -5,6 +5,7 @@
 #include "InputManager.h"
 
 extern bool IsNextScene;
+extern bool isFire;
 
 void CInputManager::ProcessingMouseMessage(HWND& hWnd, UINT& nMessageID, WPARAM& wParam, LPARAM& lParam)
 {
@@ -482,6 +483,7 @@ void CTerrainInputManager::ProcessingKeyboardMessage(HWND& hWnd, UINT& nMessageI
 		case 'n':
 		case 'N':
 			//IsNextScene = true;
+			isFire = true;
 			break;
 		case VK_CONTROL:
 			break;

@@ -3,6 +3,9 @@
 #include "Mesh.h"
 #include "Shader.h"
 
+bool isFire;
+
+
 CShader::CShader() 
 {
 }
@@ -370,12 +373,35 @@ D3D12_INPUT_LAYOUT_DESC CTerrainShader::CreateInputLayout()
 
 void CTerrainShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
 {
+	d3d_device = device;
+	command_list = commandList;
 	terrain = std::make_shared<CHeightMapTerrain>(device, commandList, _T("HeightMap.raw"), 257, 257, 257, 257, XMFLOAT3{ 8.0f, 2.0f, 8.0f }, XMFLOAT4{ 0.0f, 0.2f, 0.0f, 0.0f });
 
 	player.reset();
 	player = std::make_shared<CTerrainPlayer>(device, commandList, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, terrain.get());
 
+	objects.clear();
+	std::shared_ptr<CMesh> tankMesh = std::make_shared<CTankMesh>(device, commandList);
+
+	CEnemyTank* object = nullptr;
+	for (int i = 0; i < 5; ++i) {
+		objects.push_back(std::unique_ptr<CGameObject>());
+		object = new CEnemyTank;
+		object->SetMesh(tankMesh);
+		object->SetPosition(XMFLOAT3(player->position.x, terrain->GetHeight(player->position.x, player->position.z), player->position.z - (6.0f * i)));
+		objects[i].reset(object);
+	}
+
 	CreateShaderVariables(device, commandList);
+}
+
+void CTerrainShader::Update(float elapsedTime)
+{
+	CObjectShader::Update(elapsedTime);
+	if (isFire) {
+		dynamic_cast<CTerrainPlayer*>(player.get())->FireBullet(d3d_device, command_list);
+		isFire = false;
+	}
 }
 
 void CTerrainShader::Render(ID3D12GraphicsCommandList* commandList)

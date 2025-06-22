@@ -11,6 +11,7 @@ void CGravity::Apply(XMFLOAT3& position, XMFLOAT3& velocity, float elapsedTime)
 	velocity.y += gravity * elapsedTime * 10.0f;
 }
 
+
 void CGravity::ResolveCollision(XMFLOAT3& position, XMFLOAT3& velocity, float groundHeight)
 {
     if (position.y <= groundHeight) {

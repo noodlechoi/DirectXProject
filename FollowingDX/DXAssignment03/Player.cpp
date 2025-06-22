@@ -171,3 +171,43 @@ void CTerrainPlayer::Update(float elapsedTime)
 	// 카메라 갱신
 	camera->SetLookAt(position, up);
 }
+
+
+void CTerrainPlayer::FireBullet(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
+{
+	XMFLOAT3 Position = GetPosition();
+	Position.y += 2.0f;
+
+	XMFLOAT3 Direction = GetLook();
+	XMFLOAT3 FirePosition = Vector3::Add(Position, Vector3::ScalarProduct(Direction, 5.0f, false));
+
+	CBulletObject bullet;
+
+	bullet.SetWorldMatrix(world_matrix);
+
+	std::shared_ptr<CMesh> cube = std::make_shared<CCubeMeshDiffused>(device, commandList);
+	bullet.SetMesh(cube);
+	bullet.SetFirePosition(FirePosition);
+	bullet.SetMovingDirection(Direction);
+	bullet.SetMovingSpeed(1.0f);
+
+	bullets.push_back(bullet);
+}
+
+void CTerrainPlayer::Animate(float elapsedTime)
+{
+	CPlayer::Animate(elapsedTime);
+
+	for (CBulletObject& bullet : bullets) {
+		bullet.Animate(elapsedTime);
+	}
+}
+
+void CTerrainPlayer::Render(ID3D12GraphicsCommandList* commandList)
+{
+	CPlayer::Render(commandList);
+
+	for (CBulletObject& bullet : bullets) {
+		bullet.Render(commandList);
+	}
+}

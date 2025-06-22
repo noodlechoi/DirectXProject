@@ -1,6 +1,7 @@
 #pragma once
 #include "Mesh.h"
 #include "HeightMapImage.h"
+#include "Gravity.h"
 
 // mesh를 가지고 있는 게임 오브젝트 클래스
 class CGameObject
@@ -110,6 +111,8 @@ public:
 	void FireBullet(CGameObject* = nullptr);
 	void SetNextDestination(XMFLOAT3);
 private:
+	//CHeightMapTerrain* terrain;
+	CGravity gravity;
 	XMFLOAT3 current_distination{};
 	XMFLOAT3 next_destination{};
 };

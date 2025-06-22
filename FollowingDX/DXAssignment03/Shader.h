@@ -6,6 +6,7 @@
 //	XMFLOAT4X4 world_matrix; // 월드 행렬
 //};
 
+
 // pipeline 상태 객체를 생성
 class CShader
 {
@@ -91,9 +92,13 @@ public:
 	virtual ~CTerrainShader() {};
 	D3D12_INPUT_LAYOUT_DESC CreateInputLayout() override;
 	void BuildObjects(ID3D12Device*, ID3D12GraphicsCommandList*) override;
+	void Update(float) override;
 	void Render(ID3D12GraphicsCommandList*) override;
 
 	CHeightMapTerrain* GetTerrain() { return terrain.get(); }
 protected:
+	ID3D12GraphicsCommandList* command_list{};
+	ID3D12Device* d3d_device{};
+
 	std::shared_ptr<CHeightMapTerrain> terrain{};
 };

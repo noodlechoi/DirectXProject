@@ -1,7 +1,6 @@
 #pragma once
 #include "Object.h"
 #include "Camera.h"
-#include "Gravity.h"
 
 class CPlayer : public CGameObject
 {
@@ -55,7 +54,11 @@ public:
 class CTerrainPlayer : public CPlayer {
 public:
 	CTerrainPlayer(ID3D12Device*, ID3D12GraphicsCommandList*, float, float, void*);
+	void Animate(float) override;
+	void Render(ID3D12GraphicsCommandList*)override;
 	void Update(float = 0.016f) override;
+	void FireBullet(ID3D12Device*, ID3D12GraphicsCommandList*);
 private:
+	std::deque<CBulletObject> bullets;
 	CHeightMapTerrain* terrain;
 };

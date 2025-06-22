@@ -51,7 +51,7 @@ public:
 private:
 	DWORD togle{};
 	POINT old_cursor_pos;
-	bool isFire{};
+	//bool isFire{};
 	//CObject* lock_object{};
 };
 class CTerrainInputManager : public CInputManager {
