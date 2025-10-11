@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------------
+ï»¿//-----------------------------------------------------------------------------
 // File: CScene.cpp
 //-----------------------------------------------------------------------------
 
@@ -163,29 +163,45 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 {
 	ID3D12RootSignature *pd3dGraphicsRootSignature = NULL;
 
-	D3D12_ROOT_PARAMETER pd3dRootParameters[3];
+	D3D12_DESCRIPTOR_RANGE ranges[3];
+	ZeroMemory(&ranges, sizeof(ranges));
 
-	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	pd3dRootParameters[0].Descriptor.ShaderRegister = 1; //Camera
-	pd3dRootParameters[0].Descriptor.RegisterSpace = 0;
-	pd3dRootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	ranges[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
+	ranges[0].NumDescriptors = 1;
+	ranges[0].BaseShaderRegister = 1; // b1 (cbCameraInfo)
+	ranges[0].RegisterSpace = 0;
+	ranges[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
-	pd3dRootParameters[1].Constants.Num32BitValues = 32;
-	pd3dRootParameters[1].Constants.ShaderRegister = 2; //GameObject
-	pd3dRootParameters[1].Constants.RegisterSpace = 0;
-	pd3dRootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	ranges[1].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
+	ranges[1].NumDescriptors = 1;
+	ranges[1].BaseShaderRegister = 2; // b2 (cbGameObjectInfo)
+	ranges[1].RegisterSpace = 0;
+	ranges[1].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	pd3dRootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	pd3dRootParameters[2].Descriptor.ShaderRegister = 4; //Lights
-	pd3dRootParameters[2].Descriptor.RegisterSpace = 0;
-	pd3dRootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	ranges[2].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
+	ranges[2].NumDescriptors = 1;
+	ranges[2].BaseShaderRegister = 4; // b4 (cbLights)
+	ranges[2].RegisterSpace = 0;
+	ranges[2].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+	// Descriptor table
+	D3D12_ROOT_DESCRIPTOR_TABLE descTable;
+	ZeroMemory(&descTable, sizeof(descTable));
+	descTable.NumDescriptorRanges = _countof(ranges);
+	descTable.pDescriptorRanges = ranges;
+
+	// Root parameter: descriptor table
+	D3D12_ROOT_PARAMETER rootParameter;
+	ZeroMemory(&rootParameter, sizeof(rootParameter));
+	rootParameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameter.DescriptorTable = descTable;
+	rootParameter.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT | D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
 	D3D12_ROOT_SIGNATURE_DESC d3dRootSignatureDesc;
 	::ZeroMemory(&d3dRootSignatureDesc, sizeof(D3D12_ROOT_SIGNATURE_DESC));
-	d3dRootSignatureDesc.NumParameters = _countof(pd3dRootParameters);
-	d3dRootSignatureDesc.pParameters = pd3dRootParameters;
+	d3dRootSignatureDesc.NumParameters = 1;
+	d3dRootSignatureDesc.pParameters = &rootParameter;
 	d3dRootSignatureDesc.NumStaticSamplers = 0;
 	d3dRootSignatureDesc.pStaticSamplers = NULL;
 	d3dRootSignatureDesc.Flags = d3dRootSignatureFlags;
@@ -194,6 +210,7 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 	ID3DBlob *pd3dErrorBlob = NULL;
 	D3D12SerializeRootSignature(&d3dRootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &pd3dSignatureBlob, &pd3dErrorBlob);
 	pd3dDevice->CreateRootSignature(0, pd3dSignatureBlob->GetBufferPointer(), pd3dSignatureBlob->GetBufferSize(), __uuidof(ID3D12RootSignature), (void **)&pd3dGraphicsRootSignature);
+
 	if (pd3dSignatureBlob) pd3dSignatureBlob->Release();
 	if (pd3dErrorBlob) pd3dErrorBlob->Release();
 
@@ -202,7 +219,7 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 
 void CScene::CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
 {
-	UINT ncbElementBytes = ((sizeof(LIGHTS) + 255) & ~255); //256ÀÇ ¹è¼ö
+	UINT ncbElementBytes = ((sizeof(LIGHTS) + 255) & ~255); //256ì˜ ë°°ìˆ˜
 	m_pd3dcbLights = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 
 	m_pd3dcbLights->Map(0, NULL, (void **)&m_pcbMappedLights);
