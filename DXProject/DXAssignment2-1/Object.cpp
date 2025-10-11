@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------------
 // File: CGameObject.cpp
 //-----------------------------------------------------------------------------
 
@@ -163,7 +163,7 @@ void CGameObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pC
 {
 	OnPrepareRender();
 
-	UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
+	//UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
 
 	if (m_nMaterials > 0)
 	{
@@ -172,7 +172,7 @@ void CGameObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pC
 			if (m_ppMaterials[i])
 			{
 				if (m_ppMaterials[i]->m_pShader) m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera);
-				m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
+				//m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
 			}
 
 			if (m_pMesh) m_pMesh->Render(pd3dCommandList, i);

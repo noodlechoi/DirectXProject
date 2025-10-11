@@ -1,4 +1,4 @@
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 #include "Player.h"
 #include "Camera.h"
 
@@ -106,12 +106,24 @@ void CCamera::RegenerateViewMatrix()
 	m_xmf4x4View._43 = -Vector3::DotProduct(m_xmf3Position, m_xmf3Look);
 }
 
-void CCamera::CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
+void CCamera::CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12DescriptorHeap* descHeap)
 {
-	UINT ncbElementBytes = ((sizeof(VS_CB_CAMERA_INFO) + 255) & ~255); //256ÀÇ ¹è¼ö
+	desc_heap = descHeap;
+
+	UINT ncbElementBytes = ((sizeof(VS_CB_CAMERA_INFO) + 255) & ~255); //256ì˜ ë°°ìˆ˜
 	m_pd3dcbCamera = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 
 	m_pd3dcbCamera->Map(0, NULL, (void **)&m_pcbMappedCamera);
+
+	// descriptor heap
+	D3D12_CPU_DESCRIPTOR_HANDLE cpuDescHandle{ desc_heap->GetCPUDescriptorHandleForHeapStart() };
+
+	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbCamera->GetGPUVirtualAddress();
+
+	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc{};
+	cbvDesc.BufferLocation = d3dcbLightsGpuVirtualAddress;
+	cbvDesc.SizeInBytes = ncbElementBytes;
+	pd3dDevice->CreateConstantBufferView(&cbvDesc, cpuDescHandle);
 }
 
 void CCamera::UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList)
@@ -126,8 +138,8 @@ void CCamera::UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList)
 
 	::memcpy(&m_pcbMappedCamera->m_xmf3Position, &m_xmf3Position, sizeof(XMFLOAT3));
 
-	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbCamera->GetGPUVirtualAddress();
-	pd3dCommandList->SetGraphicsRootConstantBufferView(0, d3dGpuVirtualAddress);
+	D3D12_GPU_DESCRIPTOR_HANDLE gpuDescHandle = desc_heap->GetGPUDescriptorHandleForHeapStart();
+	pd3dCommandList->SetGraphicsRootDescriptorTable(0, gpuDescHandle);
 }
 
 void CCamera::ReleaseShaderVariables()

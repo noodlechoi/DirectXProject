@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #define DIR_FORWARD				0x01
 #define DIR_BACKWARD			0x02
@@ -33,6 +33,7 @@ protected:
 
 	CCamera						*m_pCamera = NULL;
 
+	ID3D12DescriptorHeap* desc_heap{};
 public:
 	CPlayer();
 	virtual ~CPlayer();
@@ -84,7 +85,7 @@ public:
 class CAirplanePlayer : public CPlayer
 {
 public:
-	CAirplanePlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature);
+	CAirplanePlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, ID3D12DescriptorHeap* descHeap);
 	virtual ~CAirplanePlayer();
 
 	CGameObject*				m_pMainRotorFrame = NULL;

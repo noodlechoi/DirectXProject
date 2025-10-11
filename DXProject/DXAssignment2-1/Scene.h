@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------------
 // File: Scene.h
 //-----------------------------------------------------------------------------
 
@@ -54,6 +54,7 @@ public:
 	void BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);
 	void ReleaseObjects();
 
+	ID3D12DescriptorHeap* CreateDescriptorHeap(ID3D12Device* pd3dDevice);
 	ID3D12RootSignature *CreateGraphicsRootSignature(ID3D12Device *pd3dDevice);
 	ID3D12RootSignature *GetGraphicsRootSignature() { return(m_pd3dGraphicsRootSignature); }
 
@@ -63,10 +64,13 @@ public:
 
 	void ReleaseUploadBuffers();
 
+	ID3D12DescriptorHeap* GetDescHeap() { return desc_heap.Get(); }
+
 	CPlayer						*m_pPlayer = NULL;
 
 public:
 	ID3D12RootSignature			*m_pd3dGraphicsRootSignature = NULL;
+	ComPtr<ID3D12DescriptorHeap> desc_heap{};
 
 	CGameObject					**m_ppGameObjects = NULL;
 	int							m_nGameObjects = 0;

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #define ASPECT_RATIO				(float(FRAME_BUFFER_WIDTH) / float(FRAME_BUFFER_HEIGHT))
 
@@ -44,12 +44,13 @@ protected:
 	ID3D12Resource					*m_pd3dcbCamera = NULL;
 	VS_CB_CAMERA_INFO				*m_pcbMappedCamera = NULL;
 
+	ID3D12DescriptorHeap* desc_heap{};
 public:
 	CCamera();
 	CCamera(CCamera *pCamera);
 	virtual ~CCamera();
 
-	virtual void CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);
+	virtual void CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12DescriptorHeap* descHeap);
 	virtual void ReleaseShaderVariables();
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList);
 

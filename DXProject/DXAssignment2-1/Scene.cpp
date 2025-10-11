@@ -64,6 +64,7 @@ void CScene::BuildDefaultLightsAndMaterials()
 
 void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
 {
+	desc_heap = CreateDescriptorHeap(pd3dDevice);
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
 	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
@@ -159,6 +160,20 @@ void CScene::ReleaseObjects()
 	if (m_pLights) delete[] m_pLights;
 }
 
+ID3D12DescriptorHeap* CScene::CreateDescriptorHeap(ID3D12Device* pd3dDevice)
+{
+	D3D12_DESCRIPTOR_HEAP_DESC heapDesc{};
+	heapDesc.NumDescriptors = 1;
+	heapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+	heapDesc.NodeMask = 0;
+	
+	ID3D12DescriptorHeap* descriptorHeap{};
+	pd3dDevice->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(&descriptorHeap));
+
+	return descriptorHeap;
+}
+
 ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevice)
 {
 	ID3D12RootSignature *pd3dGraphicsRootSignature = NULL;
@@ -209,7 +224,7 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 	ID3DBlob *pd3dSignatureBlob = NULL;
 	ID3DBlob *pd3dErrorBlob = NULL;
 	D3D12SerializeRootSignature(&d3dRootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &pd3dSignatureBlob, &pd3dErrorBlob);
-	pd3dDevice->CreateRootSignature(0, pd3dSignatureBlob->GetBufferPointer(), pd3dSignatureBlob->GetBufferSize(), __uuidof(ID3D12RootSignature), (void **)&pd3dGraphicsRootSignature);
+	pd3dDevice->CreateRootSignature(0, pd3dSignatureBlob->GetBufferPointer(), pd3dSignatureBlob->GetBufferSize(), IID_PPV_ARGS(&pd3dGraphicsRootSignature));
 
 	if (pd3dSignatureBlob) pd3dSignatureBlob->Release();
 	if (pd3dErrorBlob) pd3dErrorBlob->Release();
@@ -223,6 +238,16 @@ void CScene::CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsComma
 	m_pd3dcbLights = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 
 	m_pd3dcbLights->Map(0, NULL, (void **)&m_pcbMappedLights);
+
+	// descriptor heap
+	D3D12_CPU_DESCRIPTOR_HANDLE cpuDescHandle{ desc_heap->GetCPUDescriptorHandleForHeapStart() };
+
+	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
+
+	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc{};
+	cbvDesc.BufferLocation = d3dcbLightsGpuVirtualAddress;
+	cbvDesc.SizeInBytes = ncbElementBytes;
+	pd3dDevice->CreateConstantBufferView(&cbvDesc, cpuDescHandle);
 }
 
 void CScene::UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList)
@@ -294,16 +319,20 @@ void CScene::AnimateObjects(float fTimeElapsed)
 
 void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera)
 {
+	pd3dCommandList->SetDescriptorHeaps(1, desc_heap.GetAddressOf());
+
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
 
+	D3D12_GPU_DESCRIPTOR_HANDLE gpuDescHandle = desc_heap->GetGPUDescriptorHandleForHeapStart();
+	pd3dCommandList->SetGraphicsRootDescriptorTable(0, gpuDescHandle); //Lights
+
+	// camera
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pCamera->UpdateShaderVariables(pd3dCommandList);
 
 	UpdateShaderVariables(pd3dCommandList);
 
-	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
-	pd3dCommandList->SetGraphicsRootConstantBufferView(2, d3dcbLightsGpuVirtualAddress); //Lights
-
+	
 	for (int i = 0; i < m_nGameObjects; i++)
 	{
 		if (m_ppGameObjects[i])
