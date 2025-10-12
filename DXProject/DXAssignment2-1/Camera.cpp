@@ -118,7 +118,6 @@ void CCamera::CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsComm
 
 	// descriptor heap
 	D3D12_CPU_DESCRIPTOR_HANDLE cpuDescHandle{ desc_heap->GetCPUDescriptorHandleForHeapStart() };
-	//cpuDescHandle += pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV)
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbCamera->GetGPUVirtualAddress();
 
@@ -142,10 +141,6 @@ void CCamera::UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList)
 
 	// 그리기 호출에 사용할 CBV 오프셋
 	D3D12_GPU_DESCRIPTOR_HANDLE gpuDescHandle = desc_heap->GetGPUDescriptorHandleForHeapStart();
-	int rootIndex{ 0 };
-
-	D3D12_GPU_DESCRIPTOR_HANDLE rootTableHandle;
-	rootTableHandle.ptr = gpuDescHandle.ptr + cbv_srv_uav_desc_size * rootIndex;
 	pd3dCommandList->SetGraphicsRootDescriptorTable(0, gpuDescHandle); //Camera
 }
 

@@ -196,7 +196,7 @@ void CGameObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pC
 			if (m_ppMaterials[i])
 			{
 				if (m_ppMaterials[i]->m_pShader) m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera);
-				//m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
+				m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
 			}
 
 			if (m_pMesh) m_pMesh->Render(pd3dCommandList, i);
@@ -218,7 +218,6 @@ void CGameObject::CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12Graphics
 
 	// descriptor heap
 	D3D12_CPU_DESCRIPTOR_HANDLE cpuDescHandle{ descHeap->GetCPUDescriptorHandleForHeapStart() };
-	//cpuDescHandle += pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV)
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = cb_world->GetGPUVirtualAddress();
 
@@ -245,10 +244,6 @@ void CGameObject::UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandLis
 			desc_heap = GetParent()->desc_heap;
 		}
 		D3D12_GPU_DESCRIPTOR_HANDLE gpuDescHandle = desc_heap->GetGPUDescriptorHandleForHeapStart();
-		int rootIndex{ 1 };
-
-		D3D12_GPU_DESCRIPTOR_HANDLE rootTableHandle;
-		rootTableHandle.ptr = gpuDescHandle.ptr + cbv_srv_uav_desc_size * rootIndex;
 		pd3dCommandList->SetGraphicsRootDescriptorTable(0, gpuDescHandle); //object
 	}
 }
@@ -549,7 +544,7 @@ MATERIALSLOADINFO *CGameObject::LoadMaterialsInfoFromFile(ID3D12Device *pd3dDevi
 	return(pMaterialsInfo);
 }
 
-CGameObject *CGameObject::LoadFrameHierarchyFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, FILE *pInFile)
+CGameObject *CGameObject::LoadFrameHierarchyFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, FILE *pInFile, ID3D12DescriptorHeap* descHeap)
 {
 	char pstrToken[64] = { '\0' };
 	UINT nReads = 0;
@@ -608,7 +603,7 @@ CGameObject *CGameObject::LoadFrameHierarchyFromFile(ID3D12Device *pd3dDevice, I
 					pGameObject->m_ppMaterials[i] = NULL;
 
 					CMaterial *pMaterial = new CMaterial();
-
+					pMaterial->CreateShaderVariables(pd3dDevice, pd3dCommandList, descHeap);
 					CMaterialColors *pMaterialColors = new CMaterialColors(&pMaterialsInfo->m_pMaterials[i]);
 					pMaterial->SetMaterialColors(pMaterialColors);
 
@@ -625,7 +620,7 @@ CGameObject *CGameObject::LoadFrameHierarchyFromFile(ID3D12Device *pd3dDevice, I
 			{
 				for (int i = 0; i < nChilds; i++)
 				{
-					CGameObject *pChild = CGameObject::LoadFrameHierarchyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pInFile);
+					CGameObject *pChild = CGameObject::LoadFrameHierarchyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pInFile, descHeap);
 					if (pChild) pGameObject->SetChild(pChild);
 #ifdef _WITH_DEBUG_RUNTIME_FRAME_HIERARCHY
 					TCHAR pstrDebug[256] = { 0 };
@@ -654,7 +649,7 @@ void CGameObject::PrintFrameInfo(CGameObject *pGameObject, CGameObject *pParent)
 	if (pGameObject->m_pChild) CGameObject::PrintFrameInfo(pGameObject->m_pChild, pGameObject);
 }
 
-CGameObject *CGameObject::LoadGeometryFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, char *pstrFileName)
+CGameObject *CGameObject::LoadGeometryFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, char *pstrFileName, ID3D12DescriptorHeap* descHeap)
 {
 	FILE *pInFile = NULL;
 	::fopen_s(&pInFile, pstrFileName, "rb");
@@ -669,7 +664,7 @@ CGameObject *CGameObject::LoadGeometryFromFile(ID3D12Device *pd3dDevice, ID3D12G
 
 		if (!strcmp(pstrToken, "<Hierarchy>:"))
 		{
-			pGameObject = CGameObject::LoadFrameHierarchyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pInFile);
+			pGameObject = CGameObject::LoadFrameHierarchyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pInFile, descHeap);
 		}
 		else if (!strcmp(pstrToken, "</Hierarchy>"))
 		{

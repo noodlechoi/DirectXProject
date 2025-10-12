@@ -76,7 +76,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_nGameObjects = 7;
 	m_ppGameObjects = new CGameObject*[m_nGameObjects];
 
-	CGameObject *pApacheModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Apache.bin");
+	CGameObject *pApacheModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Apache.bin", desc_heap.Get());
 	CApacheObject* pApacheObject = NULL;
 
 	pApacheObject = new CApacheObject();
@@ -95,7 +95,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	pApacheObject->Rotate(0.0f, -90.0f, 0.0f);
 	m_ppGameObjects[1] = pApacheObject;
 
-	CGameObject *pGunshipModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Gunship.bin");
+	CGameObject *pGunshipModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Gunship.bin", desc_heap.Get());
 	CGunshipObject* pGunshipObject = NULL;
 
 	pGunshipObject = new CGunshipObject();
@@ -106,7 +106,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	pGunshipObject->Rotate(0.0f, -90.0f, 0.0f);
 	m_ppGameObjects[2] = pGunshipObject;
 
-	CGameObject *pSuperCobraModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/SuperCobra.bin");
+	CGameObject *pSuperCobraModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/SuperCobra.bin", desc_heap.Get());
 	CSuperCobraObject* pSuperCobraObject = NULL;
 
 	pSuperCobraObject = new CSuperCobraObject();
@@ -117,7 +117,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	pSuperCobraObject->Rotate(0.0f, -90.0f, 0.0f);
 	m_ppGameObjects[3] = pSuperCobraObject;
 
-	CGameObject *pMi24Model = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Mi24.bin");
+	CGameObject *pMi24Model = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Mi24.bin", desc_heap.Get());
 	CMi24Object* pMi24Object = new CMi24Object();
 	pMi24Object->SetChild(pMi24Model, true);
 	pMi24Object->OnInitialize();
@@ -126,7 +126,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	pMi24Object->Rotate(0.0f, -90.0f, 0.0f);
 	m_ppGameObjects[4] = pMi24Object;
 
-	CGameObject* pHummerModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Hummer.bin");
+	CGameObject* pHummerModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Hummer.bin", desc_heap.Get());
 	CHummerObject* pHummerObject = new CHummerObject();
 	pHummerObject->SetChild(pHummerModel);
 	pHummerObject->OnInitialize();
@@ -135,7 +135,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	pHummerObject->Rotate(0.0f, -90.0f, 0.0f);
 	m_ppGameObjects[5] = pHummerObject;
 
-	CGameObject* pAbramsModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/M26.bin");
+	CGameObject* pAbramsModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/M26.bin", desc_heap.Get());
 	CM26Object* pTankObject = new CM26Object();
 	pTankObject->SetChild(pAbramsModel);
 	pTankObject->OnInitialize();
@@ -165,7 +165,7 @@ void CScene::ReleaseObjects()
 ID3D12DescriptorHeap* CScene::CreateDescriptorHeap(ID3D12Device* pd3dDevice)
 {
 	D3D12_DESCRIPTOR_HEAP_DESC heapDesc{};
-	heapDesc.NumDescriptors = 1;
+	heapDesc.NumDescriptors = 3; // b1, b2, b4
 	heapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	heapDesc.NodeMask = 0;
@@ -243,6 +243,9 @@ void CScene::CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsComma
 
 	// descriptor heap
 	D3D12_CPU_DESCRIPTOR_HANDLE cpuDescHandle{ desc_heap->GetCPUDescriptorHandleForHeapStart() };
+	D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle = cpuDescHandle;
+	int cbvIndex{ 2 };
+	cpuHandle.ptr += cbv_srv_uav_desc_size * cbvIndex;
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
 
