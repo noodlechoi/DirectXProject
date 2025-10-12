@@ -27,6 +27,10 @@ CMaterial::CMaterial()
 CMaterial::~CMaterial()
 {
 	if (m_pShader) m_pShader->Release();
+	if (cb_meterial_colors) {
+		cb_meterial_colors->Unmap(0, NULL);
+		cb_meterial_colors->Release();
+	}
 	if (m_pMaterialColors) m_pMaterialColors->Release();
 }
 
@@ -44,16 +48,36 @@ void CMaterial::SetMaterialColors(CMaterialColors *pMaterialColors)
 	if (m_pMaterialColors) m_pMaterialColors->AddRef();
 }
 
+void CMaterial::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12DescriptorHeap* descHeap)
+{
+	UINT ncbElementBytes = ((sizeof(CMaterialColors) + 255) & ~255); //256의 배수
+	cb_meterial_colors = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+
+	cb_meterial_colors->Map(0, NULL, (void**)&cb_mapped_meterial_colors);
+
+	// descriptor heap
+	D3D12_CPU_DESCRIPTOR_HANDLE cpuDescHandle{ descHeap->GetCPUDescriptorHandleForHeapStart() };
+
+	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = cb_meterial_colors->GetGPUVirtualAddress();
+
+	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc{};
+	cbvDesc.BufferLocation = d3dcbLightsGpuVirtualAddress;
+	cbvDesc.SizeInBytes = ncbElementBytes;
+	pd3dDevice->CreateConstantBufferView(&cbvDesc, cpuDescHandle);
+}
+
 void CMaterial::UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandList)
 {
-	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 4, &(m_pMaterialColors->m_xmf4Ambient), 16);
-	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 4, &(m_pMaterialColors->m_xmf4Diffuse), 20);
-	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 4, &(m_pMaterialColors->m_xmf4Specular), 24);
-	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 4, &(m_pMaterialColors->m_xmf4Emissive), 28);
+	// root descriptor를 만들고 set
+	::memcpy(&cb_mapped_meterial_colors->m_xmf4Ambient, &(m_pMaterialColors->m_xmf4Ambient), sizeof(XMFLOAT4));
+	::memcpy(&cb_mapped_meterial_colors->m_xmf4Diffuse, &(m_pMaterialColors->m_xmf4Diffuse), sizeof(XMFLOAT4));
+	::memcpy(&cb_mapped_meterial_colors->m_xmf4Specular, &(m_pMaterialColors->m_xmf4Specular), sizeof(XMFLOAT4));
+	::memcpy(&cb_mapped_meterial_colors->m_xmf4Emissive, &(m_pMaterialColors->m_xmf4Emissive), sizeof(XMFLOAT4));
 }
 
 void CMaterial::PrepareShaders(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature)
 {
+	//CreateShaderVariables(pd3dDevice, pd3dCommandList, descHeap);
 	m_pIlluminatedShader = new CIlluminatedShader();
 	m_pIlluminatedShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	m_pIlluminatedShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -163,7 +187,7 @@ void CGameObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pC
 {
 	OnPrepareRender();
 
-	//UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
+	UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
 
 	if (m_nMaterials > 0)
 	{
@@ -182,8 +206,26 @@ void CGameObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pC
 	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera);
 }
 
-void CGameObject::CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
+void CGameObject::CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12DescriptorHeap* descHeap)
 {
+	cbv_srv_uav_desc_size = pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	desc_heap = descHeap;
+
+	UINT ncbElementBytes = ((sizeof(VS_CB_CAMERA_INFO) + 255) & ~255); //256의 배수
+	cb_world = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+
+	cb_world->Map(0, NULL, (void**)&m_xmf4x4World);
+
+	// descriptor heap
+	D3D12_CPU_DESCRIPTOR_HANDLE cpuDescHandle{ descHeap->GetCPUDescriptorHandleForHeapStart() };
+	//cpuDescHandle += pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV)
+
+	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = cb_world->GetGPUVirtualAddress();
+
+	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc{};
+	cbvDesc.BufferLocation = d3dcbLightsGpuVirtualAddress;
+	cbvDesc.SizeInBytes = ncbElementBytes;
+	pd3dDevice->CreateConstantBufferView(&cbvDesc, cpuDescHandle);
 }
 
 void CGameObject::UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList)
@@ -192,9 +234,23 @@ void CGameObject::UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandLi
 
 void CGameObject::UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandList, XMFLOAT4X4 *pxmf4x4World)
 {
-	XMFLOAT4X4 xmf4x4World;
+	/*XMFLOAT4X4 xmf4x4World;
 	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(pxmf4x4World)));
-	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
+
+	
+	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);*/
+	 //그리기 호출에 사용할 CBV 오프셋
+	if (desc_heap) {
+		if (m_pParent) {
+			desc_heap = GetParent()->desc_heap;
+		}
+		D3D12_GPU_DESCRIPTOR_HANDLE gpuDescHandle = desc_heap->GetGPUDescriptorHandleForHeapStart();
+		int rootIndex{ 1 };
+
+		D3D12_GPU_DESCRIPTOR_HANDLE rootTableHandle;
+		rootTableHandle.ptr = gpuDescHandle.ptr + cbv_srv_uav_desc_size * rootIndex;
+		pd3dCommandList->SetGraphicsRootDescriptorTable(0, gpuDescHandle); //object
+	}
 }
 
 void CGameObject::UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandList, CMaterial *pMaterial)

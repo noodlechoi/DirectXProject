@@ -71,6 +71,7 @@ public:
 public:
 	ID3D12RootSignature			*m_pd3dGraphicsRootSignature = NULL;
 	ComPtr<ID3D12DescriptorHeap> desc_heap{};
+	UINT cbv_srv_uav_desc_size{};
 
 	CGameObject					**m_ppGameObjects = NULL;
 	int							m_nGameObjects = 0;

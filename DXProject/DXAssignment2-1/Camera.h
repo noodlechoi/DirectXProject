@@ -44,6 +44,7 @@ protected:
 	ID3D12Resource					*m_pd3dcbCamera = NULL;
 	VS_CB_CAMERA_INFO				*m_pcbMappedCamera = NULL;
 
+	UINT cbv_srv_uav_desc_size{};
 	ID3D12DescriptorHeap* desc_heap{};
 public:
 	CCamera();

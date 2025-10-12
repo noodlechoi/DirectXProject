@@ -1,4 +1,4 @@
-//------------------------------------------------------- ----------------------
+﻿//------------------------------------------------------- ----------------------
 // File: Object.h
 //-----------------------------------------------------------------------------
 
@@ -91,11 +91,14 @@ public:
 	CShader							*m_pShader = NULL;
 
 	CMaterialColors					*m_pMaterialColors = NULL;
+	ComPtr<ID3D12Resource> cb_meterial_colors{};
+	CMaterialColors* cb_mapped_meterial_colors{};
 
 	void SetMaterialColors(CMaterialColors *pMaterialColors);
 	void SetShader(CShader *pShader);
 	void SetIlluminatedShader() { SetShader(m_pIlluminatedShader); }
 
+	void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12DescriptorHeap* descHeap);
 	void UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandList);
 
 protected:
@@ -132,6 +135,9 @@ public:
 	CGameObject 					*m_pParent = NULL;
 	CGameObject 					*m_pChild = NULL;
 	CGameObject 					*m_pSibling = NULL;
+	ComPtr<ID3D12Resource> cb_world{};
+	UINT cbv_srv_uav_desc_size{};
+	ID3D12DescriptorHeap* desc_heap{};
 
 	void SetMesh(CMesh *pMesh);
 	void SetShader(CShader *pShader);
@@ -148,7 +154,7 @@ public:
 	virtual void OnPrepareRender() { }
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera=NULL);
 
-	virtual void CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);
+	virtual void CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12DescriptorHeap* descHeap);
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList);
 	virtual void ReleaseShaderVariables();
 

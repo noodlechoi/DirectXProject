@@ -32,8 +32,6 @@ protected:
 	LPVOID						m_pCameraUpdatedContext;
 
 	CCamera						*m_pCamera = NULL;
-
-	ID3D12DescriptorHeap* desc_heap{};
 public:
 	CPlayer();
 	virtual ~CPlayer();
@@ -71,7 +69,7 @@ public:
 	virtual void OnCameraUpdateCallback(float fTimeElapsed) { }
 	void SetCameraUpdatedContext(LPVOID pContext) { m_pCameraUpdatedContext = pContext; }
 
-	virtual void CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);
+	virtual void CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12DescriptorHeap* descHeap);
 	virtual void ReleaseShaderVariables();
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList);
 

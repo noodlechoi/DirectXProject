@@ -64,6 +64,8 @@ void CScene::BuildDefaultLightsAndMaterials()
 
 void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
 {
+	cbv_srv_uav_desc_size = pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+
 	desc_heap = CreateDescriptorHeap(pd3dDevice);
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
@@ -248,6 +250,11 @@ void CScene::CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsComma
 	cbvDesc.BufferLocation = d3dcbLightsGpuVirtualAddress;
 	cbvDesc.SizeInBytes = ncbElementBytes;
 	pd3dDevice->CreateConstantBufferView(&cbvDesc, cpuDescHandle);
+
+	for (int i = 0; i < m_nGameObjects; i++)
+	{
+		m_ppGameObjects[i]->CreateShaderVariables(pd3dDevice, pd3dCommandList, desc_heap.Get());
+	}
 }
 
 void CScene::UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList)
@@ -323,7 +330,12 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
 
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
 
+	// 그리기 호출에 사용할 CBV 오프셋
 	D3D12_GPU_DESCRIPTOR_HANDLE gpuDescHandle = desc_heap->GetGPUDescriptorHandleForHeapStart();
+	int rootIndex{ 2 };
+
+	D3D12_GPU_DESCRIPTOR_HANDLE rootTableHandle;
+	rootTableHandle.ptr = gpuDescHandle.ptr + cbv_srv_uav_desc_size * rootIndex;
 	pd3dCommandList->SetGraphicsRootDescriptorTable(0, gpuDescHandle); //Lights
 
 	// camera
@@ -331,8 +343,6 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
 	pCamera->UpdateShaderVariables(pd3dCommandList);
 
 	UpdateShaderVariables(pd3dCommandList);
-
-	
 	for (int i = 0; i < m_nGameObjects; i++)
 	{
 		if (m_ppGameObjects[i])
