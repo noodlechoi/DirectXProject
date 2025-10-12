@@ -243,9 +243,8 @@ void CScene::CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsComma
 
 	// descriptor heap
 	D3D12_CPU_DESCRIPTOR_HANDLE cpuDescHandle{ desc_heap->GetCPUDescriptorHandleForHeapStart() };
-	D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle = cpuDescHandle;
 	int cbvIndex{ 2 };
-	cpuHandle.ptr += cbv_srv_uav_desc_size * cbvIndex;
+	cpuDescHandle.ptr += cbv_srv_uav_desc_size * cbvIndex;
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
 
@@ -329,17 +328,14 @@ void CScene::AnimateObjects(float fTimeElapsed)
 
 void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera)
 {
-	pd3dCommandList->SetDescriptorHeaps(1, desc_heap.GetAddressOf());
 
+	pd3dCommandList->SetDescriptorHeaps(1, desc_heap.GetAddressOf());
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
 
 	// 그리기 호출에 사용할 CBV 오프셋
 	D3D12_GPU_DESCRIPTOR_HANDLE gpuDescHandle = desc_heap->GetGPUDescriptorHandleForHeapStart();
-	int rootIndex{ 2 };
 
-	D3D12_GPU_DESCRIPTOR_HANDLE rootTableHandle;
-	rootTableHandle.ptr = gpuDescHandle.ptr + cbv_srv_uav_desc_size * rootIndex;
-	pd3dCommandList->SetGraphicsRootDescriptorTable(0, gpuDescHandle); //Lights
+	pd3dCommandList->SetGraphicsRootDescriptorTable(0, gpuDescHandle);
 
 	// camera
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);

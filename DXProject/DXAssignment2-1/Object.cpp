@@ -217,7 +217,9 @@ void CGameObject::CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12Graphics
 	cb_world->Map(0, NULL, (void**)&m_xmf4x4World);
 
 	// descriptor heap
-	D3D12_CPU_DESCRIPTOR_HANDLE cpuDescHandle{ descHeap->GetCPUDescriptorHandleForHeapStart() };
+	D3D12_CPU_DESCRIPTOR_HANDLE cpuDescHandle{ desc_heap->GetCPUDescriptorHandleForHeapStart() };
+	int cbvIndex{ 0 };
+	cpuDescHandle.ptr += cbv_srv_uav_desc_size * cbvIndex;
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = cb_world->GetGPUVirtualAddress();
 
