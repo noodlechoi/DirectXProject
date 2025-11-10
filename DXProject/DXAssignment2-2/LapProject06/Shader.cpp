@@ -83,6 +83,27 @@ D3D12_DEPTH_STENCIL_DESC CShader::CreateDepthStencilState()
 	return depthStencilDesc;
 }
 
+
+ID3D12RootSignature* CShader::CreateGraphicsRootSignature(ID3D12Device* device)
+{
+	ID3D12RootSignature* graphicsRootSignature{};
+
+	D3D12_ROOT_SIGNATURE_DESC rootSignatureDesc{};
+	rootSignatureDesc.NumParameters = 0;
+	rootSignatureDesc.pParameters = nullptr;
+	rootSignatureDesc.NumStaticSamplers = 0;
+	rootSignatureDesc.pStaticSamplers = nullptr;
+	rootSignatureDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+
+	// 임의 길이 데이터를 반환하는 데 사용
+	ComPtr<ID3DBlob> signatureBlob{};
+	ComPtr<ID3DBlob> errorBlob{};
+	D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signatureBlob, &errorBlob);
+	device->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), __uuidof(ID3D12RootSignature), (void**)&graphicsRootSignature);
+
+	return graphicsRootSignature;
+}
+
 D3D12_SHADER_BYTECODE CShader::CreateVertexShader(ID3DBlob** shaderBlob)
 {
 	return CompileShaderFromFile(L"Shaders.hlsl", "VSMain", "vs_5_1", shaderBlob);
@@ -108,14 +129,16 @@ D3D12_SHADER_BYTECODE CShader::CompileShaderFromFile(WCHAR* fileName, LPCSTR sha
 	return shaderBytecode;
 }
 
-void CShader::CreateShader(ID3D12Device* device, ID3D12RootSignature* rootSignature)
+void CShader::CreateShader(ID3D12Device* device)
 {
 	//그래픽스 파이프라인 상태 객체 배열을 생성한다.
 	pipeline_states.push_back(ComPtr<ID3D12PipelineState>());
 	ComPtr<ID3DBlob> vertexShaderBlob{}, pixelShaderBlob{};
 
+	graphics_root_signature = CreateGraphicsRootSignature(device);
+
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC pipelineStateDesc{};
-	pipelineStateDesc.pRootSignature = rootSignature;
+	pipelineStateDesc.pRootSignature = graphics_root_signature.Get();
 	pipelineStateDesc.VS = CreateVertexShader(&vertexShaderBlob);
 	pipelineStateDesc.PS = CreatePixelShader(&pixelShaderBlob);
 	pipelineStateDesc.RasterizerState = CreateRasterizerState();
@@ -144,31 +167,10 @@ void CShader::UpdateShaderVariables(ID3D12GraphicsCommandList*)
 
 void CShader::ReleaseShaderVariables()
 {
-
 }
 
 void CShader::ReleaseUploadBuffers()
 {
-	for (const auto& object : objects) {
-		object->ReleaseUploadBuffer();
-	}
-}
-
-void CShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, void* context)
-{
-	CTriangleMesh* pTriangleMesh = new CTriangleMesh(device, commandList);
-
-	for (int i = 0; i < 1; ++i) {
-		objects.push_back(std::make_unique<CGameObject>());
-	}
-	objects[0]->SetMesh(pTriangleMesh);
-}
-
-void CShader::AnimateObjects(float elapsedTime)
-{
-	for (const auto& object : objects) {
-		object->Animate(elapsedTime);
-	}
 }
 
 void CShader::OnPrepareRender(ID3D12GraphicsCommandList* commandList)
@@ -179,8 +181,4 @@ void CShader::OnPrepareRender(ID3D12GraphicsCommandList* commandList)
 void CShader::Render(ID3D12GraphicsCommandList* commandList)
 {
 	OnPrepareRender(commandList);
-
-	for (const auto& object : objects) {
-		object->Render(commandList);
-	}
 }

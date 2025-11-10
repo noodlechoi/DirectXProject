@@ -23,19 +23,21 @@ public:
 	D3D12_SHADER_BYTECODE CompileShaderFromFile(WCHAR* , LPCSTR ,LPCSTR , ID3DBlob** );
 
 	//그래픽스 파이프라인 상태 객체 생성
-	virtual void CreateShader(ID3D12Device* , ID3D12RootSignature* );
+	virtual void CreateShader(ID3D12Device*);
 	virtual void CreateShaderVariables(ID3D12Device*, ID3D12GraphicsCommandList*);
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList*);
 	virtual void ReleaseShaderVariables();
 	virtual void ReleaseUploadBuffers();
 
-	virtual void BuildObjects(ID3D12Device* , ID3D12GraphicsCommandList*, void* = nullptr);
-	virtual void AnimateObjects(float );
+	// 루트 시그니처
+	ID3D12RootSignature* GetGraphicsRootSignature() { return graphics_root_signature.Get(); }
+	ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device*);
+
 
 	virtual void OnPrepareRender(ID3D12GraphicsCommandList* );
 	virtual void Render(ID3D12GraphicsCommandList*);
 protected:
-	std::deque<std::unique_ptr<CGameObject>> objects{};
+	ComPtr<ID3D12RootSignature> graphics_root_signature{};
 	std::deque<ComPtr<ID3D12PipelineState>> pipeline_states{};
 };
 
