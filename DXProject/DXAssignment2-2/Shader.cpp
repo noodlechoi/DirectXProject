@@ -1,5 +1,6 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "Shader.h"
+#include "Object.h"
 
 CShader::CShader()
 {
@@ -120,7 +121,14 @@ D3D12_SHADER_BYTECODE CShader::CompileShaderFromFile(WCHAR* fileName, LPCSTR sha
 #if defined(_DEBUG)
 	compileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
 #endif
-	D3DCompileFromFile(fileName, nullptr, nullptr, shaderName, shaderProfile, compileFlags, 0, shaderBlob, nullptr);
+	ComPtr<ID3DBlob> error;
+	D3DCompileFromFile(fileName, nullptr, nullptr, shaderName, shaderProfile, compileFlags, 0, shaderBlob, error.GetAddressOf());
+
+
+	if (error) {
+		OutputDebugStringA("Shader Compile Error:\n");
+		OutputDebugStringA(static_cast<const char*>(error->GetBufferPointer()));
+	}
 
 	D3D12_SHADER_BYTECODE shaderBytecode{};
 	shaderBytecode.BytecodeLength = (*shaderBlob)->GetBufferSize();
@@ -157,28 +165,127 @@ void CShader::CreateShader(ID3D12Device* device)
 	if (pipelineStateDesc.InputLayout.pInputElementDescs) delete[] pipelineStateDesc.InputLayout.pInputElementDescs;
 }
 
-void CShader::CreateShaderVariables(ID3D12Device*, ID3D12GraphicsCommandList*)
-{
-}
-
-void CShader::UpdateShaderVariables(ID3D12GraphicsCommandList*)
-{
-}
-
-void CShader::ReleaseShaderVariables()
-{
-}
-
-void CShader::ReleaseUploadBuffers()
-{
-}
-
-void CShader::OnPrepareRender(ID3D12GraphicsCommandList* commandList)
+void CShader::Render(ID3D12GraphicsCommandList* commandList)
 {
 	commandList->SetPipelineState(pipeline_states[0].Get());
 }
 
-void CShader::Render(ID3D12GraphicsCommandList* commandList)
+// CTextureShader
+D3D12_INPUT_LAYOUT_DESC CTextureShader::CreateInputLayout()
 {
-	OnPrepareRender(commandList);
+	const UINT inputElementDescNum = 3;
+	D3D12_INPUT_ELEMENT_DESC* inputElementDescs = new D3D12_INPUT_ELEMENT_DESC[inputElementDescNum];
+
+	inputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	inputElementDescs[1] = { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	inputElementDescs[2] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 28, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+
+	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc;
+	inputLayoutDesc.pInputElementDescs = inputElementDescs;
+	inputLayoutDesc.NumElements = inputElementDescNum;
+
+	return inputLayoutDesc;
+}
+
+ID3D12RootSignature* CTextureShader::CreateGraphicsRootSignature(ID3D12Device* device)
+{
+	ID3D12RootSignature* graphicsRootSignature{};
+
+	D3D12_DESCRIPTOR_RANGE descriptorRanges;
+	descriptorRanges.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	descriptorRanges.NumDescriptors = 1;
+	descriptorRanges.BaseShaderRegister = 0; //t0: texture
+	descriptorRanges.RegisterSpace = 0;
+	descriptorRanges.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+	// root parameter
+	D3D12_ROOT_PARAMETER rootParameters;
+	rootParameters.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameters.DescriptorTable.NumDescriptorRanges = 1;
+	rootParameters.DescriptorTable.pDescriptorRanges = &descriptorRanges;
+	rootParameters.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+	// static sampler
+	D3D12_STATIC_SAMPLER_DESC samplerDesc{};
+	samplerDesc.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	samplerDesc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	samplerDesc.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	samplerDesc.MipLODBias = 0;
+	samplerDesc.MaxAnisotropy = 1;
+	samplerDesc.ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS;
+	samplerDesc.MinLOD = 0;
+	samplerDesc.MaxLOD = D3D12_FLOAT32_MAX;
+	samplerDesc.ShaderRegister = 0;
+	samplerDesc.RegisterSpace = 0;
+	samplerDesc.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+	// root signature
+	D3D12_ROOT_SIGNATURE_DESC rootSignatureDesc{};
+	rootSignatureDesc.NumParameters = 1;
+	rootSignatureDesc.pParameters = &rootParameters;
+	rootSignatureDesc.NumStaticSamplers = 1;
+	rootSignatureDesc.pStaticSamplers = &samplerDesc;
+	rootSignatureDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+
+	// 임의 길이 데이터를 반환하는 데 사용
+	ComPtr<ID3DBlob> signatureBlob{};
+	ComPtr<ID3DBlob> errorBlob{};
+	D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signatureBlob, &errorBlob);
+	device->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), __uuidof(ID3D12RootSignature), (void**)&graphicsRootSignature);
+
+	return graphicsRootSignature;
+}
+
+D3D12_SHADER_BYTECODE CTextureShader::CreateVertexShader(ID3DBlob** shaderBlob)
+{
+	return CompileShaderFromFile(L"TexShader.hlsl", "VSMain", "vs_5_1", shaderBlob);
+}
+
+D3D12_SHADER_BYTECODE CTextureShader::CreatePixelShader(ID3DBlob** shaderBlob)
+{
+	return CompileShaderFromFile(L"TexShader.hlsl", "PSMain", "ps_5_1", shaderBlob);
+}
+
+ID3D12DescriptorHeap* CTextureShader::CreateDescriptorHeap(ID3D12Device* device)
+{
+	D3D12_DESCRIPTOR_HEAP_DESC HeapDesc{};
+	HeapDesc.NumDescriptors = 1;
+	HeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	HeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+
+	ID3D12DescriptorHeap* descriptorHeap{};
+	ThrowIfFailed(device->CreateDescriptorHeap(&HeapDesc, IID_PPV_ARGS(&descriptorHeap)));
+
+	return descriptorHeap;
+}
+
+
+void CTextureShader::CreateShaderVariables(ID3D12Device* device, CObject* object)
+{
+	descriptor_heap = CreateDescriptorHeap(device);
+
+	// 서술자 생성
+	// 서술자 힙 처음 핸들값 구하기
+	D3D12_CPU_DESCRIPTOR_HANDLE hDescriptor{ descriptor_heap->GetCPUDescriptorHandleForHeapStart() };
+
+	ID3D12Resource* tex = object->GetTextureResource();
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
+	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDesc.Format = tex->GetDesc().Format;
+	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MostDetailedMip = 0;
+	srvDesc.Texture2D.MipLevels = tex->GetDesc().MipLevels;
+	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
+	device->CreateShaderResourceView(tex, &srvDesc, hDescriptor);
+}
+
+void CTextureShader::Render(ID3D12GraphicsCommandList* commandList)
+{
+	commandList->SetGraphicsRootSignature(graphics_root_signature.Get());
+	commandList->SetDescriptorHeaps(1, descriptor_heap.GetAddressOf());
+	D3D12_GPU_DESCRIPTOR_HANDLE hDescriptor{ descriptor_heap->GetGPUDescriptorHandleForHeapStart() };
+	commandList->SetGraphicsRootDescriptorTable(0, hDescriptor);
+
+	commandList->SetPipelineState(pipeline_states[0].Get());
 }

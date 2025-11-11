@@ -5,6 +5,7 @@ public:
 	void CreateTextureResource(ID3D12Device* device, ID3D12GraphicsCommandList* commandList ,std::wstring& fileName);
 
 	const char* GetName() const { return name.c_str(); }
+	ID3D12Resource* GetTextureResource() const { return texture.Get(); }
 private:
 	std::string name{};
 	ComPtr<ID3D12Resource> texture;

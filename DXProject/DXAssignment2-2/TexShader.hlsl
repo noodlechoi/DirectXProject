@@ -25,7 +25,7 @@ VS_OUTPUT VSMain(VS_INPUT input)
     //입력되는 픽셀의 색상(래스터라이저 단계에서 보간하여 얻은 색상)을 그대로 출력한다. 
     output.color = input.color;
     
-    input.tex = float4(input.tex, 0.0f, 1.0f);
+    output.tex = input.tex;
     
     return (output);
 }

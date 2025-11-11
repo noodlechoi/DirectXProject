@@ -18,7 +18,7 @@ public:
 	// 멤버 변수 set
 	void Render(ID3D12GraphicsCommandList*);
 protected:
-	std::deque<std::unique_ptr<CShader>> shaders{};
+	std::vector<std::unique_ptr<CShader>> shaders{};
 	std::deque<std::unique_ptr<CObject>> objects{};
 
 };

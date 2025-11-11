@@ -14,16 +14,11 @@ void CScene::ReleaseUploadBuffers()
 	for (const auto& object : objects) {
 		object->ReleaseUploadBuffer();
 	}
-	for (const auto& shader : shaders) {
-		shader->ReleaseUploadBuffers();
-	}
 }
 
 void CScene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
 {
-	shaders.push_back(std::make_unique<CTextureShader>());
-	shaders[0]->CreateShader(device);
-
+	
 	for (int i = 0; i < 1; ++i) {
 		objects.push_back(std::make_unique<CObject>());
 	}
@@ -31,8 +26,12 @@ void CScene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* comma
 	CRectangleMesh* mesh= new CRectangleMesh(device, commandList);
 	objects[0]->SetMesh(mesh);
 	CTexture* tex = new CTexture(std::string("stone"));
-	tex->CreateTextureResource(device, commandList, std::wstring(L"../Image/Stone01.dds"));
+	tex->CreateTextureResource(device, commandList, std::wstring(L"Stone01.dds"));
 	objects[0]->SetTexture(tex);
+
+	shaders.push_back(std::make_unique<CTextureShader>());
+	shaders[0]->CreateShader(device);
+	shaders[0]->CreateShaderVariables(device, objects[0].get());
 }
 
 void CScene::ReleaseObjects()

@@ -12,8 +12,11 @@ public:
 
 	void ReleaseUploadBuffer();
 
-	virtual void SetMesh(CMesh* );
-	virtual void SetTexture(CTexture* );
+	void SetMesh(CMesh* );
+	void SetTexture(CTexture* );
+	CTexture* GetTexture() const { return texture.get(); }
+	ID3D12Resource* GetTextureResource() const { return texture->GetTextureResource(); }
+
 	virtual void Animate(float );
 	virtual void Render(ID3D12GraphicsCommandList* );
 protected:
