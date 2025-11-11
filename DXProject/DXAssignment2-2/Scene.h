@@ -1,5 +1,6 @@
-﻿#pragma once
+#pragma once
 #include "Shader.h"
+#include "Object.h"
 
 class CScene
 {
@@ -18,7 +19,7 @@ public:
 	void Render(ID3D12GraphicsCommandList*);
 protected:
 	std::deque<std::unique_ptr<CShader>> shaders{};
-	std::deque<std::unique_ptr<CGameObject>> objects{};
+	std::deque<std::unique_ptr<CObject>> objects{};
 
 };
 

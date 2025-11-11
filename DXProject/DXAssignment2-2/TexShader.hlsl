@@ -1,13 +1,19 @@
-struct VS_INPUT {
+struct VS_INPUT
+{
     float3 position : POSITION;
     float4 color : COLOR;
+    float2 tex : TEXCOORD;
 };
 
 struct VS_OUTPUT
 {
     float4 position : SV_POSITION;
     float4 color : COLOR;
+    float2 tex : TEXCOORD;
 };
+
+Texture2D texDiffuse : register(t0);
+SamplerState sample: register(s0);
 
 VS_OUTPUT VSMain(VS_INPUT input)
 {
@@ -19,10 +25,12 @@ VS_OUTPUT VSMain(VS_INPUT input)
     //입력되는 픽셀의 색상(래스터라이저 단계에서 보간하여 얻은 색상)을 그대로 출력한다. 
     output.color = input.color;
     
+    input.tex = float4(input.tex, 0.0f, 1.0f);
+    
     return (output);
 }
 
 float4 PSMain(VS_OUTPUT input) : SV_TARGET
 {
-    return input.color;
+    return texDiffuse.Sample(sample, input.tex);
 }

@@ -1,6 +1,18 @@
 #include "stdafx.h"
 #include "Mesh.h"
 
+// CDiffuseVertex
+CDiffuseVertex::CDiffuseVertex()
+	: CVertex(), tex{}
+{
+}
+
+CDiffuseVertex::CDiffuseVertex(XMFLOAT3 position, XMFLOAT4 color, XMFLOAT2 tex)
+	: CVertex(position, color), tex{ tex }
+{
+}
+
+// CMesh
 CMesh::CMesh(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
 {
 }
@@ -26,6 +38,7 @@ void CMesh::Render(ID3D12GraphicsCommandList* commandList)
 		commandList->DrawInstanced(vertex_num, 1, offset, 0);
 	}
 }
+
 
 // CTriangleMesh
 CTriangleMesh::CTriangleMesh(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
@@ -59,11 +72,11 @@ CRectangleMesh::CRectangleMesh(ID3D12Device* device, ID3D12GraphicsCommandList* 
 	stride = sizeof(CVertex);
 	primitive_topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
-	CVertex vertices[] = {
-		CVertex(XMFLOAT3(-0.5f, 0.5, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f)),
-		CVertex(XMFLOAT3(0.5f, 0.5, 0.0f), XMFLOAT4(0.0f,1.0f, 0.0f, 1.0f)),
-		CVertex(XMFLOAT3(0.5f, -0.5, 0.0f), XMFLOAT4(Colors::Blue)),
-		CVertex(XMFLOAT3(-0.5f, -0.5, 0.0f), XMFLOAT4(Colors::Blue))
+	CDiffuseVertex vertices[] = {
+		CDiffuseVertex(XMFLOAT3(-0.5f, 0.5, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), XMFLOAT2(0.0f, 1.0f)),
+		CDiffuseVertex(XMFLOAT3(0.5f, 0.5, 0.0f), XMFLOAT4(0.0f,1.0f, 0.0f, 1.0f), XMFLOAT2(0.0f, 1.0f)),
+		CDiffuseVertex(XMFLOAT3(0.5f, -0.5, 0.0f), XMFLOAT4(Colors::Blue), XMFLOAT2(0.0f, 1.0f)),
+		CDiffuseVertex(XMFLOAT3(-0.5f, -0.5, 0.0f), XMFLOAT4(Colors::Blue), XMFLOAT2(0.0f, 1.0f))
 	};
 
 	// 삼각형 메쉬를 리소스로 생성

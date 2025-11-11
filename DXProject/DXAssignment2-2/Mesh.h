@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 class CVertex {
 public:
 	CVertex() : position{ XMFLOAT3(0.0f, 0.0f, 0.0f) }, color{ XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f) } {}
@@ -7,6 +7,15 @@ public:
 protected:
 	XMFLOAT3 position{};
 	XMFLOAT4 color{};
+};
+
+class CDiffuseVertex : public CVertex{
+public:
+	CDiffuseVertex();
+	CDiffuseVertex(XMFLOAT3 position, XMFLOAT4 color, XMFLOAT2 tex);
+
+protected:
+	XMFLOAT2 tex{};
 };
 
 class CMesh

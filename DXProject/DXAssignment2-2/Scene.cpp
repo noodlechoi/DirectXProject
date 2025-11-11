@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "Scene.h"
 CScene::CScene()
 {
@@ -21,15 +21,18 @@ void CScene::ReleaseUploadBuffers()
 
 void CScene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
 {
-	shaders.push_back(std::make_unique<CShader>());
+	shaders.push_back(std::make_unique<CTextureShader>());
 	shaders[0]->CreateShader(device);
 
 	for (int i = 0; i < 1; ++i) {
-		objects.push_back(std::make_unique<CGameObject>());
+		objects.push_back(std::make_unique<CObject>());
 	}
 	//CTriangleMesh* mesh= new CTriangleMesh(device, commandList);
 	CRectangleMesh* mesh= new CRectangleMesh(device, commandList);
 	objects[0]->SetMesh(mesh);
+	CTexture* tex = new CTexture(std::string("stone"));
+	tex->CreateTextureResource(device, commandList, std::wstring(L"../Image/Stone01.dds"));
+	objects[0]->SetTexture(tex);
 }
 
 void CScene::ReleaseObjects()
