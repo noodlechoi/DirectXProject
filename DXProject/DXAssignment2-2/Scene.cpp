@@ -27,8 +27,9 @@ void CScene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* comma
 	for (int i = 0; i < 1; ++i) {
 		objects.push_back(std::make_unique<CGameObject>());
 	}
-	CTriangleMesh* pTriangleMesh = new CTriangleMesh(device, commandList);
-	objects[0]->SetMesh(pTriangleMesh);
+	//CTriangleMesh* mesh= new CTriangleMesh(device, commandList);
+	CRectangleMesh* mesh= new CRectangleMesh(device, commandList);
+	objects[0]->SetMesh(mesh);
 }
 
 void CScene::ReleaseObjects()
