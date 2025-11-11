@@ -1,27 +1,12 @@
 ﻿#pragma once
 class CVertex {
 public:
-	CVertex() : position{ XMFLOAT3(0.0f, 0.0f, 0.0f)} {}
-	CVertex(float x, float y, float z) : position { XMFLOAT3(x, y, z) } {}
-	CVertex(XMFLOAT3 Position) : position{Position} {}
+	CVertex() : position{ XMFLOAT3(0.0f, 0.0f, 0.0f) }, color{ XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f) } {}
+	CVertex(XMFLOAT3 position, XMFLOAT4 color) : position{ position }, color{color} {}
 
-	CVertex(const CVertex&);
-	CVertex& operator=(const CVertex&);
-	CVertex(CVertex&&);
-	CVertex& operator=(CVertex&&);
 protected:
 	XMFLOAT3 position{};
-};
-
-class CDiffusedVertex : public CVertex
-{
-public:
-	CDiffusedVertex() : CVertex(), diffuse{ XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f) } {}
-	CDiffusedVertex(XMFLOAT3 Position, XMFLOAT4 Diffuse) : CVertex(Position), diffuse(Diffuse) {}
-	CDiffusedVertex(float x, float y, float z, XMFLOAT4 Diffuse) : CVertex(x, y, z), diffuse{Diffuse} {}
-protected:
-	// 정점의 색상
-	XMFLOAT4 diffuse;
+	XMFLOAT4 color{};
 };
 
 class CMesh

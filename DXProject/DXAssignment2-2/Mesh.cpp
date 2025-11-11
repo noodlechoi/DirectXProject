@@ -1,30 +1,5 @@
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 #include "Mesh.h"
-
-CVertex::CVertex(const CVertex& rhs) : position{ rhs.position }
-{
-
-}
-
-CVertex& CVertex::operator=(const CVertex& rhs)
-{
-	if (this == &rhs) return *this;
-	position = rhs.position;
-
-	return *this;
-}
-
-CVertex::CVertex(CVertex&& other) : position{ std::move(other.position) }
-{
-}
-
-CVertex& CVertex::operator=(CVertex&& other)
-{
-	if (this == &other) return *this;
-	position = std::move(other.position);
-
-	return *this;
-}
 
 CMesh::CMesh(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
 {
@@ -38,11 +13,11 @@ void CMesh::ReleaseUploadBuffer()
 
 void CMesh::Render(ID3D12GraphicsCommandList* commandList)
 {
-	// ÇÁ¸®¹ÌÆ¼ºê À¯Çü ¼³Á¤
+	// í”„ë¦¬ë¯¸í‹°ë¸Œ ìœ í˜• ì„¤ì •
 	commandList->IASetPrimitiveTopology(primitive_topology);
-	// Á¤Á¡ ¹öÆÛ ºä ¼³Á¤
+	// ì •ì  ë²„í¼ ë·° ì„¤ì •
 	commandList->IASetVertexBuffers(slot_num, 1, &vertex_buffer_view);
-	// ·»´õ¸µ(ÀÔ·Â Á¶¸³±â ÀÛµ¿)
+	// ë Œë”ë§(ìž…ë ¥ ì¡°ë¦½ê¸° ìž‘ë™)
 	commandList->DrawInstanced(vertex_num, 1, offset, 0);
 }
 
@@ -50,19 +25,19 @@ CTriangleMesh::CTriangleMesh(ID3D12Device* device, ID3D12GraphicsCommandList* co
 	CMesh(device, commandList)
 {
 	vertex_num = 3;
-	stride = sizeof(CDiffusedVertex);
+	stride = sizeof(CVertex);
 	primitive_topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
-	CDiffusedVertex vertices[] = {
-		CDiffusedVertex(XMFLOAT3(0.0f, 0.5, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f)),
-		CDiffusedVertex(XMFLOAT3(0.5f, -0.5, 0.0f), XMFLOAT4(0.0f,1.0f, 0.0f, 1.0f)),
-		CDiffusedVertex(XMFLOAT3(-0.5f, -0.5, 0.0f), XMFLOAT4(Colors::Blue))
+	CVertex vertices[] = {
+		CVertex(XMFLOAT3(0.0f, 0.5, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f)),
+		CVertex(XMFLOAT3(0.5f, -0.5, 0.0f), XMFLOAT4(0.0f,1.0f, 0.0f, 1.0f)),
+		CVertex(XMFLOAT3(-0.5f, -0.5, 0.0f), XMFLOAT4(Colors::Blue))
 	};
 
-	// »ï°¢Çü ¸Þ½¬¸¦ ¸®¼Ò½º·Î »ý¼º
+	// ì‚¼ê°í˜• ë©”ì‰¬ë¥¼ ë¦¬ì†ŒìŠ¤ë¡œ ìƒì„±
 	vertex_buffer = CreateBufferResource(device, commandList, vertices, stride * vertex_num, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, vertex_upload_buffer.GetAddressOf());
 	
-	// Á¤Á¡ ¹öÆÛ ºä ¼³Á¤
+	// ì •ì  ë²„í¼ ë·° ì„¤ì •
 	vertex_buffer_view.BufferLocation = vertex_buffer->GetGPUVirtualAddress();
 	vertex_buffer_view.StrideInBytes = stride;
 	vertex_buffer_view.SizeInBytes = stride * vertex_num;
