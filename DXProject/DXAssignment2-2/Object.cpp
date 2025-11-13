@@ -30,6 +30,24 @@ void CObject::Animate(float elapsedTime)
 
 }
 
+void CObject::CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
+{
+	UINT elementBytes = ((sizeof(CB_OBJECT_INFO) + 255) & ~255); //256의 배수
+	const_buffer = CreateBufferResource(device, commandList, NULL, elementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+
+	const_buffer->Map(0, NULL, (void**)&mapped_object_info);
+}
+
+void CObject::ReleaseShaderVariables()
+{
+	if (const_buffer) const_buffer->Unmap(0, NULL);
+}
+
+void CObject::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
+{
+	XMStoreFloat4x4(&mapped_object_info->world_matrix, XMMatrixTranspose(XMLoadFloat4x4(&world_matrix)));
+}
+
 void CObject::Render(ID3D12GraphicsCommandList* commandList)
 {
 	if (mesh) mesh->Render(commandList);

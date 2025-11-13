@@ -73,10 +73,10 @@ CRectangleMesh::CRectangleMesh(ID3D12Device* device, ID3D12GraphicsCommandList* 
 	primitive_topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
 	CDiffuseVertex vertices[] = {
-		CDiffuseVertex(XMFLOAT3(-0.5f, 0.5, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), XMFLOAT2(0.0f, 1.0f)),
-		CDiffuseVertex(XMFLOAT3(0.5f, 0.5, 0.0f), XMFLOAT4(0.0f,1.0f, 0.0f, 1.0f), XMFLOAT2(0.0f, 1.0f)),
-		CDiffuseVertex(XMFLOAT3(0.5f, -0.5, 0.0f), XMFLOAT4(Colors::Blue), XMFLOAT2(0.0f, 1.0f)),
-		CDiffuseVertex(XMFLOAT3(-0.5f, -0.5, 0.0f), XMFLOAT4(Colors::Blue), XMFLOAT2(0.0f, 1.0f))
+		CDiffuseVertex(XMFLOAT3(-0.5f, 0.5, -5.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), XMFLOAT2(0.0f, 1.0f)),
+		CDiffuseVertex(XMFLOAT3(0.5f, 0.5, -5.0f), XMFLOAT4(0.0f,1.0f, 0.0f, 1.0f), XMFLOAT2(0.0f, 1.0f)),
+		CDiffuseVertex(XMFLOAT3(0.5f, -0.5, -5.0f), XMFLOAT4(Colors::Blue), XMFLOAT2(0.0f, 1.0f)),
+		CDiffuseVertex(XMFLOAT3(-0.5f, -0.5, -5.0f), XMFLOAT4(Colors::Blue), XMFLOAT2(0.0f, 1.0f))
 	};
 
 	// 삼각형 메쉬를 리소스로 생성
