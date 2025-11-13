@@ -12,6 +12,17 @@ struct VS_OUTPUT
     float2 tex : TEXCOORD;
 };
 
+cbuffer gameObjectInfo : register(b0)
+{
+float4x4 worldMatrix : packoffset(c0);
+};
+
+cbuffer CameraInfo : register(b1)
+{
+    float4x4 viewMatrix : packoffset(c0);
+    float4x4 projectionMatrix : packoffset(c4);
+};
+
 Texture2D texDiffuse : register(t0);
 SamplerState sample: register(s0);
 
