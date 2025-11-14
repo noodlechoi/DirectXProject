@@ -61,3 +61,9 @@ class CRectangleMesh : public CMesh
 public:
 	CRectangleMesh(ID3D12Device*, ID3D12GraphicsCommandList*);
 };
+
+class CCubeMesh : public CMesh
+{
+public:
+	CCubeMesh(ID3D12Device*, ID3D12GraphicsCommandList*, float = 2.0f, float = 2.0f, float = 2.0f);
+};

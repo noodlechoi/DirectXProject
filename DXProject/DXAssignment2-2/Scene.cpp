@@ -40,7 +40,8 @@ void CScene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* comma
 		objects.push_back(std::make_unique<CObject>());
 	}
 	//CTriangleMesh* mesh= new CTriangleMesh(device, commandList);
-	CRectangleMesh* mesh= new CRectangleMesh(device, commandList);
+	//CRectangleMesh* mesh= new CRectangleMesh(device, commandList);
+	CCubeMesh* mesh= new CCubeMesh(device, commandList);
 	objects[0]->SetMesh(mesh);
 	CTexture* tex = new CTexture(std::string("stone"));
 	tex->CreateTextureResource(device, commandList, std::wstring(L"Stone01.dds"));

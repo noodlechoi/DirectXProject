@@ -100,3 +100,80 @@ CRectangleMesh::CRectangleMesh(ID3D12Device* device, ID3D12GraphicsCommandList* 
 	index_buffer_view.Format = DXGI_FORMAT_R32_UINT;
 	index_buffer_view.SizeInBytes = sizeof(UINT) * index_num;
 }
+
+CCubeMesh::CCubeMesh(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, float width, float height, float depth) :
+	CMesh(device, commandList)
+{
+	const size_t vertexSize = 36;
+
+	vertex_num = vertexSize;
+	stride = sizeof(CDiffuseVertex);
+	primitive_topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	float x = width * 0.5f, y = height * 0.5f, z = depth * 0.5f;
+
+	CDiffuseVertex vertices[vertexSize];
+	int i{};
+
+	// ⓐ 앞면(Front)
+	vertices[i++] = CDiffuseVertex(XMFLOAT3(-x, +y, -z), XMFLOAT4(Colors::Coral), XMFLOAT2(0.0f, 0.0f));
+	vertices[i++] = CDiffuseVertex(XMFLOAT3(+x, +y, -z), XMFLOAT4(Colors::Orange), XMFLOAT2(1.0f, 0.0f));
+	vertices[i++] = CDiffuseVertex(XMFLOAT3(+x, -y, -z), XMFLOAT4(Colors::Gold), XMFLOAT2(1.0f, 1.0f));
+
+	vertices[i++] = CDiffuseVertex(XMFLOAT3(-x, +y, -z), XMFLOAT4(Colors::Coral), XMFLOAT2(0.0f, 0.0f));
+	vertices[i++] = CDiffuseVertex(XMFLOAT3(+x, -y, -z), XMFLOAT4(Colors::Gold), XMFLOAT2(1.0f, 1.0f));
+	vertices[i++] = CDiffuseVertex(XMFLOAT3(-x, -y, -z), XMFLOAT4(Colors::Tomato), XMFLOAT2(0.0f, 1.0f));
+
+	// ⓒ 윗면(Top)
+	vertices[i++] = CDiffuseVertex(XMFLOAT3(-x, +y, +z), XMFLOAT4(Colors::SkyBlue), XMFLOAT2(0.0f, 0.0f));
+	vertices[i++] = CDiffuseVertex(XMFLOAT3(+x, +y, +z), XMFLOAT4(Colors::LightBlue), XMFLOAT2(1.0f, 0.0f));
+	vertices[i++] = CDiffuseVertex(XMFLOAT3(+x, +y, -z), XMFLOAT4(Colors::SteelBlue), XMFLOAT2(1.0f, 1.0f));
+
+	vertices[i++] = CDiffuseVertex(XMFLOAT3(-x, +y, +z), XMFLOAT4(Colors::SkyBlue), XMFLOAT2(0.0f, 0.0f));
+	vertices[i++] = CDiffuseVertex(XMFLOAT3(+x, +y, -z), XMFLOAT4(Colors::SteelBlue), XMFLOAT2(1.0f, 1.0f));
+	vertices[i++] = CDiffuseVertex(XMFLOAT3(-x, +y, -z), XMFLOAT4(Colors::DodgerBlue), XMFLOAT2(0.0f, 1.0f));
+
+	// ⓔ 뒷면(Back)
+	vertices[i++] = CDiffuseVertex(XMFLOAT3(-x, -y, +z), XMFLOAT4(Colors::MediumPurple), XMFLOAT2(0.0f, 0.0f));
+	vertices[i++] = CDiffuseVertex(XMFLOAT3(+x, -y, +z), XMFLOAT4(Colors::Orchid), XMFLOAT2(1.0f, 0.0f));
+	vertices[i++] = CDiffuseVertex(XMFLOAT3(+x, +y, +z), XMFLOAT4(Colors::Plum), XMFLOAT2(1.0f, 1.0f));
+
+	vertices[i++] = CDiffuseVertex(XMFLOAT3(-x, -y, +z), XMFLOAT4(Colors::MediumPurple), XMFLOAT2(0.0f, 0.0f));
+	vertices[i++] = CDiffuseVertex(XMFLOAT3(+x, +y, +z), XMFLOAT4(Colors::Plum), XMFLOAT2(1.0f, 1.0f));
+	vertices[i++] = CDiffuseVertex(XMFLOAT3(-x, +y, +z), XMFLOAT4(Colors::Thistle), XMFLOAT2(0.0f, 1.0f));
+
+	// ⓖ 아래면(Bottom)
+	vertices[i++] = CDiffuseVertex(XMFLOAT3(-x, -y, -z), XMFLOAT4(Colors::DarkGreen), XMFLOAT2(0.0f, 0.0f));
+	vertices[i++] = CDiffuseVertex(XMFLOAT3(+x, -y, -z), XMFLOAT4(Colors::ForestGreen), XMFLOAT2(1.0f, 0.0f));
+	vertices[i++] = CDiffuseVertex(XMFLOAT3(+x, -y, +z), XMFLOAT4(Colors::SeaGreen), XMFLOAT2(1.0f, 1.0f));
+
+	vertices[i++] = CDiffuseVertex(XMFLOAT3(-x, -y, -z), XMFLOAT4(Colors::DarkGreen), XMFLOAT2(0.0f, 0.0f));
+	vertices[i++] = CDiffuseVertex(XMFLOAT3(+x, -y, +z), XMFLOAT4(Colors::SeaGreen), XMFLOAT2(1.0f, 1.0f));
+	vertices[i++] = CDiffuseVertex(XMFLOAT3(-x, -y, +z), XMFLOAT4(Colors::LimeGreen), XMFLOAT2(0.0f, 1.0f));
+
+	// ⓘ 왼쪽면(Left)
+	vertices[i++] = CDiffuseVertex(XMFLOAT3(-x, +y, +z), XMFLOAT4(Colors::Sienna), XMFLOAT2(0.0f, 0.0f));
+	vertices[i++] = CDiffuseVertex(XMFLOAT3(-x, +y, -z), XMFLOAT4(Colors::SaddleBrown), XMFLOAT2(1.0f, 0.0f));
+	vertices[i++] = CDiffuseVertex(XMFLOAT3(-x, -y, -z), XMFLOAT4(Colors::Chocolate), XMFLOAT2(1.0f, 1.0f));
+
+	vertices[i++] = CDiffuseVertex(XMFLOAT3(-x, +y, +z), XMFLOAT4(Colors::Sienna), XMFLOAT2(0.0f, 0.0f));
+	vertices[i++] = CDiffuseVertex(XMFLOAT3(-x, -y, -z), XMFLOAT4(Colors::Chocolate), XMFLOAT2(1.0f, 1.0f));
+	vertices[i++] = CDiffuseVertex(XMFLOAT3(-x, -y, +z), XMFLOAT4(Colors::Peru), XMFLOAT2(0.0f, 1.0f));
+
+	// ⓚ 오른쪽면(Right)
+	vertices[i++] = CDiffuseVertex(XMFLOAT3(+x, +y, -z), XMFLOAT4(Colors::SlateGray), XMFLOAT2(0.0f, 0.0f));
+	vertices[i++] = CDiffuseVertex(XMFLOAT3(+x, +y, +z), XMFLOAT4(Colors::LightSlateGray), XMFLOAT2(1.0f, 0.0f));
+	vertices[i++] = CDiffuseVertex(XMFLOAT3(+x, -y, +z), XMFLOAT4(Colors::DarkSlateGray), XMFLOAT2(1.0f, 1.0f));
+
+	vertices[i++] = CDiffuseVertex(XMFLOAT3(+x, +y, -z), XMFLOAT4(Colors::SlateGray), XMFLOAT2(0.0f, 0.0f));
+	vertices[i++] = CDiffuseVertex(XMFLOAT3(+x, -y, +z), XMFLOAT4(Colors::DarkSlateGray), XMFLOAT2(1.0f, 1.0f));
+	vertices[i++] = CDiffuseVertex(XMFLOAT3(+x, -y, -z), XMFLOAT4(Colors::DimGray), XMFLOAT2(0.0f, 1.0f));
+
+
+	// 삼각형 메쉬를 리소스로 생성
+	vertex_buffer = CreateBufferResource(device, commandList, vertices, stride * vertex_num, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, vertex_upload_buffer.GetAddressOf());
+
+	// 정점 버퍼 뷰 설정
+	vertex_buffer_view.BufferLocation = vertex_buffer->GetGPUVirtualAddress();
+	vertex_buffer_view.StrideInBytes = stride;
+	vertex_buffer_view.SizeInBytes = stride * vertex_num;
+}
