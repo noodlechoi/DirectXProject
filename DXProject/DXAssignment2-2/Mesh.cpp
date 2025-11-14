@@ -69,14 +69,14 @@ CRectangleMesh::CRectangleMesh(ID3D12Device* device, ID3D12GraphicsCommandList* 
 {
 	// 정점 버퍼 생성
 	vertex_num = 4;
-	stride = sizeof(CVertex);
+	stride = sizeof(CDiffuseVertex);
 	primitive_topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
 	CDiffuseVertex vertices[] = {
-		CDiffuseVertex(XMFLOAT3(-0.5f, 0.5, -5.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), XMFLOAT2(0.0f, 1.0f)),
-		CDiffuseVertex(XMFLOAT3(0.5f, 0.5, -5.0f), XMFLOAT4(0.0f,1.0f, 0.0f, 1.0f), XMFLOAT2(0.0f, 1.0f)),
-		CDiffuseVertex(XMFLOAT3(0.5f, -0.5, -5.0f), XMFLOAT4(Colors::Blue), XMFLOAT2(0.0f, 1.0f)),
-		CDiffuseVertex(XMFLOAT3(-0.5f, -0.5, -5.0f), XMFLOAT4(Colors::Blue), XMFLOAT2(0.0f, 1.0f))
+		CDiffuseVertex(XMFLOAT3(-0.5f, 0.5, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), XMFLOAT2(0.0f, 0.0f)),
+		CDiffuseVertex(XMFLOAT3(0.5f, 0.5, 0.0f), XMFLOAT4(0.0f,1.0f, 0.0f, 1.0f), XMFLOAT2(1.0f, 0.0f)),
+		CDiffuseVertex(XMFLOAT3(0.5f, -0.5, 0.0f), XMFLOAT4(Colors::Blue), XMFLOAT2(1.0f, 1.0f)),
+		CDiffuseVertex(XMFLOAT3(-0.5f, -0.5, 0.0f), XMFLOAT4(Colors::Blue), XMFLOAT2(0.0f, 1.0f))
 	};
 
 	// 삼각형 메쉬를 리소스로 생성
