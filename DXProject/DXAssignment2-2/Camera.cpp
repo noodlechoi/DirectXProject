@@ -9,21 +9,15 @@ CCamera::CCamera()
 {
 }
 
-void CCamera::CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
-{
-	UINT elementBytes = ((sizeof(CB_Camera_INFO) + 255) & ~255); //256의 배수
-	viewproj_cb = CreateBufferResource(device, commandList, NULL, elementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
-
-	viewproj_cb->Map(0, NULL, (void**)&mapped_camera_info);
-}
-
-void CCamera::ReleaseShaderVariables()
-{
-
-}
-
 void CCamera::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
 {
+	XMFLOAT4X4 viewMatrix, projectionMatrix;
+	XMStoreFloat4x4(&viewMatrix, XMMatrixTranspose(XMLoadFloat4x4(&view_matrix)));
+	XMStoreFloat4x4(&projectionMatrix, XMMatrixTranspose(XMLoadFloat4x4(&projection_matrix)));
+
+	// root signiture index = 1
+	commandList->SetGraphicsRoot32BitConstants(1, 16, &viewMatrix, 0);
+	commandList->SetGraphicsRoot32BitConstants(1, 16, &projectionMatrix, 16);
 }
 
 void CCamera::GenerateViewMatrix(XMFLOAT3 position, XMFLOAT3 lookAt, XMFLOAT3 up)

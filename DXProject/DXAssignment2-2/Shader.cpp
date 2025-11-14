@@ -199,11 +199,23 @@ ID3D12RootSignature* CTextureShader::CreateGraphicsRootSignature(ID3D12Device* d
 	descriptorRanges.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	// root parameter
-	D3D12_ROOT_PARAMETER rootParameters;
-	rootParameters.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-	rootParameters.DescriptorTable.NumDescriptorRanges = 1;
-	rootParameters.DescriptorTable.pDescriptorRanges = &descriptorRanges;
-	rootParameters.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	D3D12_ROOT_PARAMETER rootParameters[3];
+	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+	rootParameters[0].Constants.Num32BitValues = 16;
+	rootParameters[0].Constants.ShaderRegister = 0;
+	rootParameters[0].Constants.RegisterSpace = 0;
+	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+
+	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+	rootParameters[1].Constants.Num32BitValues = 32;
+	rootParameters[1].Constants.ShaderRegister = 1;
+	rootParameters[1].Constants.RegisterSpace = 0;
+	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+
+	rootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameters[2].DescriptorTable.NumDescriptorRanges = 1;
+	rootParameters[2].DescriptorTable.pDescriptorRanges = &descriptorRanges;
+	rootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 	// static sampler
 	D3D12_STATIC_SAMPLER_DESC samplerDesc{};
@@ -220,13 +232,16 @@ ID3D12RootSignature* CTextureShader::CreateGraphicsRootSignature(ID3D12Device* d
 	samplerDesc.RegisterSpace = 0;
 	samplerDesc.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
+
+	D3D12_ROOT_SIGNATURE_FLAGS rootSignatureFlags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+
 	// root signature
 	D3D12_ROOT_SIGNATURE_DESC rootSignatureDesc{};
-	rootSignatureDesc.NumParameters = 1;
-	rootSignatureDesc.pParameters = &rootParameters;
+	rootSignatureDesc.NumParameters = _countof(rootParameters);
+	rootSignatureDesc.pParameters = rootParameters;
 	rootSignatureDesc.NumStaticSamplers = 1;
 	rootSignatureDesc.pStaticSamplers = &samplerDesc;
-	rootSignatureDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+	rootSignatureDesc.Flags = rootSignatureFlags;
 
 	// 임의 길이 데이터를 반환하는 데 사용
 	ComPtr<ID3DBlob> signatureBlob{};
@@ -267,7 +282,7 @@ void CTextureShader::CreateShaderVariables(ID3D12Device* device, CObject* object
 
 	// 서술자 생성
 	// 서술자 힙 처음 핸들값 구하기
-	D3D12_CPU_DESCRIPTOR_HANDLE hDescriptor{ descriptor_heap->GetCPUDescriptorHandleForHeapStart() };
+	D3D12_CPU_DESCRIPTOR_HANDLE hcpuDescriptor{ descriptor_heap->GetCPUDescriptorHandleForHeapStart() };
 
 	ID3D12Resource* tex = object->GetTextureResource();
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
@@ -277,15 +292,19 @@ void CTextureShader::CreateShaderVariables(ID3D12Device* device, CObject* object
 	srvDesc.Texture2D.MostDetailedMip = 0;
 	srvDesc.Texture2D.MipLevels = tex->GetDesc().MipLevels;
 	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
-	device->CreateShaderResourceView(tex, &srvDesc, hDescriptor);
+	device->CreateShaderResourceView(tex, &srvDesc, hcpuDescriptor);
+
 }
 
-void CTextureShader::Render(ID3D12GraphicsCommandList* commandList)
+void CTextureShader::PreRender(ID3D12GraphicsCommandList* commandList)
 {
 	commandList->SetGraphicsRootSignature(graphics_root_signature.Get());
 	commandList->SetDescriptorHeaps(1, descriptor_heap.GetAddressOf());
 	D3D12_GPU_DESCRIPTOR_HANDLE hDescriptor{ descriptor_heap->GetGPUDescriptorHandleForHeapStart() };
-	commandList->SetGraphicsRootDescriptorTable(0, hDescriptor);
+	commandList->SetGraphicsRootDescriptorTable(2, hDescriptor);
+}
 
+void CTextureShader::Render(ID3D12GraphicsCommandList* commandList)
+{
 	commandList->SetPipelineState(pipeline_states[0].Get());
 }

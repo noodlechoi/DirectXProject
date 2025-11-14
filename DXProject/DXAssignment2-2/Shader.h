@@ -31,6 +31,7 @@ public:
 	ID3D12RootSignature* GetGraphicsRootSignature() { return graphics_root_signature.Get(); }
 	virtual ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device*);
 
+	virtual void PreRender(ID3D12GraphicsCommandList*) {};
 	virtual void Render(ID3D12GraphicsCommandList*);
 protected:
 	ComPtr<ID3D12RootSignature> graphics_root_signature{};
@@ -48,7 +49,9 @@ public:
 	ID3D12DescriptorHeap* CreateDescriptorHeap(ID3D12Device*);
 	void CreateShaderVariables(ID3D12Device*, CObject*) override;
 
+	void PreRender(ID3D12GraphicsCommandList*) override;
 	void Render(ID3D12GraphicsCommandList*) override;
 private:
 	ComPtr<ID3D12DescriptorHeap> descriptor_heap;
+
 };

@@ -24,15 +24,10 @@ public:
 
 	virtual void Animate(float );
 
-	void CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* commandList);
-	void ReleaseShaderVariables();
 	void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void Render(ID3D12GraphicsCommandList* );
 protected:
 	XMFLOAT4X4 world_matrix;
-	ComPtr<ID3D12Resource> object_cb;
-	std::unique_ptr<CB_OBJECT_INFO> mapped_object_info;
-
 	std::shared_ptr<CMesh> mesh{};
 	std::shared_ptr<CTexture> texture{};
 };

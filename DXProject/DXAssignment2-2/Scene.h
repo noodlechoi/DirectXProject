@@ -1,6 +1,7 @@
 #pragma once
-#include "Shader.h"
-#include "Object.h"
+class CShader;
+class CObject;
+class CCamera;
 
 class CScene
 {
@@ -20,6 +21,6 @@ public:
 protected:
 	std::vector<std::unique_ptr<CShader>> shaders{};
 	std::deque<std::unique_ptr<CObject>> objects{};
-
+	std::shared_ptr<CCamera> camera;
 };
 
