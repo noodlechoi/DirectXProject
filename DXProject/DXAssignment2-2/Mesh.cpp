@@ -49,9 +49,9 @@ CTriangleMesh::CTriangleMesh(ID3D12Device* device, ID3D12GraphicsCommandList* co
 	primitive_topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
 	CVertex vertices[] = {
-		CVertex(XMFLOAT3(0.0f, 0.5, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f)),
-		CVertex(XMFLOAT3(0.5f, -0.5, 0.0f), XMFLOAT4(0.0f,1.0f, 0.0f, 1.0f)),
-		CVertex(XMFLOAT3(-0.5f, -0.5, 0.0f), XMFLOAT4(Colors::Blue))
+		CVertex(XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f)),
+		CVertex(XMFLOAT3(1.0f, -1.0f, 0.0f), XMFLOAT4(0.0f,1.0f, 0.0f, 1.0f)),
+		CVertex(XMFLOAT3(-1.0f, -1.0f, 0.0f), XMFLOAT4(Colors::Blue))
 	};
 
 	// 삼각형 메쉬를 리소스로 생성
@@ -73,10 +73,50 @@ CRectangleMesh::CRectangleMesh(ID3D12Device* device, ID3D12GraphicsCommandList* 
 	primitive_topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
 	CDiffuseVertex vertices[] = {
-		CDiffuseVertex(XMFLOAT3(-0.5f, 0.5, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), XMFLOAT2(0.0f, 0.0f)),
-		CDiffuseVertex(XMFLOAT3(0.5f, 0.5, 0.0f), XMFLOAT4(0.0f,1.0f, 0.0f, 1.0f), XMFLOAT2(1.0f, 0.0f)),
-		CDiffuseVertex(XMFLOAT3(0.5f, -0.5, 0.0f), XMFLOAT4(Colors::Blue), XMFLOAT2(1.0f, 1.0f)),
-		CDiffuseVertex(XMFLOAT3(-0.5f, -0.5, 0.0f), XMFLOAT4(Colors::Blue), XMFLOAT2(0.0f, 1.0f))
+		CDiffuseVertex(XMFLOAT3(-1.0f, 1.0f, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), XMFLOAT2(0.0f, 0.0f)),
+		CDiffuseVertex(XMFLOAT3(1.0f, 1.0f, 0.0f), XMFLOAT4(0.0f,1.0f, 0.0f, 1.0f), XMFLOAT2(1.0f, 0.0f)),
+		CDiffuseVertex(XMFLOAT3(1.0f, -1.0f, 0.0f), XMFLOAT4(Colors::Blue), XMFLOAT2(1.0f, 1.0f)),
+		CDiffuseVertex(XMFLOAT3(-1.0f, -1.0f, 0.0f), XMFLOAT4(Colors::Blue), XMFLOAT2(0.0f, 1.0f))
+	};
+
+	// 삼각형 메쉬를 리소스로 생성
+	vertex_buffer = CreateBufferResource(device, commandList, vertices, stride * vertex_num, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, vertex_upload_buffer.GetAddressOf());
+
+	// 정점 버퍼 뷰 설정
+	vertex_buffer_view.BufferLocation = vertex_buffer->GetGPUVirtualAddress();
+	vertex_buffer_view.StrideInBytes = stride;
+	vertex_buffer_view.SizeInBytes = stride * vertex_num;
+
+	// 인덱스 버퍼 생성
+	index_num = 6;
+	UINT indexes[] = {
+		0,1,3,
+		1,2,3
+	};
+
+	index_buffer = CreateBufferResource(device, commandList, indexes, sizeof(UINT) * index_num, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, vertex_upload_buffer.GetAddressOf());
+
+	index_buffer_view.BufferLocation = index_buffer->GetGPUVirtualAddress();
+	index_buffer_view.Format = DXGI_FORMAT_R32_UINT;
+	index_buffer_view.SizeInBytes = sizeof(UINT) * index_num;
+}
+
+CRectangleMesh::CRectangleMesh(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, float width, float height)
+	: CMesh(device, commandList)
+{
+	// 정점 버퍼 생성
+	vertex_num = 4;
+	stride = sizeof(CDiffuseVertex);
+	primitive_topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+	float halfWidth = width * 0.5f;
+	float halfHeight = height * 0.5f;
+
+	CDiffuseVertex vertices[] = {
+		CDiffuseVertex(XMFLOAT3(-halfWidth,  halfHeight, 0.0f), XMFLOAT4(1, 0, 0, 1), XMFLOAT2(0.0f, 0.0f)),
+		CDiffuseVertex(XMFLOAT3(halfWidth,  halfHeight, 0.0f), XMFLOAT4(0, 1, 0, 1), XMFLOAT2(1.0f, 0.0f)),
+		CDiffuseVertex(XMFLOAT3(halfWidth, -halfHeight, 0.0f), XMFLOAT4(0, 0, 1, 1), XMFLOAT2(1.0f, 1.0f)),
+		CDiffuseVertex(XMFLOAT3(-halfWidth, -halfHeight, 0.0f), XMFLOAT4(0, 0, 1, 1), XMFLOAT2(0.0f, 1.0f))
 	};
 
 	// 삼각형 메쉬를 리소스로 생성

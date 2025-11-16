@@ -4,11 +4,6 @@
 
 class CShader;
 
-struct CB_OBJECT_INFO
-{
-	XMFLOAT4X4 world_matrix;
-};
-
 // mesh를 가지고 있는 게임 오브젝트 클래스
 class CObject
 {

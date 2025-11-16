@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "GameFramework.h"
 
 extern HWND ghWnd;
@@ -249,7 +249,7 @@ void CGameFramework::BuildObjects()
 	command_list->Reset(command_allocator.Get(), NULL);
 
 	// 씬 객체 생성
-	now_scene = std::make_unique<CScene>();
+	now_scene = std::make_unique<CTitleScene>();
 	if (now_scene) now_scene->BuildObjects(d3d_device.Get(), command_list.Get());
 
 	// 그래픽 명령 리스트 명령 큐에 추가

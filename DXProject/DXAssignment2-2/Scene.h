@@ -1,18 +1,16 @@
 #pragma once
-class CShader;
-class CObject;
-class CCamera;
-
+#include "Shader.h"
+#include "Object.h"
+#include "Camera.h"
 class CScene
 {
 public:
-	CScene();
-	~CScene();
+	CScene() = default;
+	~CScene() = default;
 
 	void ReleaseUploadBuffers();
 
-	void BuildObjects(ID3D12Device*, ID3D12GraphicsCommandList*);
-	void ReleaseObjects();
+	virtual void BuildObjects(ID3D12Device*, ID3D12GraphicsCommandList*);
 
 	void AnimateObjects(float);
 
@@ -24,3 +22,10 @@ protected:
 	std::shared_ptr<CCamera> camera;
 };
 
+class CTitleScene : public CScene {
+public:
+	CTitleScene() = default;
+	~CTitleScene() = default;
+
+	void BuildObjects(ID3D12Device*, ID3D12GraphicsCommandList*) override;
+};
