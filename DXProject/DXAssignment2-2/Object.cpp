@@ -45,3 +45,25 @@ void CObject::Render(ID3D12GraphicsCommandList* commandList)
 {
 	if (mesh) mesh->Render(commandList);
 }
+
+// 피킹
+void CObject::GenerateRayForPicking(XMVECTOR& pickPosition, XMMATRIX& view, XMVECTOR& pickRayOrigin, XMVECTOR& pickRayDirection)
+{
+	XMMATRIX xmmtxToModel = XMMatrixInverse(NULL, XMLoadFloat4x4(&world_matrix) * view);
+
+	XMFLOAT3 xmf3CameraOrigin(0.0f, 0.0f, 0.0f);
+	pickRayOrigin = XMVector3TransformCoord(XMLoadFloat3(&xmf3CameraOrigin), xmmtxToModel);
+	pickRayDirection = XMVector3TransformCoord(pickPosition, xmmtxToModel);
+	pickRayDirection = XMVector3Normalize(pickRayDirection - pickRayOrigin);
+}
+
+bool CObject::PickObjectByRayIntersection(XMVECTOR& pickPosition, XMMATRIX& view, float* hitDistance)
+{
+	if (mesh)
+	{
+		XMVECTOR pickRayOrigin, pickRayDirection;
+		GenerateRayForPicking(pickPosition, view, pickRayOrigin, pickRayDirection);
+		return oobb.Intersects(pickRayOrigin, pickRayDirection, *hitDistance);
+	}
+	return false;
+}

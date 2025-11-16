@@ -22,6 +22,10 @@ public:
 
 	void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void Render(ID3D12GraphicsCommandList* );
+
+	// picking
+	void GenerateRayForPicking(XMVECTOR& pickPosition, XMMATRIX& view, XMVECTOR& pickRayOrigin, XMVECTOR& pickRayDirection);
+	bool PickObjectByRayIntersection(XMVECTOR& pickPosition, XMMATRIX& view, float* hitDistance);
 protected:
 	XMFLOAT4X4 world_matrix;
 	std::shared_ptr<CMesh> mesh{};

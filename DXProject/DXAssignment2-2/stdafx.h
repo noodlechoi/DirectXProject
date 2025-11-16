@@ -36,7 +36,7 @@
 #include <deque>
 #include <algorithm>
 #include <vector>
-
+#include <functional>
 
 using namespace DirectX;
 using namespace DirectX::PackedVector;

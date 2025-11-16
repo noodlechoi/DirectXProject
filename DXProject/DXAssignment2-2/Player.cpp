@@ -1,7 +1,6 @@
-#include "Player.h"
 #include "stdafx.h"
+#include "Player.h"
 #include "Camera.h"
-
 
 // Player
 CPlayer::CPlayer()

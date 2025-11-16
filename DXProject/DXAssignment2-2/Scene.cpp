@@ -92,8 +92,34 @@ void CTitleScene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* 
 	CTexture* tex = new CTexture(std::string("title"));
 	tex->CreateTextureResource(device, commandList, std::wstring(L"Image\\Title.dds"));
 	objects[0]->SetTexture(tex);
-
+	
 	shaders.push_back(std::make_unique<CTextureShader>());
 	shaders[0]->CreateShader(device);
 	shaders[0]->CreateShaderVariables(device, objects[0].get());
+}
+
+extern bool nextScene;
+
+void CTitleScene::ProcessInput()
+{
+	//input_manager->ProcessInput();
+
+	static UCHAR key_buffer[256];
+	if (GetKeyboardState(key_buffer))
+	{
+	}
+
+	if (GetCapture() == ghWnd) {
+		POINT cursorPos;
+		GetCursorPos(&cursorPos);
+		ScreenToClient(ghWnd, &cursorPos);
+		if (key_buffer[VK_LBUTTON] & 0xF0) {
+			if (cursorPos.x >= start_button.left && cursorPos.x <= start_button.right && cursorPos.y >= start_button.top && cursorPos.y <= start_button.bottom) {
+				nextScene = true;
+			}
+			else if(cursorPos.x >= exit_button.left && cursorPos.x <= exit_button.right && cursorPos.y >= exit_button.top && cursorPos.y <= exit_button.bottom) {
+				::PostQuitMessage(0);
+			}
+		}
+	}
 }

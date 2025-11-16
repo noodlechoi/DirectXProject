@@ -12,6 +12,7 @@ void ClickCommand::Execute(CObject& object)
 
 // Input
 InputManager::InputManager()
+	: mouse{new ClickCommand}
 {
 }
 

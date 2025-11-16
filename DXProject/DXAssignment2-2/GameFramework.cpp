@@ -339,13 +339,14 @@ void CGameFramework::FrameAdvance()
 {
 	timer.Tick(0.0f);
 
-	ProcessInput();
 
 	AnimateObjects();
 
 	// 명령 리셋
 	ThrowIfFailed(command_allocator->Reset());
 	ThrowIfFailed(command_list->Reset(command_allocator.Get(), NULL));
+
+	ProcessInput();
 
 	// 뷰포트 씨저 사각형 설정
 	command_list->RSSetViewports(1, &viewport);
@@ -404,10 +405,16 @@ void CGameFramework::FrameAdvance()
 	::SetWindowText(ghWnd, frame_rate_str);
 }
 
-// 사용자 입력, 애니메이션, 렌더링 함수
+bool nextScene{ false };
 void CGameFramework::ProcessInput()
 {
-
+	if(now_scene)
+		now_scene->ProcessInput();
+	if (nextScene) {
+		now_scene.reset(new CScene);
+		now_scene->BuildObjects(d3d_device.Get(), command_list.Get());
+		nextScene = false;
+	}
 }
 
 void CGameFramework::ProcessMouseMessage(HWND hWnd, UINT MessageID, WPARAM wParam, LPARAM lParam)
@@ -460,9 +467,14 @@ void CGameFramework::ProcessWindowMessage(HWND hWnd, UINT MessageID, WPARAM wPar
 		break;
 	}
 	case WM_LBUTTONDOWN:
+		::SetCapture(hWnd);
+		break;
 	case WM_RBUTTONDOWN:
+		break;
 	case WM_LBUTTONUP:
 	case WM_RBUTTONUP:
+		::ReleaseCapture();
+		break;
 	case WM_MOUSEMOVE:
 		ProcessMouseMessage(hWnd, MessageID, wParam, lParam);
 		break;

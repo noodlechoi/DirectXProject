@@ -2,6 +2,8 @@
 #include "Shader.h"
 #include "Object.h"
 #include "Camera.h"
+#include "InputManager.h"
+
 class CScene
 {
 public:
@@ -13,6 +15,7 @@ public:
 	virtual void BuildObjects(ID3D12Device*, ID3D12GraphicsCommandList*);
 
 	void AnimateObjects(float);
+	virtual void ProcessInput() {};
 
 	// 멤버 변수 set
 	void Render(ID3D12GraphicsCommandList*);
@@ -28,4 +31,11 @@ public:
 	~CTitleScene() = default;
 
 	void BuildObjects(ID3D12Device*, ID3D12GraphicsCommandList*) override;
+	void ProcessInput() override;
+
+private:
+	std::unique_ptr<InputManager> input_manager;
+	
+	RECT start_button{ 100, 150, 680, 240 };
+	RECT exit_button{240, 250, 550, 330};
 };

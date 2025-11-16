@@ -3,7 +3,6 @@
 
 class CCamera;
 
-
 class CPlayer : public CObject{
 public:
 	CPlayer();
