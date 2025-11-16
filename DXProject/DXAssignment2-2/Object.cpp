@@ -30,6 +30,10 @@ void CObject::Animate(float elapsedTime)
 
 }
 
+void CObject::Rotate(float pitch, float yaw, float roll)
+{
+}
+
 void CObject::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
 {
 	XMFLOAT4X4 TWorldMatrix;

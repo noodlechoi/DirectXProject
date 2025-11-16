@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "GameFramework.h"
+#include "Player.h"
 
 extern HWND ghWnd;
 

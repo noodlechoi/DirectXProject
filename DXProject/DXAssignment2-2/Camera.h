@@ -19,6 +19,8 @@ protected:
 
 	D3D12_VIEWPORT viewport;
 	D3D12_RECT scissor_rect;
+
+	BoundingFrustum frustum;
 };
 
 

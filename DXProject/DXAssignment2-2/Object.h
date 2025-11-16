@@ -18,6 +18,7 @@ public:
 	ID3D12Resource* GetTextureResource() const { return texture->GetTextureResource(); }
 
 	virtual void Animate(float );
+	virtual void Rotate(float pitch, float yaw, float roll);
 
 	void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void Render(ID3D12GraphicsCommandList* );
@@ -25,4 +26,7 @@ protected:
 	XMFLOAT4X4 world_matrix;
 	std::shared_ptr<CMesh> mesh{};
 	std::shared_ptr<CTexture> texture{};
+
+	bool is_visible{ true };
+	BoundingOrientedBox oobb;
 };
