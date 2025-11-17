@@ -19,6 +19,9 @@ public:
 	void GenerateViewMatrix();
 
 	XMFLOAT3 GetPos() const { return position; }
+	void Rotate(float pitch, float yaw, float roll);
+	void Move(const XMFLOAT3 shift);
+	void Move(const XMFLOAT2 direction, float distance);
 protected:
 	XMFLOAT4X4 view_matrix;
 	XMFLOAT4X4 projection_matrix;

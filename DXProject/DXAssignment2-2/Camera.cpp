@@ -57,6 +57,7 @@ void CCamera::SetViewportsAndScissorRects(ID3D12GraphicsCommandList* commandList
 void CCamera::SetLookAt(XMFLOAT3 Position, XMFLOAT3 lookAt, XMFLOAT3 Up)
 {
 	position = Position;
+	look_at = lookAt;
 	XMStoreFloat4x4(&view_matrix, XMMatrixLookAtLH(XMLoadFloat3(&position), XMLoadFloat3(&lookAt), XMLoadFloat3(&Up)));
 
 	XMVECTORF32 xm32vRight = { view_matrix._11, view_matrix._21, view_matrix._31, 0.0f };
@@ -80,5 +81,47 @@ void CCamera::SetCameraOffset(XMFLOAT3& cameraOffset)
 
 void CCamera::GenerateViewMatrix()
 {
-	view_matrix = Matrix4x4::LookAtLH(position, look_at, up);
+	//view_matrix = Matrix4x4::LookAtLH(position, look_at, up);
+	view_matrix = Matrix4x4::LookToLH(position, look, up);
+}
+
+void CCamera::Rotate(float pitch, float yaw, float roll)
+{
+	if (pitch != 0.0f) {
+		XMMATRIX rotate = XMMatrixRotationAxis(XMLoadFloat3(&right), XMConvertToRadians(pitch));
+		XMStoreFloat3(&look, XMVector3TransformNormal(XMLoadFloat3(&look), rotate));
+		XMStoreFloat3(&up, XMVector3TransformNormal(XMLoadFloat3(&up), rotate));
+	}
+	if (yaw != 0.0f) {
+		XMMATRIX rotate = XMMatrixRotationAxis(XMLoadFloat3(&up), XMConvertToRadians(yaw));
+		XMStoreFloat3(&look, XMVector3TransformNormal(XMLoadFloat3(&look), rotate));
+		XMStoreFloat3(&right, XMVector3TransformNormal(XMLoadFloat3(&right), rotate));
+	}
+	if (roll != 0.0f) {
+		XMMATRIX rotate = XMMatrixRotationAxis(XMLoadFloat3(&look), XMConvertToRadians(roll));
+		XMStoreFloat3(&up, XMVector3TransformNormal(XMLoadFloat3(&up), rotate));
+		XMStoreFloat3(&right, XMVector3TransformNormal(XMLoadFloat3(&right), rotate));
+	}
+	GenerateViewMatrix();
+}
+
+void CCamera::Move(const XMFLOAT2 direction, float distance)
+{
+	XMFLOAT3 shift = XMFLOAT3(0, 0, 0);
+	if (direction.y > 0) {
+		XMStoreFloat3(&shift, XMVectorAdd(XMLoadFloat3(&shift), XMVectorScale(XMLoadFloat3(&look), distance)));
+	}if (direction.y < 0) {
+		XMStoreFloat3(&shift, XMVectorAdd(XMLoadFloat3(&shift), XMVectorScale(XMLoadFloat3(&look), -distance)));
+	}if (direction.x < 0) {
+		XMStoreFloat3(&shift, XMVectorAdd(XMLoadFloat3(&shift), XMVectorScale(XMLoadFloat3(&right), -distance)));
+	}if (direction.x > 0) {
+		XMStoreFloat3(&shift, XMVectorAdd(XMLoadFloat3(&shift), XMVectorScale(XMLoadFloat3(&right), distance)));
+	}
+	Move(shift);
+}
+
+void CCamera::Move(const XMFLOAT3 shift)
+{
+	XMStoreFloat3(&position, XMVectorAdd(XMLoadFloat3(&position), XMLoadFloat3(&shift)));
+	GenerateViewMatrix();
 }

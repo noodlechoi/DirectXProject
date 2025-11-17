@@ -457,6 +457,8 @@ void CGameFramework::ProcessKeyboardMessage(HWND hWnd, UINT MessageID, WPARAM wP
 	}
 }
 
+POINT oldCursorPos{};
+
 void CGameFramework::ProcessWindowMessage(HWND hWnd, UINT MessageID, WPARAM wParam, LPARAM lParam)
 {
 	switch (MessageID) {
@@ -466,10 +468,10 @@ void CGameFramework::ProcessWindowMessage(HWND hWnd, UINT MessageID, WPARAM wPar
 		client_height = HIWORD(lParam);
 		break;
 	}
+	case WM_RBUTTONDOWN:
 	case WM_LBUTTONDOWN:
 		::SetCapture(hWnd);
-		break;
-	case WM_RBUTTONDOWN:
+		::GetCursorPos(&oldCursorPos);
 		break;
 	case WM_LBUTTONUP:
 	case WM_RBUTTONUP:

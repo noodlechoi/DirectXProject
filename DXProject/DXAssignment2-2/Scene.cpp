@@ -171,24 +171,39 @@ void CGameScene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* c
 	tex->CreateSrv(device, shaders[0]->GetCPUDescriptorHandle());
 }
 
+extern POINT oldCursorPos;
+
 void CGameScene::ProcessInput()
 {
 	static UCHAR key_buffer[256];
 	if (GetKeyboardState(key_buffer))
 	{
+		XMFLOAT2 direction{};
+		if (key_buffer[VK_UP] & 0xF0) direction.y++;
+		if (key_buffer[VK_DOWN] & 0xF0) direction.y--;
+		if (key_buffer[VK_LEFT] & 0xF0) direction.x--;
+		if (key_buffer[VK_RIGHT] & 0xF0) direction.x++;
+
+		if (direction.x != 0 || direction.y != 0) {
+			camera->Move(direction, 0.005);
+		}
 	}
 
 	if (GetCapture() == ghWnd) {
 		SetCursor(NULL);
 		POINT ptCursorPos;
 		GetCursorPos(&ptCursorPos);
-		float cxMouseDelta = (float)(ptCursorPos.x - old_cursor_pos.x) / 3.0f;
-		float cyMouseDelta = (float)(ptCursorPos.y - old_cursor_pos.y) / 3.0f;
-		SetCursorPos(old_cursor_pos.x, old_cursor_pos.y);
+		float cxMouseDelta = (float)(ptCursorPos.x - oldCursorPos.x) / 3.0f;
+		float cyMouseDelta = (float)(ptCursorPos.y - oldCursorPos.y) / 3.0f;
+		SetCursorPos(oldCursorPos.x, oldCursorPos.y);
 		if (cxMouseDelta || cyMouseDelta)
 		{
-			//if (key_buffer[VK_LBUTTON] & 0xF0)
-				//camera->Rotate()
+			if (key_buffer[VK_LBUTTON] & 0xF0) {
+				camera->Rotate(cyMouseDelta, cxMouseDelta, 0.0f);
+			}
+			if (key_buffer[VK_RBUTTON] & 0xF0)
+				camera->Rotate(cyMouseDelta, 0.0f, -cxMouseDelta);
 		}
+
 	}
 }
