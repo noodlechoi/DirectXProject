@@ -275,6 +275,46 @@ ID3D12DescriptorHeap* CTextureShader::CreateDescriptorHeap(ID3D12Device* device)
 	return descriptorHeap;
 }
 
+D3D12_BLEND_DESC CTextureShader::CreateBlendState()
+{
+	D3D12_BLEND_DESC blendDesc{};
+	blendDesc.AlphaToCoverageEnable = TRUE;
+	blendDesc.IndependentBlendEnable = FALSE;
+	blendDesc.RenderTarget[0].BlendEnable = FALSE;
+	blendDesc.RenderTarget[0].LogicOpEnable = FALSE;
+	blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_ONE;
+	blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_ZERO;
+	blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
+	blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
+	blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].LogicOp = D3D12_LOGIC_OP_NOOP;
+	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+
+	return blendDesc;
+}
+
+D3D12_DEPTH_STENCIL_DESC CTextureShader::CreateDepthStencilState()
+{
+	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
+	depthStencilDesc.DepthEnable = TRUE;
+	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
+	depthStencilDesc.StencilEnable = FALSE;
+	depthStencilDesc.StencilReadMask = 0x00;
+	depthStencilDesc.StencilWriteMask = 0x00;
+	depthStencilDesc.FrontFace.StencilFailOp = D3D12_STENCIL_OP_KEEP;
+	depthStencilDesc.FrontFace.StencilDepthFailOp = D3D12_STENCIL_OP_KEEP;
+	depthStencilDesc.FrontFace.StencilPassOp = D3D12_STENCIL_OP_KEEP;
+	depthStencilDesc.FrontFace.StencilFunc = D3D12_COMPARISON_FUNC_NEVER;
+	depthStencilDesc.BackFace.StencilFailOp = D3D12_STENCIL_OP_KEEP;
+	depthStencilDesc.BackFace.StencilDepthFailOp = D3D12_STENCIL_OP_KEEP;
+	depthStencilDesc.BackFace.StencilPassOp = D3D12_STENCIL_OP_KEEP;
+	depthStencilDesc.BackFace.StencilFunc = D3D12_COMPARISON_FUNC_NEVER;
+
+	return depthStencilDesc;
+}
+
 
 void CTextureShader::CreateShaderVariables(ID3D12Device* device, CObject* object)
 {

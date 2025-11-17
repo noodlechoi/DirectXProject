@@ -47,6 +47,11 @@ public:
 	D3D12_INPUT_LAYOUT_DESC CreateInputLayout() override;
 	ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device*) override;
 
+	// 블렌드 상태를 설정하기 위한 구조체 반환
+	D3D12_BLEND_DESC CreateBlendState() override;
+	// 깊이-스텐실 검사를 위한 상태를 설정하기 위한 구조체 반환
+	D3D12_DEPTH_STENCIL_DESC CreateDepthStencilState() override;
+
 	D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob**) override;
 	D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob**)override;
 
