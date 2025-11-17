@@ -26,6 +26,8 @@ public:
 	virtual void CreateShader(ID3D12Device*);
 	// descriptor heap, descriptor 생성 함수
 	virtual void CreateShaderVariables(ID3D12Device*, CObject*) {}
+	D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle() const { return cpu_descriptor_handle; }
+	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle() const { return gpu_descriptor_handle; }
 
 	// 루트 시그니처
 	ID3D12RootSignature* GetGraphicsRootSignature() { return graphics_root_signature.Get(); }
@@ -36,6 +38,8 @@ public:
 protected:
 	ComPtr<ID3D12RootSignature> graphics_root_signature{};
 	std::deque<ComPtr<ID3D12PipelineState>> pipeline_states{};
+	D3D12_CPU_DESCRIPTOR_HANDLE cpu_descriptor_handle;
+	D3D12_GPU_DESCRIPTOR_HANDLE gpu_descriptor_handle;
 };
 
 class CTextureShader final : public CShader{
@@ -53,5 +57,4 @@ public:
 	void Render(ID3D12GraphicsCommandList*) override;
 private:
 	ComPtr<ID3D12DescriptorHeap> descriptor_heap;
-
 };

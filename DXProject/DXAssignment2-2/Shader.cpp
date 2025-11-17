@@ -280,28 +280,15 @@ void CTextureShader::CreateShaderVariables(ID3D12Device* device, CObject* object
 {
 	descriptor_heap = CreateDescriptorHeap(device);
 
-	// 서술자 생성
-	// 서술자 힙 처음 핸들값 구하기
-	D3D12_CPU_DESCRIPTOR_HANDLE hcpuDescriptor{ descriptor_heap->GetCPUDescriptorHandleForHeapStart() };
-
-	ID3D12Resource* tex = object->GetTextureResource();
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc.Format = tex->GetDesc().Format;
-	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	srvDesc.Texture2D.MostDetailedMip = 0;
-	srvDesc.Texture2D.MipLevels = tex->GetDesc().MipLevels;
-	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
-	device->CreateShaderResourceView(tex, &srvDesc, hcpuDescriptor);
-
+	cpu_descriptor_handle = descriptor_heap->GetCPUDescriptorHandleForHeapStart();
+	gpu_descriptor_handle = descriptor_heap->GetGPUDescriptorHandleForHeapStart();
 }
 
 void CTextureShader::PreRender(ID3D12GraphicsCommandList* commandList)
 {
 	commandList->SetGraphicsRootSignature(graphics_root_signature.Get());
 	commandList->SetDescriptorHeaps(1, descriptor_heap.GetAddressOf());
-	D3D12_GPU_DESCRIPTOR_HANDLE hDescriptor{ descriptor_heap->GetGPUDescriptorHandleForHeapStart() };
-	commandList->SetGraphicsRootDescriptorTable(2, hDescriptor);
+	commandList->SetGraphicsRootDescriptorTable(2, gpu_descriptor_handle);
 }
 
 void CTextureShader::Render(ID3D12GraphicsCommandList* commandList)

@@ -39,6 +39,8 @@ void CScene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* comma
 	shaders.push_back(std::make_unique<CTextureShader>());
 	shaders[0]->CreateShader(device);
 	shaders[0]->CreateShaderVariables(device, objects[0].get());
+
+	tex->CreateSrv(device, shaders[0]->GetCPUDescriptorHandle());
 }
 
 void CScene::AnimateObjects(float elapsedTime)
@@ -73,6 +75,7 @@ void CScene::Render(ID3D12GraphicsCommandList* commandList)
 
 void CTitleScene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
 {
+	// camera
 	RECT client_rect;
 	GetClientRect(ghWnd, &client_rect);
 	float width{ float(client_rect.right - client_rect.left) };
@@ -84,6 +87,7 @@ void CTitleScene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* 
 	camera->GenerateProjectionMatrix(1.0f, 500.0f, (float)width / (float)height, 90.0f);
 	camera->GenerateViewMatrix(XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 1.0f, 0.0f));
 
+	// object
 	for (int i = 0; i < 1; ++i) {
 		objects.push_back(std::make_unique<CObject>());
 	}
@@ -93,9 +97,12 @@ void CTitleScene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* 
 	tex->CreateTextureResource(device, commandList, std::wstring(L"Image\\Title.dds"));
 	objects[0]->SetTexture(tex);
 	
+	// shader
 	shaders.push_back(std::make_unique<CTextureShader>());
 	shaders[0]->CreateShader(device);
 	shaders[0]->CreateShaderVariables(device, objects[0].get());
+
+	tex->CreateSrv(device, shaders[0]->GetCPUDescriptorHandle());
 }
 
 extern bool nextScene;
