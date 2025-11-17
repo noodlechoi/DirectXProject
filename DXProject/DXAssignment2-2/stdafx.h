@@ -89,6 +89,12 @@ public:
 	int line_number{ -1 };
 };
 
+#define EPSILON					1.0e-6f
+
+inline bool IsZero(float fValue) { return((fabsf(fValue) < EPSILON)); }
+inline bool IsEqual(float fA, float fB) { return(::IsZero(fA - fB)); }
+inline float InverseSqrt(float fValue) { return 1.0f / sqrtf(fValue); }
+inline void Swap(float* pfS, float* pfT) { float fTemp = *pfS; *pfS = *pfT; *pfT = fTemp; }
 
 namespace Vector3
 {
@@ -208,6 +214,13 @@ namespace Vector3
 	inline XMFLOAT3 TransformCoord(XMFLOAT3& xmf3Vector, XMFLOAT4X4& xmmtx4x4Matrix)
 	{
 		return(TransformCoord(xmf3Vector, XMLoadFloat4x4(&xmmtx4x4Matrix)));
+	}
+
+	inline bool IsZero(XMFLOAT3& xmf3Vector)
+	{
+		if (::IsZero(xmf3Vector.x) && ::IsZero(xmf3Vector.y) && ::IsZero(xmf3Vector.z))
+			return(true);
+		return(false);
 	}
 }
 

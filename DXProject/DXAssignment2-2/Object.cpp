@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Shader.h"
 #include "Object.h"
+#include "Camera.h"
 
 CObject::CObject()
 {
@@ -23,11 +24,6 @@ void CObject::SetMesh(CMesh* otherMesh)
 void CObject::SetTexture(CTexture* otherTexture)
 {
 	texture.reset(otherTexture);
-}
-
-void CObject::Animate(float elapsedTime)
-{
-
 }
 
 void CObject::Rotate(float pitch, float yaw, float roll)
@@ -66,4 +62,29 @@ bool CObject::PickObjectByRayIntersection(XMVECTOR& pickPosition, XMMATRIX& view
 		return oobb.Intersects(pickRayOrigin, pickRayDirection, *hitDistance);
 	}
 	return false;
+}
+
+void CObject::SetPosition(float x, float y, float z)
+{
+	world_matrix._41 = x;
+	world_matrix._42 = y;
+	world_matrix._43 = z;
+}
+// billboard
+void CBillboardObject::Animate(float elapsedTime, CCamera* camera)
+{
+	XMFLOAT3 cameraPos = camera->GetPos();
+	SetLookAt(cameraPos);
+}
+
+void CBillboardObject::SetLookAt(XMFLOAT3& target)
+{
+	XMFLOAT3 up{ 0.0f, 1.0f, 0.0f };
+	XMFLOAT3 pos{ world_matrix._41, world_matrix._42, world_matrix._43};
+	XMFLOAT3 look{ Vector3::Normalize(Vector3::Subtract(target, pos)) };
+	XMFLOAT3 right{ Vector3::CrossProduct(up, look, true) };
+	
+	world_matrix._11 = right.x; world_matrix._12 = right.y; world_matrix._13 = right.z;
+	world_matrix._21 = up.x; world_matrix._22 = up.y; world_matrix._23 = up.z;
+	world_matrix._31 = look.x; world_matrix._32 = look.y; world_matrix._33 = look.z;
 }

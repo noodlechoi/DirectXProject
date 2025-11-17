@@ -23,18 +23,20 @@ void CScene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* comma
 	camera->SetViewport(0, 0, width, height);
 	camera->SetScissorRect(0, 0, width, height);
 	camera->GenerateProjectionMatrix(1.0f, 500.0f, (float)width / (float)height, 90.0f);
-	camera->GenerateViewMatrix(XMFLOAT3(0.0f, 2.0f, -2.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 1.0f, 0.0f));
+	camera->SetLookAt(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f));
+	camera->SetCameraOffset(XMFLOAT3(0.0f, 2.0f, -2.0f));
 
-	for (int i = 0; i < 1; ++i) {
-		objects.push_back(std::make_unique<CObject>());
-	}
+	auto object = std::make_unique<CBillboardObject>();
+	object->SetPosition(XMFLOAT3(2.0f, 0.0f, 0.0f));
+
 	//CTriangleMesh* mesh= new CTriangleMesh(device, commandList);
 	//CRectangleMesh* mesh= new CRectangleMesh(device, commandList);
 	CCubeMesh* mesh= new CCubeMesh(device, commandList);
-	objects[0]->SetMesh(mesh);
+	object->SetMesh(mesh);
 	CTexture* tex = new CTexture(std::string("stone"));
 	tex->CreateTextureResource(device, commandList, std::wstring(L"Image\\Stone01.dds"));
-	objects[0]->SetTexture(tex);
+	object->SetTexture(tex);
+	objects.push_back(std::move(object));
 
 	shaders.push_back(std::make_unique<CTextureShader>());
 	shaders[0]->CreateShader(device);
@@ -46,7 +48,7 @@ void CScene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* comma
 void CScene::AnimateObjects(float elapsedTime)
 {
 	for (const auto& object : objects) {
-		object->Animate(elapsedTime);
+		object->Animate(elapsedTime, camera.get());
 	}
 }
 
@@ -85,7 +87,8 @@ void CTitleScene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* 
 	camera->SetViewport(0, 0, width, height);
 	camera->SetScissorRect(0, 0, width, height);
 	camera->GenerateProjectionMatrix(1.0f, 500.0f, (float)width / (float)height, 90.0f);
-	camera->GenerateViewMatrix(XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 1.0f, 0.0f));
+	camera->SetLookAt(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f));
+	camera->SetCameraOffset(XMFLOAT3(0.0f, 0.0f, -1.0f));
 
 	// object
 	for (int i = 0; i < 1; ++i) {
