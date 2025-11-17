@@ -39,3 +39,11 @@ private:
 	RECT start_button{ 100, 150, 680, 240 };
 	RECT exit_button{240, 250, 550, 330};
 };
+
+class CGameScene : public CScene {
+public:
+	void BuildObjects(ID3D12Device*, ID3D12GraphicsCommandList*) override;
+	void ProcessInput() override;
+private:
+	POINT old_cursor_pos;
+};

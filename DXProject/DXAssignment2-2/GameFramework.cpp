@@ -411,7 +411,7 @@ void CGameFramework::ProcessInput()
 	if(now_scene)
 		now_scene->ProcessInput();
 	if (nextScene) {
-		now_scene.reset(new CScene);
+		now_scene.reset(new CGameScene);
 		now_scene->BuildObjects(d3d_device.Get(), command_list.Get());
 		nextScene = false;
 	}

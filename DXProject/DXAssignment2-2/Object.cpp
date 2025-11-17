@@ -82,7 +82,7 @@ void CBillboardObject::SetLookAt(XMFLOAT3& target)
 	XMFLOAT3 up{ 0.0f, 1.0f, 0.0f };
 	XMFLOAT3 pos{ world_matrix._41, world_matrix._42, world_matrix._43};
 	XMFLOAT3 look{ Vector3::Normalize(Vector3::Subtract(target, pos)) };
-	XMFLOAT3 right{ Vector3::CrossProduct(up, look, true) };
+	XMFLOAT3 right{ Vector3::CrossProduct(look, up, true) };
 	
 	world_matrix._11 = right.x; world_matrix._12 = right.y; world_matrix._13 = right.z;
 	world_matrix._21 = up.x; world_matrix._22 = up.y; world_matrix._23 = up.z;
