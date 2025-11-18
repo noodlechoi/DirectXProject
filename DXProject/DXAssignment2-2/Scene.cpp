@@ -31,7 +31,7 @@ void CScene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* comma
 
 	//CTriangleMesh* mesh= new CTriangleMesh(device, commandList);
 	//CRectangleMesh* mesh= new CRectangleMesh(device, commandList);
-	CCubeMesh* mesh= new CCubeMesh(device, commandList);
+	std::shared_ptr<CMesh> mesh= std::make_shared<CCubeMesh>(device, commandList);
 	object->SetMesh(mesh);
 	CTexture* tex = new CTexture(std::string("stone"));
 	tex->CreateTextureResource(device, commandList, std::wstring(L"Image\\Stone01.dds"));
@@ -96,7 +96,7 @@ void CTitleScene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* 
 	//CTriangleMesh* mesh= new CTriangleMesh(device, commandList);
 	//CRectangleMesh* mesh = new CRectangleMesh(device, commandList, 3.0f, 2.0f);
 	//CCubeMesh* mesh = new CCubeMesh(device, commandList);
-	CBillboardMesh* mesh = new CBillboardMesh(device, commandList);
+	std::shared_ptr<CMesh> mesh = std::make_shared<CBillboardMesh>(device, commandList);
 	object->SetMesh(mesh);
 	CTexture* tex = new CTexture(std::string("title"));
 	tex->CreateTextureResource(device, commandList, std::wstring(L"Image\\title.dds"));
@@ -159,12 +159,13 @@ void CGameScene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* c
 	//CTriangleMesh* mesh= new CTriangleMesh(device, commandList);
 	//CRectangleMesh* mesh= new CRectangleMesh(device, commandList);
 	//CCubeMesh* mesh = new CCubeMesh(device, commandList);
-	CBillboardMesh* mesh = new CBillboardMesh(device, commandList);
+	std::shared_ptr<CMesh> mesh = std::make_shared<CBillboardMesh>(device, commandList);
 	object->SetMesh(mesh);
 	CTexture* tex = new CTexture(std::string("tree"));
 	tex->CreateTextureResource(device, commandList, std::wstring(L"Image\\tree.dds"));
 	object->SetTexture(tex);
 	objects.push_back(std::move(object));
+	objects.push_back(std::make_unique<CHeightMapTerrain>(device, commandList, _T("HeightMap.raw"), 257, 257, 257, 257, XMFLOAT3{ 8.0f, 2.0f, 8.0f }, XMFLOAT4{ 0.0f, 0.2f, 0.0f, 0.0f }));
 
 	shaders.push_back(std::make_unique<CTextureShader>());
 	shaders[0]->CreateShader(device);

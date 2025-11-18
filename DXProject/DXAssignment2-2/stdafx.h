@@ -37,6 +37,7 @@
 #include <algorithm>
 #include <vector>
 #include <functional>
+#include <fstream>
 
 using namespace DirectX;
 using namespace DirectX::PackedVector;

@@ -11,14 +11,13 @@ CObject::CObject()
 void CObject::ReleaseUploadBuffer()
 {
 	// 정점 버퍼를 위한 업로드 버퍼를 소멸시킨다.
-	if (mesh) {
+	for(const auto& mesh : meshes)
 		mesh->ReleaseUploadBuffer();
-	}
 }
 
-void CObject::SetMesh(CMesh* otherMesh)
+void CObject::SetMesh(std::shared_ptr<CMesh>& otherMesh)
 {
-	mesh.reset(otherMesh);
+	meshes.push_back(otherMesh);
 }
 
 void CObject::SetTexture(CTexture* otherTexture)
@@ -39,7 +38,8 @@ void CObject::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
 
 void CObject::Render(ID3D12GraphicsCommandList* commandList)
 {
-	if (mesh) mesh->Render(commandList);
+	for (const auto& mesh : meshes)
+		mesh->Render(commandList);
 }
 
 // 피킹
@@ -55,7 +55,7 @@ void CObject::GenerateRayForPicking(XMVECTOR& pickPosition, XMMATRIX& view, XMVE
 
 bool CObject::PickObjectByRayIntersection(XMVECTOR& pickPosition, XMMATRIX& view, float* hitDistance)
 {
-	if (mesh)
+	if (!meshes.empty())
 	{
 		XMVECTOR pickRayOrigin, pickRayDirection;
 		GenerateRayForPicking(pickPosition, view, pickRayOrigin, pickRayDirection);
@@ -87,4 +87,26 @@ void CBillboardObject::SetLookAt(XMFLOAT3& target)
 	world_matrix._11 = right.x; world_matrix._12 = right.y; world_matrix._13 = right.z;
 	world_matrix._21 = up.x; world_matrix._22 = up.y; world_matrix._23 = up.z;
 	world_matrix._31 = look.x; world_matrix._32 = look.y; world_matrix._33 = look.z;
+}
+
+CHeightMapTerrain::CHeightMapTerrain(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, LPCTSTR fileName, int otherWidth, int otherLength, int blockWidth, int blockLength, XMFLOAT3 otherScale, XMFLOAT4 color)
+	: width{ otherWidth }, length{ otherLength }, scale{ otherScale }
+{
+	int xQuadsPerBlock{ blockWidth - 1 };
+	int zQuadsPerBlock{ blockLength - 1 };
+
+	height_map_image = std::make_unique<CHeightMapImage>(fileName, width, length, scale);
+
+	long xBlocks = (width - 1) / xQuadsPerBlock;
+	long zBlocks = (length - 1) / zQuadsPerBlock;
+
+	std::shared_ptr<CMesh> heightMapMesh;
+	for (int z = 0, zStart = 0; z < zBlocks; ++z) {
+		for (int x = 0, xStart = 0; x < xBlocks; ++x) {
+			xStart = x * (blockWidth - 1);
+			zStart = z * (blockLength - 1);
+			heightMapMesh = std::make_shared<CHeightMapGridMesh>(device, commandList, xStart, zStart, blockWidth, blockLength, scale, color, height_map_image.get());
+			SetMesh(heightMapMesh);
+		}
+	}
 }

@@ -22,6 +22,7 @@ class CBillBoardVertex {
 public:
 	CBillBoardVertex();
 	CBillBoardVertex(XMFLOAT3 position, XMFLOAT2 size);
+	void SetPos(XMFLOAT3 pos) { position = pos; }
 protected:
 	XMFLOAT3 position{};
 	XMFLOAT2 size{};
@@ -53,7 +54,7 @@ protected:
 	int base_vertex_index{}; // 인덱스 버퍼의 인덱스에 더해질 인덱스
 
 	// View
-	D3D12_PRIMITIVE_TOPOLOGY primitive_topology{ D3D_PRIMITIVE_TOPOLOGY_POINTLIST };
+	D3D12_PRIMITIVE_TOPOLOGY primitive_topology{ D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST };
 	UINT slot_num{};
 	UINT stride{};
 	UINT offset{};
@@ -83,4 +84,20 @@ class CCubeMesh : public CMesh
 {
 public:
 	CCubeMesh(ID3D12Device*, ID3D12GraphicsCommandList*, float = 2.0f, float = 2.0f, float = 2.0f);
+};
+
+class CHeightMapGridMesh : public CMesh {
+public:
+	CHeightMapGridMesh(ID3D12Device*, ID3D12GraphicsCommandList*, int, int, int, int, XMFLOAT3 = XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT4 = XMFLOAT4(1.0f, 1.0f, 0.0f, 0.0f), void* = nullptr);
+
+	XMFLOAT3 GetScale() { return scale; }
+	int GetWidth() { return width; }
+	int GetLength() { return length; }
+
+	// 격자 좌표 정점 높이 반환
+	virtual float OnGetHeight(int, int, void*);
+	virtual XMFLOAT4 OnGetColor(int, int, void*);
+protected:
+	XMFLOAT3 scale;
+	int width, length;
 };
