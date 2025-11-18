@@ -34,7 +34,7 @@ public:
 	ID3D12RootSignature* GetGraphicsRootSignature() { return graphics_root_signature.Get(); }
 	virtual ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device*);
 
-	virtual void PreRender(ID3D12GraphicsCommandList*) {};
+	virtual void PreRender(ID3D12GraphicsCommandList*);
 	virtual void Render(ID3D12GraphicsCommandList*);
 protected:
 	ComPtr<ID3D12RootSignature> graphics_root_signature{};
@@ -56,6 +56,7 @@ public:
 	D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob**) override;
 	D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob**)override;
 	D3D12_SHADER_BYTECODE CreateGeometryShader(ID3DBlob**) override;
+	void CreateShader(ID3D12Device* device) override;
 
 	ID3D12DescriptorHeap* CreateDescriptorHeap(ID3D12Device*);
 	void CreateShaderVariables(ID3D12Device*, CObject*) override;

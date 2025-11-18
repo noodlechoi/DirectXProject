@@ -18,7 +18,7 @@ public:
 	virtual void ProcessInput() {};
 
 	// 멤버 변수 set
-	void Render(ID3D12GraphicsCommandList*);
+	virtual void Render(ID3D12GraphicsCommandList*);
 protected:
 	std::vector<std::unique_ptr<CShader>> shaders{};
 	std::deque<std::unique_ptr<CObject>> objects{};
@@ -44,6 +44,7 @@ class CGameScene : public CScene {
 public:
 	void BuildObjects(ID3D12Device*, ID3D12GraphicsCommandList*) override;
 	void ProcessInput() override;
+	void Render(ID3D12GraphicsCommandList*) override;
 private:
 	POINT old_cursor_pos;
 };

@@ -89,12 +89,29 @@ ID3D12RootSignature* CShader::CreateGraphicsRootSignature(ID3D12Device* device)
 {
 	ID3D12RootSignature* graphicsRootSignature{};
 
+	// root parameter
+	D3D12_ROOT_PARAMETER rootParameters[2];
+	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+	rootParameters[0].Constants.Num32BitValues = 16;
+	rootParameters[0].Constants.ShaderRegister = 0;
+	rootParameters[0].Constants.RegisterSpace = 0;
+	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+
+	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+	rootParameters[1].Constants.Num32BitValues = 35;
+	rootParameters[1].Constants.ShaderRegister = 1;
+	rootParameters[1].Constants.RegisterSpace = 0;
+	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+	D3D12_ROOT_SIGNATURE_FLAGS rootSignatureFlags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+
+	// root signature
 	D3D12_ROOT_SIGNATURE_DESC rootSignatureDesc{};
-	rootSignatureDesc.NumParameters = 0;
-	rootSignatureDesc.pParameters = nullptr;
+	rootSignatureDesc.NumParameters = _countof(rootParameters);
+	rootSignatureDesc.pParameters = rootParameters;
 	rootSignatureDesc.NumStaticSamplers = 0;
 	rootSignatureDesc.pStaticSamplers = nullptr;
-	rootSignatureDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+	rootSignatureDesc.Flags = rootSignatureFlags;
 
 	// 임의 길이 데이터를 반환하는 데 사용
 	ComPtr<ID3DBlob> signatureBlob{};
@@ -154,7 +171,6 @@ void CShader::CreateShader(ID3D12Device* device)
 	pipelineStateDesc.pRootSignature = graphics_root_signature.Get();
 	pipelineStateDesc.VS = CreateVertexShader(&shaderblo);
 	pipelineStateDesc.PS = CreatePixelShader(&pixelShaderBlob);
-	pipelineStateDesc.GS = CreateGeometryShader(&gsShaderBlob);
 	pipelineStateDesc.RasterizerState = CreateRasterizerState();
 	pipelineStateDesc.BlendState = CreateBlendState();
 	pipelineStateDesc.DepthStencilState = CreateDepthStencilState();
@@ -170,6 +186,11 @@ void CShader::CreateShader(ID3D12Device* device)
 	device->CreateGraphicsPipelineState(&pipelineStateDesc, __uuidof(ID3D12PipelineState), (void**)pipeline_states[0].GetAddressOf());
 
 	if (pipelineStateDesc.InputLayout.pInputElementDescs) delete[] pipelineStateDesc.InputLayout.pInputElementDescs;
+}
+
+void CShader::PreRender(ID3D12GraphicsCommandList* commandList)
+{
+	commandList->SetGraphicsRootSignature(graphics_root_signature.Get());
 }
 
 void CShader::Render(ID3D12GraphicsCommandList* commandList)
@@ -329,6 +350,36 @@ D3D12_DEPTH_STENCIL_DESC CTextureShader::CreateDepthStencilState()
 	depthStencilDesc.BackFace.StencilFunc = D3D12_COMPARISON_FUNC_NEVER;
 
 	return depthStencilDesc;
+}
+
+void CTextureShader::CreateShader(ID3D12Device* device)
+{
+	//그래픽스 파이프라인 상태 객체 배열을 생성한다.
+	pipeline_states.push_back(ComPtr<ID3D12PipelineState>());
+	ComPtr<ID3DBlob> shaderblo{}, pixelShaderBlob{}, gsShaderBlob;
+
+	graphics_root_signature = CreateGraphicsRootSignature(device);
+
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC pipelineStateDesc{};
+	pipelineStateDesc.pRootSignature = graphics_root_signature.Get();
+	pipelineStateDesc.VS = CreateVertexShader(&shaderblo);
+	pipelineStateDesc.PS = CreatePixelShader(&pixelShaderBlob);
+	pipelineStateDesc.GS = CreateGeometryShader(&gsShaderBlob);
+	pipelineStateDesc.RasterizerState = CreateRasterizerState();
+	pipelineStateDesc.BlendState = CreateBlendState();
+	pipelineStateDesc.DepthStencilState = CreateDepthStencilState();
+	pipelineStateDesc.InputLayout = CreateInputLayout();
+	pipelineStateDesc.SampleMask = UINT_MAX;
+	//pipelineStateDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	pipelineStateDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
+	pipelineStateDesc.NumRenderTargets = 1;
+	pipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
+	pipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	pipelineStateDesc.SampleDesc.Count = 1;
+
+	device->CreateGraphicsPipelineState(&pipelineStateDesc, __uuidof(ID3D12PipelineState), (void**)pipeline_states[0].GetAddressOf());
+
+	if (pipelineStateDesc.InputLayout.pInputElementDescs) delete[] pipelineStateDesc.InputLayout.pInputElementDescs;
 }
 
 

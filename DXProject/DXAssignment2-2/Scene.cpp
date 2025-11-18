@@ -150,28 +150,61 @@ void CGameScene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* c
 	camera->SetViewport(0, 0, width, height);
 	camera->SetScissorRect(0, 0, width, height);
 	camera->GenerateProjectionMatrix(1.0f, 500.0f, (float)width / (float)height, 90.0f);
-	camera->SetLookAt(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f));
 	camera->SetCameraOffset(XMFLOAT3(0.0f, 2.0f, -2.0f));
 
-	auto object = std::make_unique<CBillboardObject>();
-	object->SetPosition(XMFLOAT3(2.0f, 0.0f, 0.0f));
-
-	//CTriangleMesh* mesh= new CTriangleMesh(device, commandList);
-	//CRectangleMesh* mesh= new CRectangleMesh(device, commandList);
-	//CCubeMesh* mesh = new CCubeMesh(device, commandList);
-	std::shared_ptr<CMesh> mesh = std::make_shared<CBillboardMesh>(device, commandList);
-	object->SetMesh(mesh);
+	std::shared_ptr<CMesh> mesh = std::make_shared<CBillboardMesh>(device, commandList, 10.0f, 10.0f);
 	CTexture* tex = new CTexture(std::string("tree"));
 	tex->CreateTextureResource(device, commandList, std::wstring(L"Image\\tree.dds"));
-	object->SetTexture(tex);
-	objects.push_back(std::move(object));
-	objects.push_back(std::make_unique<CHeightMapTerrain>(device, commandList, _T("HeightMap.raw"), 257, 257, 257, 257, XMFLOAT3{ 8.0f, 2.0f, 8.0f }, XMFLOAT4{ 0.0f, 0.2f, 0.0f, 0.0f }));
+
+	{
+		std::unique_ptr<CHeightMapTerrain> terrian = std::make_unique<CHeightMapTerrain>(device, commandList, _T("HeightMap.raw"), 257, 257, 257, 257, XMFLOAT3{ 8.0f, 2.0f, 8.0f }, XMFLOAT4{ 0.0f, 0.2f, 0.0f, 0.0f });
+		float mapHeight = terrian->GetHeight(terrian->GetWidth() * 0.5f, terrian->GetLength() * 0.5f);
+		camera->SetLookAt(XMFLOAT3(terrian->GetWidth() * 0.5f, mapHeight + 20, terrian->GetLength() * 0.5f), XMFLOAT3(terrian->GetWidth() * 0.5f, 215.0f, -1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f));
+
+		for (int i = 0; i < 10; ++i) {
+			std::unique_ptr<CObject> object = std::make_unique<CBillboardObject>();
+			object->SetPosition(XMFLOAT3(terrian->GetWidth() * 0.5f, mapHeight + 20, terrian->GetLength() * 0.5f - 10.0f));
+			object->SetMesh(mesh);
+			object->SetTexture(tex);
+			objects.push_back(std::move(object));
+		}
+		objects.push_back(std::move(terrian));
+	}
 
 	shaders.push_back(std::make_unique<CTextureShader>());
 	shaders[0]->CreateShader(device);
 	shaders[0]->CreateShaderVariables(device, objects[0].get());
 
+	shaders.push_back(std::make_unique<CShader>());
+	shaders[1]->CreateShader(device);
+	shaders[1]->CreateShaderVariables(device, objects[0].get());
+
+
 	tex->CreateSrv(device, shaders[0]->GetCPUDescriptorHandle());
+}
+
+void CGameScene::Render(ID3D12GraphicsCommandList* commandList)
+{
+	shaders[0]->PreRender(commandList);	// root signature set
+	// camera set
+	camera->SetViewportsAndScissorRects(commandList);
+	camera->UpdateShaderVariables(commandList);
+
+	for (int i = 0; i < objects.size() - 1; ++i) {
+		objects[i]->UpdateShaderVariables(commandList);
+	}
+	shaders[0]->Render(commandList);
+	for (int i = 0; i < objects.size() - 1; ++i) {
+		objects[i]->Render(commandList);
+	}
+
+	// 2
+	shaders[1]->PreRender(commandList);	// root signature set
+
+	objects[objects.size() - 1]->UpdateShaderVariables(commandList);
+	shaders[1]->Render(commandList);
+	objects[objects.size() - 1]->Render(commandList);
+	
 }
 
 extern POINT oldCursorPos;
@@ -188,7 +221,7 @@ void CGameScene::ProcessInput()
 		if (key_buffer[VK_RIGHT] & 0xF0) direction.x++;
 
 		if (direction.x != 0 || direction.y != 0) {
-			camera->Move(direction, 0.005);
+			camera->Move(direction, 0.15);
 		}
 	}
 
