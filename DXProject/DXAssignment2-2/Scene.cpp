@@ -94,8 +94,9 @@ void CTitleScene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* 
 	auto object = std::make_unique<CBillboardObject>();
 
 	//CTriangleMesh* mesh= new CTriangleMesh(device, commandList);
-	CRectangleMesh* mesh = new CRectangleMesh(device, commandList, 3.0f, 2.0f);
+	//CRectangleMesh* mesh = new CRectangleMesh(device, commandList, 3.0f, 2.0f);
 	//CCubeMesh* mesh = new CCubeMesh(device, commandList);
+	CBillboardMesh* mesh = new CBillboardMesh(device, commandList);
 	object->SetMesh(mesh);
 	CTexture* tex = new CTexture(std::string("title"));
 	tex->CreateTextureResource(device, commandList, std::wstring(L"Image\\title.dds"));
@@ -156,8 +157,9 @@ void CGameScene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* c
 	object->SetPosition(XMFLOAT3(2.0f, 0.0f, 0.0f));
 
 	//CTriangleMesh* mesh= new CTriangleMesh(device, commandList);
-	CRectangleMesh* mesh= new CRectangleMesh(device, commandList);
+	//CRectangleMesh* mesh= new CRectangleMesh(device, commandList);
 	//CCubeMesh* mesh = new CCubeMesh(device, commandList);
+	CBillboardMesh* mesh = new CBillboardMesh(device, commandList);
 	object->SetMesh(mesh);
 	CTexture* tex = new CTexture(std::string("tree"));
 	tex->CreateTextureResource(device, commandList, std::wstring(L"Image\\tree.dds"));

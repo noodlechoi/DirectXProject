@@ -18,6 +18,15 @@ protected:
 	XMFLOAT2 tex{};
 };
 
+class CBillBoardVertex {
+public:
+	CBillBoardVertex();
+	CBillBoardVertex(XMFLOAT3 position, XMFLOAT2 size);
+protected:
+	XMFLOAT3 position{};
+	XMFLOAT2 size{};
+};
+
 class CMesh
 {
 public:
@@ -44,7 +53,7 @@ protected:
 	int base_vertex_index{}; // 인덱스 버퍼의 인덱스에 더해질 인덱스
 
 	// View
-	D3D12_PRIMITIVE_TOPOLOGY primitive_topology{ D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST };
+	D3D12_PRIMITIVE_TOPOLOGY primitive_topology{ D3D_PRIMITIVE_TOPOLOGY_POINTLIST };
 	UINT slot_num{};
 	UINT stride{};
 	UINT offset{};
@@ -61,6 +70,13 @@ class CRectangleMesh : public CMesh
 public:
 	CRectangleMesh(ID3D12Device*, ID3D12GraphicsCommandList*);
 	CRectangleMesh(ID3D12Device*, ID3D12GraphicsCommandList*, float, float);
+};
+
+class CBillboardMesh : public CMesh {
+public:
+	CBillboardMesh(ID3D12Device*, ID3D12GraphicsCommandList*);
+	CBillboardMesh(ID3D12Device*, ID3D12GraphicsCommandList*, float, float);
+
 };
 
 class CCubeMesh : public CMesh

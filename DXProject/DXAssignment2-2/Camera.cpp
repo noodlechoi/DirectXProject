@@ -15,9 +15,11 @@ void CCamera::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
 	XMStoreFloat4x4(&viewMatrix, XMMatrixTranspose(XMLoadFloat4x4(&view_matrix)));
 	XMStoreFloat4x4(&projectionMatrix, XMMatrixTranspose(XMLoadFloat4x4(&projection_matrix)));
 
+
 	// root signiture index = 1
 	commandList->SetGraphicsRoot32BitConstants(1, 16, &viewMatrix, 0);
 	commandList->SetGraphicsRoot32BitConstants(1, 16, &projectionMatrix, 16);
+	commandList->SetGraphicsRoot32BitConstants(1, 3, &position, 32);
 }
 
 //void CCamera::GenerateViewMatrix(XMFLOAT3 position, XMFLOAT3 lookAt, XMFLOAT3 up)

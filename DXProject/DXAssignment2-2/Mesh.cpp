@@ -12,6 +12,15 @@ CDiffuseVertex::CDiffuseVertex(XMFLOAT3 position, XMFLOAT4 color, XMFLOAT2 tex)
 {
 }
 
+CBillBoardVertex::CBillBoardVertex()
+	: size{ 3, 3 }
+{
+}
+CBillBoardVertex::CBillBoardVertex(XMFLOAT3 position, XMFLOAT2 size)
+	: position{position} , size{size}
+{
+
+}
 // CMesh
 CMesh::CMesh(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
 {
@@ -107,7 +116,7 @@ CRectangleMesh::CRectangleMesh(ID3D12Device* device, ID3D12GraphicsCommandList* 
 	// 정점 버퍼 생성
 	vertex_num = 4;
 	stride = sizeof(CDiffuseVertex);
-	primitive_topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	//primitive_topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
 	float halfWidth = width * 0.5f;
 	float halfHeight = height * 0.5f;
@@ -139,6 +148,48 @@ CRectangleMesh::CRectangleMesh(ID3D12Device* device, ID3D12GraphicsCommandList* 
 	index_buffer_view.BufferLocation = index_buffer->GetGPUVirtualAddress();
 	index_buffer_view.Format = DXGI_FORMAT_R32_UINT;
 	index_buffer_view.SizeInBytes = sizeof(UINT) * index_num;
+}
+
+
+CBillboardMesh::CBillboardMesh(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
+	: CMesh(device, commandList)
+{
+	// 정점 버퍼 생성
+	vertex_num = 1;
+	stride = sizeof(CBillBoardVertex);
+	primitive_topology = D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
+
+	XMFLOAT2 size{ 3.0f, 3.0f };
+	CBillBoardVertex vertex{ XMFLOAT3(0.0f, 0.0f, 0.0f), size };
+
+	// 삼각형 메쉬를 리소스로 생성
+	vertex_buffer = CreateBufferResource(device, commandList, &vertex, stride * vertex_num, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, vertex_upload_buffer.GetAddressOf());
+
+	// 정점 버퍼 뷰 설정
+	vertex_buffer_view.BufferLocation = vertex_buffer->GetGPUVirtualAddress();
+	vertex_buffer_view.StrideInBytes = stride;
+	vertex_buffer_view.SizeInBytes = stride * vertex_num;
+}
+
+CBillboardMesh::CBillboardMesh(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, float width, float height)
+	: CMesh(device, commandList)
+{
+
+	// 정점 버퍼 생성
+	vertex_num = 1;
+	stride = sizeof(CBillBoardVertex);
+	primitive_topology = D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
+
+	XMFLOAT2 size{ width, height};
+	CBillBoardVertex vertex{ XMFLOAT3(0.0f, 0.0f, 0.0f), size };
+
+	// 삼각형 메쉬를 리소스로 생성
+	vertex_buffer = CreateBufferResource(device, commandList, &vertex, stride * vertex_num, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, vertex_upload_buffer.GetAddressOf());
+
+	// 정점 버퍼 뷰 설정
+	vertex_buffer_view.BufferLocation = vertex_buffer->GetGPUVirtualAddress();
+	vertex_buffer_view.StrideInBytes = stride;
+	vertex_buffer_view.SizeInBytes = stride * vertex_num;
 }
 
 CCubeMesh::CCubeMesh(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, float width, float height, float depth) :

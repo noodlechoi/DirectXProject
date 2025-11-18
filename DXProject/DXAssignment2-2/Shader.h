@@ -20,6 +20,7 @@ public:
 	// 셰이더 코드 컴파일
 	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** );
 	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** );
+	virtual D3D12_SHADER_BYTECODE CreateGeometryShader(ID3DBlob**);
 	D3D12_SHADER_BYTECODE CompileShaderFromFile(WCHAR* , LPCSTR ,LPCSTR , ID3DBlob** );
 
 	//그래픽스 파이프라인 상태 객체 생성
@@ -54,6 +55,7 @@ public:
 
 	D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob**) override;
 	D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob**)override;
+	D3D12_SHADER_BYTECODE CreateGeometryShader(ID3DBlob**) override;
 
 	ID3D12DescriptorHeap* CreateDescriptorHeap(ID3D12Device*);
 	void CreateShaderVariables(ID3D12Device*, CObject*) override;

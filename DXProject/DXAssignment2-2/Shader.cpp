@@ -115,6 +115,11 @@ D3D12_SHADER_BYTECODE CShader::CreatePixelShader(ID3DBlob** shaderBlob)
 	return CompileShaderFromFile(L"Shaders.hlsl", "PSMain", "ps_5_1", shaderBlob);
 }
 
+D3D12_SHADER_BYTECODE CShader::CreateGeometryShader(ID3DBlob** shaderBlob)
+{
+	return CompileShaderFromFile(L"Shaders.hlsl", "PSMain", "ps_5_1", shaderBlob);
+}
+
 D3D12_SHADER_BYTECODE CShader::CompileShaderFromFile(WCHAR* fileName, LPCSTR shaderName, LPCSTR shaderProfile, ID3DBlob** shaderBlob)
 {
 	UINT compileFlags{};
@@ -141,20 +146,22 @@ void CShader::CreateShader(ID3D12Device* device)
 {
 	//그래픽스 파이프라인 상태 객체 배열을 생성한다.
 	pipeline_states.push_back(ComPtr<ID3D12PipelineState>());
-	ComPtr<ID3DBlob> vertexShaderBlob{}, pixelShaderBlob{};
+	ComPtr<ID3DBlob> shaderblo{}, pixelShaderBlob{}, gsShaderBlob;
 
 	graphics_root_signature = CreateGraphicsRootSignature(device);
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC pipelineStateDesc{};
 	pipelineStateDesc.pRootSignature = graphics_root_signature.Get();
-	pipelineStateDesc.VS = CreateVertexShader(&vertexShaderBlob);
+	pipelineStateDesc.VS = CreateVertexShader(&shaderblo);
 	pipelineStateDesc.PS = CreatePixelShader(&pixelShaderBlob);
+	pipelineStateDesc.GS = CreateGeometryShader(&gsShaderBlob);
 	pipelineStateDesc.RasterizerState = CreateRasterizerState();
 	pipelineStateDesc.BlendState = CreateBlendState();
 	pipelineStateDesc.DepthStencilState = CreateDepthStencilState();
 	pipelineStateDesc.InputLayout = CreateInputLayout();
 	pipelineStateDesc.SampleMask = UINT_MAX;
-	pipelineStateDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	//pipelineStateDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	pipelineStateDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
 	pipelineStateDesc.NumRenderTargets = 1;
 	pipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
 	pipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
@@ -173,14 +180,18 @@ void CShader::Render(ID3D12GraphicsCommandList* commandList)
 // CTextureShader
 D3D12_INPUT_LAYOUT_DESC CTextureShader::CreateInputLayout()
 {
-	const UINT inputElementDescNum = 3;
+	const UINT inputElementDescNum = 2;
 	D3D12_INPUT_ELEMENT_DESC* inputElementDescs = new D3D12_INPUT_ELEMENT_DESC[inputElementDescNum];
 
-	inputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	inputElementDescs[1] = { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	inputElementDescs[2] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 28, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	inputElementDescs[0] = {
+		"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0
+	};
 
-	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc;
+	inputElementDescs[1] = {
+		"SIZE", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0
+	};
+
+	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc = {};
 	inputLayoutDesc.pInputElementDescs = inputElementDescs;
 	inputLayoutDesc.NumElements = inputElementDescNum;
 
@@ -207,11 +218,11 @@ ID3D12RootSignature* CTextureShader::CreateGraphicsRootSignature(ID3D12Device* d
 	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
 
 	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
-	rootParameters[1].Constants.Num32BitValues = 32;
+	rootParameters[1].Constants.Num32BitValues = 35;
 	rootParameters[1].Constants.ShaderRegister = 1;
 	rootParameters[1].Constants.RegisterSpace = 0;
-	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
-
+	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	
 	rootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	rootParameters[2].DescriptorTable.NumDescriptorRanges = 1;
 	rootParameters[2].DescriptorTable.pDescriptorRanges = &descriptorRanges;
@@ -260,6 +271,11 @@ D3D12_SHADER_BYTECODE CTextureShader::CreateVertexShader(ID3DBlob** shaderBlob)
 D3D12_SHADER_BYTECODE CTextureShader::CreatePixelShader(ID3DBlob** shaderBlob)
 {
 	return CompileShaderFromFile(L"TexShader.hlsl", "PSMain", "ps_5_1", shaderBlob);
+}
+
+D3D12_SHADER_BYTECODE CTextureShader::CreateGeometryShader(ID3DBlob** shaderBlob)
+{
+	return CompileShaderFromFile(L"TexShader.hlsl", "GS", "gs_5_1", shaderBlob);
 }
 
 ID3D12DescriptorHeap* CTextureShader::CreateDescriptorHeap(ID3D12Device* device)
